@@ -13,4 +13,4 @@ addons:
       - clang-8
 script:
   - clang-8 -v
-  - clang++8 -v
+  - clang++-8 -v
