@@ -9,8 +9,8 @@ wrapped into standalone executables. I wrote these examples when I was learning
 how to work with LLVM. In terms of functionality you won't find anything particularly
 original here - similar examples can be found elsewhere online. What's new is
 that:
-  * there's a CI set-up for this project - you can be confident that the
-    example build and work fine
+  * there's a CI set-up for this project - you and me can be
+    confident that the examples do build and work fine
   * there's plenty of comments - it should speed-up your learning process
   * it's based on the latest version of LLVM -  you won't get stuck
     trying to download/build some ancient version of it
@@ -98,6 +98,51 @@ or, for dynamic call analysis:
 $ <build_dir>/bin/lt-cc  -dynamic  example_1.bc -o example_1
 $ ./example_1
 ```
+
+Testing
+-------
+There's a handful of LIT tests added to this project. These tests are meant to
+prevent any future breakage in **llvm-tutor**. They also serve as reference for
+setting them up in the future (i.e. you will also find here LIT configuration
+scripts which are part of the required set-up).
+
+### Test Requirements
+
+Before running the tests you need to make sure that you have the following
+tools installed:
+  * [**FileCheck**](https://llvm.org/docs/CommandGuide/lit.html) (LIT
+    requirement, it's used to check whether tests generate the expected output)
+  * [**opt**](http://llvm.org/docs/CommandGuide/opt.html) (the modular LLVM
+    optimizer and analyzer, used to load and run passes from shared objects)
+  * [**lit**](https://llvm.org/docs/CommandGuide/lit.html) (LLVM tool for executing
+    the tests)
+
+Neither of the requirements are satisfied on Ubuntu Xenial - sadly there are no
+packages that would provide `opt` or `FileCheck` for LLVM-8.0. Although older
+versions are available (e.g. bundled with LLVM-4.0), this project has been
+developed against LLVM-8.0 and ideally you want a matching version of both
+`opt` and `FileCheck`.
+
+### Running The Tests
+First, you will have to specify the location of the tools required for
+running the tests (e.g. `FileCheck`). This is done when configuring the
+project:
+
+```
+$ cmake -DLT_LLVM_INSTALL_DIR=<either_build_or_installation_dir>
+-DLT_LIT_TOOLS_DIR=<location_of_filecheck> <source_dir>
+```
+Next, you can run the tests like this:
+```
+$ lit <build_dir>/test
+```
+Voilà! (well, assuming that `lit` is in your _path_).
+
+### Wee disclaimer
+I haven't been able to set-up the tests in my CI (because Travis runs Ubuntu
+Xenial on which the basic requirements are not met). This means that I've only
+been able to run the tests on my host. If you encounter any problems on your
+machine - please let me know and I will try to fix that.
 
 License
 --------

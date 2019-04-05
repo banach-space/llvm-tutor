@@ -2,20 +2,21 @@ dist: xenial
 language: cpp
 
 compiler:
-  - clang
+  - clang-4
 
 # Install LLVM-8 - the version against which this project has been
-# develope (so it's required for building it)
+# developed
 addons:
   apt:
     sources:
       - sourceline: 'deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-8 main'
         key_url: 'http://apt.llvm.org/llvm-snapshot.gpg.key'
     packages:
+      - llvm-8
       - llvm-8-dev
 
 script:
   - mkdir build
   - cd build
-  - cmake -DLT_LLVM_INSTALL_DIR=/usr/lib/llvm-8/ ../
+  - cmake -DLT_LLVM_INSTALL_DIR=/usr/lib/llvm-8/ -DLT_LIT_TOOLS_DIR=/usr/lib/llvm-4.0/bin/  ../
   - make -j4

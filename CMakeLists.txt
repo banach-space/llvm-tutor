@@ -13,6 +13,10 @@ set(PACKAGE_STRING "${PACKAGE_NAME} ${PACKAGE_VERSION}")
 # Set this to a valid LLVM installation dir
 set(LT_LLVM_INSTALL_DIR "" CACHE PATH "LLVM installation directory")
 
+# Set this to a valid LLVM installation dir
+set(LT_LIT_TOOLS_DIR "" CACHE PATH "The location of tools required for testing
+with LIT ( FileCheck, not, count)")
+
 # A bit of a sanity checking
 set(LT_LLVM_INCLUDE_DIR "${LT_LLVM_INSTALL_DIR}/include/llvm")
 if(NOT EXISTS "${LT_LLVM_INCLUDE_DIR}")
@@ -79,9 +83,9 @@ add_definitions(${LLVM_DEFINITIONS})
 
 #===============================================================================
 # 3. ADD SUBDIRECTORIES
-# Finally, add targets.  Doing this at the end so that all definitions and
+# Finally, add targets. Doing this at the end so that all definitions and
 # link/include paths are available for the sub-projects.
 #===============================================================================
 add_subdirectory(lib)
 add_subdirectory(tools)
-
+add_subdirectory(test)
