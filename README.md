@@ -33,7 +33,7 @@ of LLVM is not yet available in the official repositories. On `Ubuntu Xenial`,
 you can
 [install](https://blog.kowalczyk.info/article/k/how-to-install-latest-clang-6.0-on-ubuntu-16.04-xenial-wsl.html)
 it from the official LLVM [repo](http://apt.llvm.org/):
-```
+```bash
 $ wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
 $ sudo apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-8.0 main"
 $ sudo apt-get update
@@ -70,7 +70,7 @@ It is assumed that **llvm-tutor** will be built in `<build-dir>` and that the
 top-level source directory is `<source-dir>`.
 
 You can build all the examples as follows:
-```
+```bash
 $ cd <build-dir>
 $ cmake -DLT_LLVM_INSTALL_DIR=<either_build_or_installation_dir>  <source_dir>
 $ make
@@ -88,13 +88,13 @@ pass individually.
 ### Counting Function Calls
 The `lt-cc` executable implements two basic direct call counters: static, and
 dynamic. You can test it with one of the provided examples, e.g.:
-```
+```bash
 $ clang  -emit-llvm -c <source_dir>/test/example_1.c
 $ <build_dir>/bin/lt-cc -static example_1.bc
 ```
 
 or, for dynamic call analysis:
-```
+```bash
 $ <build_dir>/bin/lt-cc  -dynamic  example_1.bc -o example_1
 $ ./example_1
 ```
@@ -128,12 +128,12 @@ First, you will have to specify the location of the tools required for
 running the tests (e.g. `FileCheck`). This is done when configuring the
 project:
 
-```
+```bash
 $ cmake -DLT_LLVM_INSTALL_DIR=<either_build_or_installation_dir>
 -DLT_LIT_TOOLS_DIR=<location_of_filecheck> <source_dir>
 ```
 Next, you can run the tests like this:
-```
+```bash
 $ lit <build_dir>/test
 ```
 Voilà! (well, assuming that `lit` is in your _path_).
