@@ -80,9 +80,22 @@ void StaticCallCounter::print(raw_ostream &out, Module const * /*m*/) const {
   const char *str2 = "#N DIRECT CALLS";
   out << format("%-20s %-10s\n", str1, str2);
   out << "-------------------------------------------------" << "\n";
+
+  // Generate a vector of captured functions, sorted alphabetically by function
+  // names. The solution implemented here is a suboptimal - a separate
+  // container with functions is created for sorting.
+  // TODO Make this more elegant (i.e. avoid creating a separate container)
+  std::vector<const Function*> funcNames;
+  funcNames.reserve(counts.size());
   for (auto &kvPair : counts) {
-    auto *function = kvPair.first;
-    auto count = kvPair.second;
-    out << format("%-20s %-10lu\n", function->getName().str().c_str(), count);
+    funcNames.push_back(kvPair.getFirst());
+  }
+  std::sort(funcNames.begin(), funcNames.end(), [](const Function *x, const Function
+        *y){ return (x->getName().str() < y->getName().str()); });
+
+  // Print functions (alphabetically)
+  for (auto &func : funcNames) {
+    auto count = (counts.find(func))->getSecond();
+    out << format("%-20s %-10lu\n", func->getName().str().c_str(), count);
   }
 }
