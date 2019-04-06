@@ -6,7 +6,27 @@
 //    banach-space@github
 //
 // DESCRIPTION:
-//    Implements counting of dynamic function calls.
+//    Counts the dynamic function calls
+//
+//    Counts the number of dynamic (i.e. run-time) direct function calls.
+//    Leverages the runtime library, implemented in DynamicCallCounterRT.cpp.
+//    It instruments the underlying module by:
+//      * defining the variables required by the run-time library
+//      * declaring the run-time library function which are installed inside the
+//        module (more precisely, calls to these functions are installed).
+//        These functions are defined in the runtime library.
+//    There are two cases:
+//      * for each function defined in this module, this pass inserts a call to
+//        lt_RUNTIME_called before any other instruction inside the function
+//        (i.e. it modifies the function)
+//      * for each call to an externally defined function, this pass inserts a
+//        call to lt_RUNTIME_called just before the instruction calling the
+//        function (we can't instrument externally defined functions so we modify
+//        the call site inside this module).
+//    The function and data types inserted here *must* match those in
+//    DynamicCallCounterRT.cpp.
+//
+//    This pass can only be run through lt-cc.
 //
 // License: MIT
 //========================================================================
@@ -39,7 +59,7 @@ computeFunctionIDs(llvm::ArrayRef<Function *> functions) {
   return idMap;
 }
 
-// Returns a set of all internal (defined) functions.
+// Returns a set of all internal (i.e. defined in this module) functions.
 static DenseSet<Function *>
 computeInternal(llvm::ArrayRef<Function *> functions) {
   DenseSet<Function *> internal;
@@ -68,7 +88,8 @@ static llvm::Constant *createConstantString(llvm::Module &m,
   return llvm::ConstantExpr::getInBoundsGetElementPtr(arrayTy, asStr, indices);
 }
 
-// Creates the global lt_RUNTIME_functionInfo table used by the runtime library.
+// Creates the global lt_RUNTIME_functionInfo table used by the runtime
+// library.
 static void createGlobalFunctionTable(Module &m, uint64_t numFunctions) {
   auto &context = m.getContext();
 
@@ -119,10 +140,10 @@ bool DynamicCallCounter::runOnModule(Module &m) {
   // 3. Create a global table of function infos
   createGlobalFunctionTable(m, numFunctions);
 
-  // 4. Declare the counter function.
+  // 4. Declare the counter function
   auto *voidTy = Type::getVoidTy(context);
   auto *helperTy = FunctionType::get(voidTy, int64Ty, false);
-  auto *counter = m.getOrInsertFunction("lt_RUNTIME_called", helperTy);
+  auto *counterFunc = m.getOrInsertFunction("lt_RUNTIME_called", helperTy);
 
   // 5. Declare and install the result printing function so that it prints out
   // the counts after the entire program is finished executing.
@@ -135,13 +156,16 @@ bool DynamicCallCounter::runOnModule(Module &m) {
       continue;
     }
 
-    // Count each internal function as it executes.
-    installCCFunction(*f, counter);
+    // Count each internal function - install a call to
+    // lt_RUNTIME_called at the beginning of each internal function.
+    installCCFunction(*f, counterFunc);
 
-    // Count each external function as it is called.
+    // Count each external function - loop over all instructions in
+    // this function and for each function call insert a call to
+    // lt_RUNTIME_called just before the call-site instruction.
     for (auto &bb : *f) {
       for (auto &i : bb) {
-        installCCInstruction(CallSite(&i), counter);
+        installCCInstruction(CallSite(&i), counterFunc);
       }
     }
   }
@@ -156,18 +180,20 @@ void DynamicCallCounter::installCCFunction(Function &f, Value *counter) {
 
 void DynamicCallCounter::installCCInstruction(CallSite cs, Value *counter) {
   // Check whether the instruction is actually a call
-  if (!cs.getInstruction()) {
+  if (nullptr == cs.getInstruction()) {
     return;
   }
 
   // Check whether the called function is directly invoked
   auto called = dyn_cast<Function>(cs.getCalledValue()->stripPointerCasts());
-  if (!called) {
+  if (nullptr == called) {
     return;
   }
 
   // Check if the function is internal or blacklisted.
-  if (internal.count(called) || !ids.count(called)) {
+  // (A function is blacklisted if it wasn't present in the module at the point
+  // of creating the ids map, i.e. the functions from the run-time library).
+  if ((internal.count(called) > 0 ) || (0 == ids.count(called))) {
     // Internal functions are counted upon the entry of each function body.
     // Blacklisted functions are not counted. Neither should proceed.
     return;

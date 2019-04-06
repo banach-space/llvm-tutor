@@ -6,8 +6,11 @@
 //    banach-space@github
 //
 // DESCRIPTION:
-//    Implements counting of static function calls.  This pass can be used
-//    through opt. After compilation, use:
+//    Counts the static function calls
+//
+//    Counts the number of static direct function calls.
+//
+//    This pass can be run through lt-cc as well ass opt. For the latter:
 //      $ opt -load <BUILD_DIR>/lib/liblt-lib.so --lt -analyze <bitcode-file>
 //
 // License: MIT

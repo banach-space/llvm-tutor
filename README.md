@@ -19,6 +19,18 @@ I created this project out of frustration. Although there's a lot of great
 content available online, you'll find that most of it (at least the ones I
 came across) lacks the above elements.
 
+tl;dr
+-----
+The best place to start is the `lt` pass implemented in
+`StaticCallCounter.cpp`. Build it first:
+```
+$ cmake -DLT_LLVM_INSTALL_DIR=<either_build_or_installation_dir_of_llvm_8>  <source_dir>
+```
+and then run:
+```
+$ opt -load <build_dir>/lib/liblt-lib.so --lt -analyze <bitcode-file>
+```
+
 Status
 ------
 A list of currently available passes:
@@ -72,7 +84,7 @@ top-level source directory is `<source-dir>`.
 You can build all the examples as follows:
 ```bash
 $ cd <build-dir>
-$ cmake -DLT_LLVM_INSTALL_DIR=<either_build_or_installation_dir>  <source_dir>
+$ cmake -DLT_LLVM_INSTALL_DIR=<either_build_or_installation_dir_of_llvm_8>  <source_dir>
 $ make
 ```
 
