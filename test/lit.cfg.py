@@ -30,3 +30,4 @@ llvm_config.use_default_substitutions()
 
 tools = ["opt"]
 llvm_config.add_tool_substitutions(tools, config.llvm_tools_dir)
+config.substitutions.append(('%shlibext', config.llvm_shlib_ext))

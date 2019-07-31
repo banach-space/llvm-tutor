@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.4.3)
 project(llvm-tutor)
 
 set(PACKAGE_NAME lt-cc)
@@ -15,7 +15,7 @@ set(LT_LLVM_INSTALL_DIR "" CACHE PATH "LLVM installation directory")
 
 # Set this to a valid LLVM installation dir
 set(LT_LIT_TOOLS_DIR "" CACHE PATH "The location of tools required for testing
-with LIT ( FileCheck, not, count)")
+with LIT (FileCheck, not, count)")
 
 # A bit of a sanity checking
 set(LT_LLVM_INCLUDE_DIR "${LT_LLVM_INSTALL_DIR}/include/llvm")
@@ -39,10 +39,30 @@ if (NOT CMAKE_BUILD_TYPE)
       STRING "Build type (default Debug):" FORCE)
 endif()
 
+# Set the build flags
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -std=c++14 -fno-rtti -Wall\
     -fdiagnostics-color=always")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -std=c++14 -fno-rtti -Wall\
     -fdiagnostics-color=always -fno-omit-frame-pointer")
+
+# Copied from HandleLLVMOptions.cmake
+function(append_if condition value)
+  if (${condition})
+    foreach(variable ${ARGN})
+      set(${variable} "${${variable}} ${value}" PARENT_SCOPE)
+    endforeach(variable)
+  endif()
+endfunction()
+
+# -fvisibility-inlines-hidden is set when building LLVM and on Darwin warnings
+# are triggered if LT is built without this flag (though otherwise it builts fine).
+# For consistency, add it here too.
+include(CheckCXXCompilerFlag)
+if(NOT WIN32 AND NOT CYGWIN)
+  # MinGW warns if -fvisibility-inlines-hidden is used.
+  check_cxx_compiler_flag("-fvisibility-inlines-hidden" SUPPORTS_FVISIBILITY_INLINES_HIDDEN_FLAG)
+  append_if(SUPPORTS_FVISIBILITY_INLINES_HIDDEN_FLAG "-fvisibility-inlines-hidden" CMAKE_CXX_FLAGS)
+endif()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
@@ -52,6 +72,9 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
 include_directories(${CMAKE_SOURCE_DIR}/include)
 link_directories(${LIBRARY_OUTPUT_PATH})
 set(LT_RT_LIBRARY_PATH "${PROJECT_BINARY_DIR}/lib")
+
+# Config for LIT tests
+set(SHLIBEXT "${CMAKE_SHARED_LIBRARY_SUFFIX}")
 
 #===============================================================================
 # 2. LLVM-CONFIGURATION

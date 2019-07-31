@@ -1,8 +1,4 @@
-dist: xenial
 language: cpp
-
-compiler:
-  - clang-4
 
 # Install LLVM-8 - the version against which this project has been
 # developed
@@ -14,9 +10,38 @@ addons:
     packages:
       - llvm-8
       - llvm-8-dev
+  homebrew:
+    packages:
+      - llvm@8
+    # The following error was triggered when Homebrew was _not_ updated:
+    #   Error: Your Homebrew is outdated. Please run `brew update`.
+    # However, updating Homebrew slows down the build considerably.
+    update: true
+
+matrix:
+  include:
+    - os: linux
+      dist: xenial
+      env:
+        - LLVM_DIR="/usr/lib/llvm-8/"
+        - LLVM_TOOLCHAIN=""
+        # There's currently no way of obtaining FileCheck on Ubuntu (apart from
+        # building from sources), so testing is not possible.
+        - RUN_TESTS="False"
+    - os: osx
+      osx_image: xcode11
+      env:
+        - LLVM_DIR="/usr/local/opt/llvm/"
+        - LLVM_TOOLCHAIN="/usr/local/opt/llvm/Toolchains/LLVM8.0.0.xctoolchain/usr/bin/"
+        - RUN_TESTS="True"
+
+# AFAIK, there's no other way of obtaining LLVM's lit
+install:
+  - pip install --user lit
 
 script:
   - mkdir build
   - cd build
-  - cmake -DLT_LLVM_INSTALL_DIR=/usr/lib/llvm-8/ -DLT_LIT_TOOLS_DIR=/usr/lib/llvm-4.0/bin/  ../
+  - cmake -DLT_LLVM_INSTALL_DIR="$LLVM_DIR" -DLT_LIT_TOOLS_DIR="$LLVM_TOOLCHAIN"  ../
   - make -j4
+  - if [[ "$RUN_TESTS" == "True" ]]; then /Users/travis/Library/Python/2.7/bin/lit test/; fi
