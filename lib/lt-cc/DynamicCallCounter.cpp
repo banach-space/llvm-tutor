@@ -143,11 +143,11 @@ bool DynamicCallCounter::runOnModule(Module &m) {
   // 4. Declare the counter function
   auto *voidTy = Type::getVoidTy(context);
   auto *helperTy = FunctionType::get(voidTy, int64Ty, false);
-  auto *counterFunc = m.getOrInsertFunction("lt_RUNTIME_called", helperTy);
+  auto *counterFunc = m.getOrInsertFunction("lt_RUNTIME_called", helperTy).getCallee();
 
   // 5. Declare and install the result printing function so that it prints out
   // the counts after the entire program is finished executing.
-  auto *printer = m.getOrInsertFunction("lt_RUNTIME_print", voidTy);
+  auto *printer = m.getOrInsertFunction("lt_RUNTIME_print", voidTy).getCallee();
   appendToGlobalDtors(m, llvm::cast<Function>(printer), 0);
 
   for (auto f : toCount) {
