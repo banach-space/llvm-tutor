@@ -9,6 +9,8 @@ add_executable(lt-cc
 
 llvm_map_components_to_libnames(REQ_LLVM_LIBRARIES ${LLVM_TARGETS_TO_BUILD}
         asmparser
+        asmprinter
+        codegen
         core
         linker
         support
@@ -17,6 +19,9 @@ llvm_map_components_to_libnames(REQ_LLVM_LIBRARIES ${LLVM_TARGETS_TO_BUILD}
         irreader
         ipo
         scalaropts
+        selectiondag
+        instrumentation
+        transformutils
         analysis
         target
         mc
