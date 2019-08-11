@@ -6,7 +6,9 @@
 //      banach-space@github
 //
 // DESCRIPTION:
-//      Basic example to test lt-cc with
+//      A very basic example with a few functions calls and a few function
+//      casts (some of which are UB). Note that currently none of the passes
+//      handles function casts (i.e. the corresponding calls won't be counted).
 //
 // License: MIT
 //========================================================================

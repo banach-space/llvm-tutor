@@ -35,7 +35,8 @@ Status
 This is still **WORK IN PROGRESS**.
 
 The list of currently available passes:
-   * direct call counter: static and dynamic calls
+   * **cc:** direct call counter (static and dynamic calls)
+   * **mba:** obfuscation through mixed boolean arithmetic
 
 Requirements
 ------------
@@ -134,6 +135,26 @@ or, for dynamic call analysis:
 ```bash
 $ <build_dir>/bin/lt-cc  -dynamic  example_1.bc -o example_1
 $ ./example_1
+```
+
+### Obfuscation
+The `mba` pass implements a very basic [obfuscation with mixed
+boolean-arithmetic](https://tel.archives-ouvertes.fr/tel-01623849/document)
+expression:
+```
+a + b == (a ^ b) + 2 * (a & b)
+```
+Basically, it replaces all instances of addition according to the above
+formula. There are a few LIT tests that verify that indeed this is correct. You
+can run this pass as follows:
+```bash
+opt -load <build_dir>/lib/liblt-mba-shared.so --mba test_examples/MBA.c -o MBA_mod.ll
+```
+You can also specify the level of obfuscation on a scale of `0` to `1`, with
+`0` corresponding to no obfuscation and `1` meaning that all `add` instructions
+are to be replaced with `(a ^ b) + 2 * (a & b)`, e.g.:
+```bash
+opt -load <build_dir>/lib/liblt-mba-shared.so -mba -mba-ration=0.3 test_examples/MBA.c -o MBA_mod.ll
 ```
 
 Testing

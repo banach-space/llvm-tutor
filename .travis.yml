@@ -32,7 +32,7 @@ matrix:
       osx_image: xcode11
       env:
         - LLVM_DIR="/usr/local/opt/llvm/"
-        - LLVM_TOOLCHAIN="/usr/local/opt/llvm/Toolchains/LLVM8.0.0.xctoolchain/usr/bin/"
+        - LLVM_TOOLCHAIN="/usr/local/opt/llvm@8/bin/"
         - RUN_TESTS="True"
 
 # AFAIK, there's no other way of obtaining LLVM's lit
