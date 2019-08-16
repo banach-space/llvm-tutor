@@ -29,9 +29,14 @@ $ opt -load <build_dir>/lib/liblt-lib.so --lt -analyze <bitcode-file>
 
 Status
 ------
-This is still **WORK IN PROGRESS**.
+This is still **WORK IN PROGRESS**. Major outstanding TODOs:
+   * add more passes (suggestions are welcome)
+   * support for new pass manager
+   * more tests
+   * more documentation
+   * test on Windows
 
-The list of currently available passes:
+And here's the list of currently available passes:
    * **cc:** direct call counter (static and dynamic calls)
    * **mba:** obfuscation through mixed boolean arithmetic
 
