@@ -7,16 +7,13 @@ Example LLVM passes - based on LLVM-8
 **llvm-tutor** (a.k.a **lt**) is a collection of self-contained reference LLVM
 passes developed as a tutorial.  It targets novice and aspiring LLVM
 developers. It strives to be:
-  * **Complete:** There's a functional `CMakeLists.txt` and CI that provides a
-    working reference set-up.
-  * **Out of source:** It builds against a binary LLVM installation.
-  * **Modern:** It's based on the latest version of LLVM -  you won't get stuck
-    trying to download/build an old version of LLVM or learning an outdated API.
+  * **Complete:** There's a functional `CMakeLists.txt` (and CI that provides a
+    working reference set-up)
+  * **Out of source:** It builds against a binary LLVM installation (no need to build LLVM)
+  * **Modern:** It's based on the latest version of LLVM (and will be updated with every release)
 
-There's a CI set-up for this project so both you and I can be confident that
-the examples do build and work fine. I've also tried to leave plenty of
-comments everywhere (in source files, build scripts and tests) - both for my
-future self as well as you. I encourage you to study and modify the code.
+There is plenty of comments in source files, build scripts and tests - I hope
+that you'll find them helpful.
 
 tl;dr
 -----
