@@ -51,13 +51,17 @@ Installing `clang-8` (and other LLVM-based tools) won't hurt, but is neither
 required nor sufficient. There are additional requirements to be able to run
 tests, which are documented [here](#test_requirements).
 
-### Obtaining LLVM-8
-Basically, there are two options here: either build from sources (works
-regardless of the operating system, but is slow and complex) or download an
-installation package (very quick and easy, but works only on systems for which
-there are LLVM package maintainers).
+## Obtaining LLVM-8
+There are two options:
+* **build from sources** (works regardless of the operating system, but can
+  be slow and tricky to debug if things don't go according to plan)
+* **download pre-compilled packages** (very quick and easy, but works only on
+  systems for which there are LLVM package maintainers).
 
-#### Installing on Ubuntu
+The packages available for Ubuntu and Mac OS X are sufficient. Windows users
+will have to build from sources.
+
+### Installing on Ubuntu
 If you're using `Ubuntu` then install `llvm-8-dev` (other dependencies will be
 _pulled_ automatically). Note that this very recent version of LLVM is not yet
 available in the official repositories. On `Ubuntu Xenial`, you can [install
@@ -76,7 +80,7 @@ In order to run LIT tests you will have to build the dependencies from sources.
 However, you don't need them to be able to build and run the passes developed
 here.
 
-#### Installing on Mac OS X
+### Installing on Mac OS X
 On Darwin you can install LLVM-8 with [Homebrew](https://brew.sh/):
 ```bash
 $ brew install llvm@8
@@ -85,10 +89,22 @@ This will install all the required header files, libraries and binaries in
 `/usr/local/opt/llvm/`. Currently this will also install the binaries required
 for testing.
 
-#### Build From Sources
+### Building From Sources
 You can also choose to [build LLVM](https://llvm.org/docs/CMake.html) from
 sources. It might be required if there are no precompiled packages for your
-OS.
+OS. This will work on Linux, OS X and Windows:
+```bash
+cd <llvm-project/root/dir>/../
+git clone https://github.com/llvm/llvm-project.git
+cd llvm-project
+git checkout release/8.x
+mkdir build 
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=X86 <llvm-project/root/dir>/llvm/
+cmake --build .
+```
+These steps are not optimal. Please refer to the official documentaion for more
+hints.
 
 Platform Support
 ----------------
