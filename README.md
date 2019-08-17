@@ -142,14 +142,14 @@ pass individually.
 The `lt-cc` executable implements two basic direct call counters: static, and
 dynamic. You can test it with one of the provided examples, e.g.:
 ```bash
-$ clang  -emit-llvm -c <source_dir>/test/example_1.c
-$ <build_dir>/bin/lt-cc -static example_1.bc
+$ clang  -emit-llvm -c <source_dir>/test/input_for_cc.c
+$ <build_dir>/bin/lt-cc -static input_for_cc.bc
 ```
 
 or, for dynamic call analysis:
 ```bash
-$ <build_dir>/bin/lt-cc  -dynamic  example_1.bc -o example_1
-$ ./example_1
+$ <build_dir>/bin/lt-cc  -dynamic  input_for_cc.bc -o input_for_cc
+$ ./input_for_cc
 ```
 
 ### Obfuscation
@@ -163,13 +163,13 @@ Basically, it replaces all instances of addition according to the above
 formula. There are a few LIT tests that verify that indeed this is correct. You
 can run this pass as follows:
 ```bash
-opt -load <build_dir>/lib/libMBA.so --mba test_examples/MBA.c -o MBA_mod.ll
+opt -load <build_dir>/lib/libMBA.so --mba inputs/input_for_mba.c -o MBA_mod.ll
 ```
 You can also specify the level of obfuscation on a scale of `0` to `1`, with
 `0` corresponding to no obfuscation and `1` meaning that all `add` instructions
 are to be replaced with `(a ^ b) + 2 * (a & b)`, e.g.:
 ```bash
-opt -load <build_dir>/lib/libMBA.so -mba -mba-ration=0.3 test_examples/MBA.c -o MBA_mod.ll
+opt -load <build_dir>/lib/libMBA.so -mba -mba-ration=0.3 inputs/input_for_mba.c -o MBA_mod.ll
 ```
 
 Testing

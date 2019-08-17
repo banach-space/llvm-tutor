@@ -1,4 +1,5 @@
 add_library(CallCounter SHARED StaticCallCounter.cpp DynamicCallCounter.cpp)
+add_library(CallCounterStatic STATIC StaticCallCounter.cpp DynamicCallCounter.cpp)
 
 add_library(MBA SHARED MBA.cpp Utils.cpp)
 

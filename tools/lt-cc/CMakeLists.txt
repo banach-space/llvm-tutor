@@ -23,7 +23,7 @@ llvm_map_components_to_libnames(REQ_LLVM_LIBRARIES ${LLVM_TARGETS_TO_BUILD}
         support
 )
 
-target_link_libraries(lt-cc CallCounter ${REQ_LLVM_LIBRARIES})
+target_link_libraries(lt-cc CallCounterStatic ${REQ_LLVM_LIBRARIES})
 
 set_target_properties(lt-cc
                       PROPERTIES
