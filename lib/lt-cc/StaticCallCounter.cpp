@@ -31,7 +31,7 @@ namespace lt {
 char StaticCallCounter::ID = 0;
 
 // Register the pass - required for (among others) opt
-RegisterPass<StaticCallCounter> X("lt",
+RegisterPass<StaticCallCounter> X("static-cc",
                                   "Print the static count of direct calls",
                                   true /* Only looks at CFG */,
                                   true /* Analysis Pass */);

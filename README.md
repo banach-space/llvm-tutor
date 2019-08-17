@@ -2,43 +2,40 @@ llvm-tutor
 =========
 [![Build Status](https://travis-ci.org/banach-space/llvm-tutor.svg?branch=master)](https://travis-ci.org/banach-space/llvm-tutor)
 
-Example LLVM passes - based on LLVM-8
+Example LLVM passes - based on **LLVM 8**
 
-**llvm-tutor** (a.k.a **lt**) is a collection of self-contained reference LLVM
-passes developed as a tutorial.  It targets novice and aspiring LLVM
-developers. It strives to be:
-  * **Complete:** There's a functional `CMakeLists.txt` (and CI that provides a
-    working reference set-up)
-  * **Out of source:** It builds against a binary LLVM installation (no need to build LLVM)
-  * **Modern:** It's based on the latest version of LLVM (and will be updated with every release)
+**llvm-tutor** (aka **lt**) is a collection of self-contained reference LLVM
+passes developed as a tutorial. It targets novice and aspiring LLVM developers.
+It strives to be:
+  * **Complete** - includes `CMake` build scripts, LIT tests and CI set-up
+  * **Out of source** - builds against a binary LLVM installation (no need to
+    build LLVM from sources)
+  * **Modern** - based on the latest version of LLVM (and updated with every release)
 
 There is plenty of comments in source files, build scripts and tests - I hope
 that you'll find them helpful.
 
 tl;dr
 -----
-The best place to start is the `lt` pass implemented in
+The best place to start is the `static-cc` pass implemented in
 `StaticCallCounter.cpp`. Build it first:
-```
-$ cmake -DLT_LLVM_INSTALL_DIR=<either_build_or_installation_dir_of_llvm_8>  <source_dir>
+```bash
+$ cmake -DLT_LLVM_INSTALL_DIR=<installation/dir/of/llvm/8>  <source_dir>
 ```
 and then run:
-```
-$ opt -load <build_dir>/lib/libCallCounter.so --lt -analyze <bitcode-file>
+```bash
+$ opt -load <build_dir>/lib/libCallCounter.so --static-cc -analyze <bitcode-file>
 ```
 
 Status
 ------
-This is still **WORK IN PROGRESS**. Major outstanding TODOs:
-   * add more passes (suggestions are welcome)
-   * support for new pass manager
-   * more tests
-   * more documentation
-   * test on Windows
+This is still **WORK IN PROGRESS**.
 
-And here's the list of currently available passes:
-   * **CallCounter:** direct call counter (static and dynamic calls)
-   * **MBA:** obfuscation through Mixed Boolean Arithmetic
+Passes
+------
+Here's the list of currently available passes:
+   * **CallCounter** - direct call counter (static and dynamic calls)
+   * **MBA** - obfuscation through Mixed Boolean Arithmetic
 
 Requirements
 ------------
@@ -100,7 +97,7 @@ cd <llvm-project/root/dir>/../
 git clone https://github.com/llvm/llvm-project.git
 cd llvm-project
 git checkout release/8.x
-mkdir build 
+mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=X86 <llvm-project/root/dir>/llvm/
 cmake --build .
@@ -110,15 +107,15 @@ hints.
 
 Platform Support
 ----------------
-This project is currently being tested on Linux and Mac OS X. It should build
+This project is regularly being tested on Linux and Mac OS X. It should build
 and run seamlessly on Windows, though some tweaks in CMake might be required.
 It is regularly tested against the following configurations (extracted from the
 CI files: `.travis.yml`):
-  * Linux Ubuntu 16.04 (LLVM-7)
-  * Mac OS X 10.14.4 (AppleClang 11)
+  * Linux Ubuntu 16.04
+  * Mac OS X 10.14.4
 
-Locally I used GCC-8.2.1 and LLVM-7 for development (i.e. for compiling). Please
-refer to the CI logs (links at the top of the page) for reference setups.
+Please refer to the CI logs (links at the top of the page) for reference
+setups.
 
 Build Instructions
 ------------------
