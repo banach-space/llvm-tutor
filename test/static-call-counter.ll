@@ -1,5 +1,5 @@
 ; RUN: clang -c -emit-llvm %S/../test_examples/example_1.c -o %t
-; RUN: opt -load ../lib/liblt-cc-shared%shlibext --lt -analyze %t | FileCheck %s
+; RUN: opt -load ../lib/libCallCounter%shlibext --lt -analyze %t | FileCheck %s
 
 ; This is the expected output after running static analysis. Note calls via
 function pointers are not counted.

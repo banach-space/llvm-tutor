@@ -24,7 +24,7 @@ $ cmake -DLT_LLVM_INSTALL_DIR=<either_build_or_installation_dir_of_llvm_8>  <sou
 ```
 and then run:
 ```
-$ opt -load <build_dir>/lib/liblt-lib.so --lt -analyze <bitcode-file>
+$ opt -load <build_dir>/lib/libCallCounter.so --lt -analyze <bitcode-file>
 ```
 
 Status
@@ -37,8 +37,8 @@ This is still **WORK IN PROGRESS**. Major outstanding TODOs:
    * test on Windows
 
 And here's the list of currently available passes:
-   * **cc:** direct call counter (static and dynamic calls)
-   * **mba:** obfuscation through mixed boolean arithmetic
+   * **CallCounter:** direct call counter (static and dynamic calls)
+   * **MBA:** obfuscation through Mixed Boolean Arithmetic
 
 Requirements
 ------------
@@ -166,13 +166,13 @@ Basically, it replaces all instances of addition according to the above
 formula. There are a few LIT tests that verify that indeed this is correct. You
 can run this pass as follows:
 ```bash
-opt -load <build_dir>/lib/liblt-mba-shared.so --mba test_examples/MBA.c -o MBA_mod.ll
+opt -load <build_dir>/lib/libMBA.so --mba test_examples/MBA.c -o MBA_mod.ll
 ```
 You can also specify the level of obfuscation on a scale of `0` to `1`, with
 `0` corresponding to no obfuscation and `1` meaning that all `add` instructions
 are to be replaced with `(a ^ b) + 2 * (a & b)`, e.g.:
 ```bash
-opt -load <build_dir>/lib/liblt-mba-shared.so -mba -mba-ration=0.3 test_examples/MBA.c -o MBA_mod.ll
+opt -load <build_dir>/lib/libMBA.so -mba -mba-ration=0.3 test_examples/MBA.c -o MBA_mod.ll
 ```
 
 Testing

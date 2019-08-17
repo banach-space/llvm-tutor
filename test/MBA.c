@@ -1,5 +1,5 @@
 // RUN: clang -S -emit-llvm %S/../test_examples/MBA.c -o - \
-// RUN:   | opt -load ../lib/liblt-mba-shared%shlibext -mba -S \
+// RUN:   | opt -load ../lib/libMBA%shlibext -mba -S \
 // RUN:   | FileCheck %s
 
 // The input file has 3 additions. Verify that these are correctly replaced as
