@@ -34,8 +34,11 @@ This is still **WORK IN PROGRESS**.
 Passes
 ------
 Here's the list of currently available passes:
-   * **CallCounter** - direct call counter (static and dynamic calls)
-   * **MBA** - obfuscation through Mixed Boolean Arithmetic
+   * **CallCounter** - direct call counter (static and dynamic calls, pure
+     analysis and instrumentation pass, parametrisable)
+   * **MBA** - obfuscation through Mixed Boolean Arithmetic (transformation
+     pass, paramterisable)
+   * **RIV** - reachable integer values (analysis pass)
 
 Requirements
 ------------
@@ -135,12 +138,12 @@ build directory of LLVM-8. It is used to locate the corresponding
 
 Usage
 -----
-Once you've [built](#build-instructions) this project, you can verify every
-pass individually.
+Once you've [built](#build-instructions) this project, you can experiment with
+every pass separately.
 
 ### Counting Function Calls
-The `lt-cc` executable implements two basic direct call counters: static, and
-dynamic. You can test it with one of the provided examples, e.g.:
+The `lt-cc` executable implements two (rather) basic direct call counters:
+static, and dynamic. You can test it with one of the provided examples, e.g.:
 ```bash
 $ clang  -emit-llvm -c <source_dir>/test/input_for_cc.c
 $ <build_dir>/bin/lt-cc -static input_for_cc.bc
@@ -171,6 +174,18 @@ are to be replaced with `(a ^ b) + 2 * (a & b)`, e.g.:
 ```bash
 opt -load <build_dir>/lib/libMBA.so -mba -mba-ration=0.3 inputs/input_for_mba.c -o MBA_mod.ll
 ```
+
+### Reachable Integer Values
+For each basic block in a module, calculates the reachable integer values (i.e.
+values that can be used in the particular basic block).  There are a few LIT
+tests that verify that indeed this is correct. You can run this pass as
+follows:
+```bash
+opt -load <build_dir>/lib/libRVI.so --rvi inputs/input_for_rvi.c
+```
+
+Note that this, unlike previous ones, is only really useful when in analysing
+the underlying IR representation of the input module.
 
 Testing
 -------

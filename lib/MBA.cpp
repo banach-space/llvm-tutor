@@ -57,8 +57,8 @@ char MBA::ID = 0;
 static RegisterPass<MBA>
     X("mba",
       "Mixed Boolean Arithmetic Substitution",
-      true, // true as we don't modify the CFG
-      false // false as this is not pure analysis
+      true, // doesn't modify the CFG => true
+      false // not a pure analysis pass => false
     );
 } // namespace lt
 
