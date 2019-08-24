@@ -82,7 +82,7 @@ bool MBA::runOnBasicBlock(BasicBlock &BB) {
       // The instruction is not a binary operator, skip.
       continue;
 
-    if (Dist(RNG) > MBARatio.getRatio())
+    if (Dist(*RNG) > MBARatio.getRatio())
       // Probabilistic replacement, skip if we are not in the threshold.
       continue;
 

@@ -1,9 +1,9 @@
 add_library(CallCounter SHARED StaticCallCounter.cpp DynamicCallCounter.cpp)
 add_library(CallCounterStatic STATIC StaticCallCounter.cpp DynamicCallCounter.cpp)
 
-add_library(MBA SHARED MBA.cpp Utils.cpp)
+add_library(MBA SHARED MBA.cpp Ratio.cpp)
 add_library(RIV SHARED RIV.cpp)
-add_library(DuplicateBB SHARED DuplicateBB.cpp Utils.cpp)
+add_library(DuplicateBB SHARED DuplicateBB.cpp Ratio.cpp)
 
 # On Darwin (unlike on Linux), undefined symbols in shared objects are not
 # allowed at the end of the link-edit. Hence the following extra flag is

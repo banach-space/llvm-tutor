@@ -10,9 +10,12 @@
 #ifndef LLVM_TUTOR_DUPLICATE_BB_H
 #define LLVM_TUTOR_DUPLICATE_BB_H
 
-#include "llvm/Pass.h"
-#include "Utils.h"
 #include "llvm/IR/ValueMap.h"
+#include "llvm/Pass.h"
+#include "llvm/Support/RandomNumberGenerator.h"
+
+#include "Ratio.h"
+
 #include <map>
 
 namespace lt {
@@ -28,7 +31,7 @@ struct DuplicateBB : public llvm::FunctionPass {
   bool doInitialization(llvm::Module &M) override;
   void getAnalysisUsage(llvm::AnalysisUsage &Info) const override;
 
-  RandomNumberGenerator RNG;
+  std::unique_ptr<llvm::RandomNumberGenerator> RNG;
 
 private:
   // This method does most of the actual heavy-lifting.

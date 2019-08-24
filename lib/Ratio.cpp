@@ -1,14 +1,14 @@
 //==============================================================================
 // FILE:
-//    Utils.cpp
+//    Ratio.cpp
 //
 // DESCRIPTION:
-//    llvm::cl parser specialisation for the Ratio type. See:
-//      http://llvm.org/docs/CommandLine.html#extending-the-library
+//    Implementation of llvm::cl::parser specialisation for the Ratio type. See:
+//    http://llvm.org/docs/CommandLine.html#extending-the-library
 //
 // License: MIT
 //==============================================================================
-#include "Utils.h"
+#include "Ratio.h"
 
 namespace llvm {
 namespace cl {

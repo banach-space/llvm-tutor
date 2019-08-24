@@ -11,7 +11,9 @@
 #define LLVM_TUTOR_MBA_H
 
 #include "llvm/Pass.h"
-#include "Utils.h"
+#include "llvm/Support/RandomNumberGenerator.h"
+
+#include "Ratio.h"
 
 namespace lt {
 
@@ -25,7 +27,7 @@ struct MBA : public llvm::BasicBlockPass {
   bool runOnBasicBlock(llvm::BasicBlock &BB) override;
   bool doInitialization(llvm::Module &M) override;
 
-  RandomNumberGenerator RNG;
+  std::unique_ptr<llvm::RandomNumberGenerator> RNG;
 };
 } // namespace lt
 

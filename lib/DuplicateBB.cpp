@@ -53,7 +53,7 @@
 #include "llvm/Transforms/Utils/Cloning.h"
 
 #include "RIV.h"
-#include "Utils.h"
+#include "Ratio.h"
 
 #define DEBUG_TYPE "duplicate-bb"
 
@@ -109,7 +109,7 @@ bool DuplicateBB::runOnFunction(Function &F) {
     if (BB.isLandingPad())
       continue;
 
-    if (Dist(RNG) <= Ratio) {
+    if (Dist(*RNG) <= Ratio) {
       // Are there any integer values reachable from this BB?
       auto const &ReachableValues = RIVResult.lookup(&BB);
       size_t ReachableValuesCount = ReachableValues.size();
@@ -117,7 +117,7 @@ bool DuplicateBB::runOnFunction(Function &F) {
         // Yes, pick a random one.
         std::uniform_int_distribution<size_t> Dist(0, ReachableValuesCount - 1);
         auto Iter = ReachableValues.begin();
-        std::advance(Iter, Dist(RNG));
+        std::advance(Iter, Dist(*RNG));
         LLVM_DEBUG(errs() << "picking: " << **Iter
                           << " as random context value\n");
         // Store the binding and a BB to duplicate and the context variable
