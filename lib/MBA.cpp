@@ -62,8 +62,7 @@ static RegisterPass<MBA>
     );
 } // namespace lt
 
-// Called once for each module, before the calls on the basic blocks.
-// We could use doFinalization to clear RNG, but that's not needed.
+// Called once for each module, before the calls on basic blocks.
 bool MBA::doInitialization(Module &M) {
   RNG = M.createRNG(this);
   return false;

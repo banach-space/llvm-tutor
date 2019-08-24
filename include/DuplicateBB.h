@@ -1,31 +1,39 @@
 //========================================================================
 // FILE:
-//    MBA.h
+//    DuplicateBB.h
 //
 // DESCRIPTION:
-//    Declares the MBA pass.
+//    Declares the DuplicateBB pass.
 //
 // License: MIT
 //========================================================================
-#ifndef LLVM_TUTOR_MBA_H
-#define LLVM_TUTOR_MBA_H
+#ifndef LLVM_TUTOR_DUPLICATE_BB_H
+#define LLVM_TUTOR_DUPLICATE_BB_H
 
 #include "llvm/Pass.h"
 #include "Utils.h"
+#include "llvm/IR/ValueMap.h"
+#include <map>
 
 namespace lt {
 
-struct MBA : public llvm::BasicBlockPass {
+struct DuplicateBB : public llvm::FunctionPass {
   // The address of this static is used to uniquely identify this pass in the
   // pass registry. The PassManager relies on this address to find instance of
   // analyses passes and build dependencies on demand.
   // The value does not matter.
   static char ID;
-  MBA() : BasicBlockPass(ID), RNG(nullptr) {}
-  bool runOnBasicBlock(llvm::BasicBlock &BB) override;
+  DuplicateBB() : llvm::FunctionPass(ID), RNG(nullptr) {}
+  bool runOnFunction(llvm::Function &F) override;
   bool doInitialization(llvm::Module &M) override;
+  void getAnalysisUsage(llvm::AnalysisUsage &Info) const override;
 
   RandomNumberGenerator RNG;
+
+private:
+  // This method does most of the actual heavy-lifting.
+  void duplicate(llvm::BasicBlock &BB, llvm::Value *ContextValue,
+                 std::map<llvm::Value *, llvm::Value *> &ReMapper);
 };
 } // namespace lt
 

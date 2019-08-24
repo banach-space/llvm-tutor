@@ -20,25 +20,34 @@ tl;dr
 The best place to start is the `static-cc` pass implemented in
 `StaticCallCounter.cpp`. Build it first:
 ```bash
-$ cmake -DLT_LLVM_INSTALL_DIR=<installation/dir/of/llvm/8>  <source_dir>
+cmake G Ninja -DLT_LLVM_INSTALL_DIR=<installation/dir/of/llvm/8> <source/dir/llvm/tutor>
+ninja
 ```
-and then run:
+and then run it through `opt`:
 ```bash
-$ opt -load <build_dir>/lib/libCallCounter.so --static-cc -analyze <bitcode-file>
+opt -load <build_dir>/lib/libCallCounter.so --static-cc -analyze <bitcode/file/to/analyze>
 ```
 
 Status
 ------
-This is still **WORK IN PROGRESS**.
+**WORK IN PROGRESS**.
 
-Passes
-------
-Here's the list of currently available passes:
+Expect typos, but code builds fine and all tests pass. This is still early
+stages, so I might be moving the code around or renaming things. More
+functionality to come.
+
+Available Passes
+-----------------
+The list of implemented passes:
    * **CallCounter** - direct call counter (static and dynamic calls, pure
      analysis and instrumentation pass, parametrisable)
    * **MBA** - obfuscation through Mixed Boolean Arithmetic (transformation
      pass, paramterisable)
    * **RIV** - reachable integer values (analysis pass)
+   * **DuplicateBB** - reachable integer values (transformation pass,
+     parametrisable)
+
+For more details go to [usage](#usage).
 
 Requirements
 ------------
@@ -127,9 +136,9 @@ top-level source directory is `<source-dir>`.
 
 You can build all the examples as follows:
 ```bash
-$ cd <build-dir>
-$ cmake -DLT_LLVM_INSTALL_DIR=<either_build_or_installation_dir_of_llvm_8>  <source_dir>
-$ make
+cd <build-dir>
+cmake -DLT_LLVM_INSTALL_DIR=<either_build_or_installation_dir_of_llvm_8>  <source_dir>
+make
 ```
 
 The `LT_LLVM_INSTALL_DIR` variable should be set to either the installation or
@@ -141,21 +150,21 @@ Usage
 Once you've [built](#build-instructions) this project, you can experiment with
 every pass separately.
 
-### Counting Function Calls
+### Counting Function Calls (**CallCounter**)
 The `lt-cc` executable implements two (rather) basic direct call counters:
 static, and dynamic. You can test it with one of the provided examples, e.g.:
 ```bash
-$ clang  -emit-llvm -c <source_dir>/test/input_for_cc.c
-$ <build_dir>/bin/lt-cc -static input_for_cc.bc
+clang  -emit-llvm -c <source_dir>/test/input_for_cc.c
+<build_dir>/bin/lt-cc -static input_for_cc.bc
 ```
 
 or, for dynamic call analysis:
 ```bash
-$ <build_dir>/bin/lt-cc  -dynamic  input_for_cc.bc -o input_for_cc
-$ ./input_for_cc
+<build_dir>/bin/lt-cc  -dynamic  input_for_cc.bc -o input_for_cc
+./input_for_cc
 ```
 
-### Obfuscation
+### Obfuscation through mixed boolean arithmetic (**MBA**)
 The `mba` pass implements a very basic [obfuscation with mixed
 boolean-arithmetic](https://tel.archives-ouvertes.fr/tel-01623849/document)
 expression:
@@ -175,17 +184,31 @@ are to be replaced with `(a ^ b) + 2 * (a & b)`, e.g.:
 opt -load <build_dir>/lib/libMBA.so -mba -mba-ration=0.3 inputs/input_for_mba.c -o MBA_mod.ll
 ```
 
-### Reachable Integer Values
+### Reachable Integer Values (**RIV**)
 For each basic block in a module, calculates the reachable integer values (i.e.
 values that can be used in the particular basic block).  There are a few LIT
 tests that verify that indeed this is correct. You can run this pass as
 follows:
 ```bash
-opt -load <build_dir>/lib/libRVI.so --rvi inputs/input_for_rvi.c
+opt -load <build_dir>/lib/libRVI.so -rvi inputs/input_for_rvi.c
 ```
 
-Note that this, unlike previous ones, is only really useful when in analysing
+Note that this pass, unlike previous ones, is only really useful when analysing
 the underlying IR representation of the input module.
+
+### Duplicate Basic Blocks (**DuplicateBB**)
+This pass will duplicate all basic blocks in a module, with the exception of
+basic blocks for which there are no reachable integer values (identified
+through the `RVI` pass). This should only exclude the entry block in functions
+that take no arguments and which are embedded in modules with no global values.
+Duplicates (almost) every basic block in a module. This pass depends on the
+`RVI` pass, hence you need to load to modules in order to run it:
+```bash
+opt -load <build_dir>/lib/libRVI.so -load <build_dir>/lib/libDuplicateBB.so -rvi inputs/input_for_duplicate_bb.c
+```
+Basic blocks are duplicated by inserting an `if-then-else` construct and
+cloning all the instructions (with the exception of PHI nodes) into the new
+blocks.
 
 Testing
 -------

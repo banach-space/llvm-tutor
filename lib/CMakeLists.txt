@@ -3,6 +3,7 @@ add_library(CallCounterStatic STATIC StaticCallCounter.cpp DynamicCallCounter.cp
 
 add_library(MBA SHARED MBA.cpp Utils.cpp)
 add_library(RIV SHARED RIV.cpp)
+add_library(DuplicateBB SHARED DuplicateBB.cpp Utils.cpp)
 
 # On Darwin (unlike on Linux), undefined symbols in shared objects are not
 # allowed at the end of the link-edit. Hence the following extra flag is
@@ -15,6 +16,8 @@ target_link_libraries(CallCounter
 target_link_libraries(MBA
   "$<$<PLATFORM_ID:Darwin>:-undefined dynamic_lookup>")
 target_link_libraries(RIV
+  "$<$<PLATFORM_ID:Darwin>:-undefined dynamic_lookup>")
+target_link_libraries(DuplicateBB
   "$<$<PLATFORM_ID:Darwin>:-undefined dynamic_lookup>")
 
 add_library(lt-cc-rt DynamicCallCounterRT)
