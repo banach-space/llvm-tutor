@@ -1,5 +1,5 @@
 ; RUN: clang -S -emit-llvm %S/../inputs/input_for_mba.c -o - \
-; RUN:   | opt -load ../lib/libMBA%shlibext -mba -S -o %instrumented.ll
+; RUN:   | opt -load ../lib/libMBAAdd%shlibext -legacy-mba-add -S -o %instrumented.ll
 ; RUN: clang %instrumented.ll -o %instrumented.bin
 
 ; The program implemented in input_for_mba.c takes for inputs and adds them up,

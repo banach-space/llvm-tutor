@@ -1,4 +1,4 @@
-; RUN: not opt -load ../lib/libMBA%shlibext -mba -mba-ratio=100 -S %s 2>&1 | FileCheck %s
+; RUN: not opt -load ../lib/libMBAAdd%shlibext -legacy-mba-add -mba-ratio=100 -S %s 2>&1 | FileCheck %s
 
 ;  Verify that wrong MBA ratio triggers an adequate error
 

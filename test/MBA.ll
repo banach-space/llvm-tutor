@@ -1,5 +1,8 @@
 ; RUN: clang -S -emit-llvm %S/../inputs/input_for_mba.c -o - \
-; RUN:  | opt -load ../lib/libMBA%shlibext -mba -S \
+; RUN:  | opt -load ../lib/libMBAAdd%shlibext -legacy-mba-add -S \
+; RUN:  | FileCheck %s
+; RUN: clang -S -emit-llvm %S/../inputs/input_for_mba.c -o - \
+; RUN:  | opt -load-pass-plugin=../lib/libMBAAdd%shlibext -passes="mba-add" -S \
 ; RUN:  | FileCheck %s
 
 ; The input file contains 3 additions. Verify that these are correctly

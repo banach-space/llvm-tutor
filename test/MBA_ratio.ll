@@ -1,5 +1,5 @@
-; RUN: opt -load ../lib/libMBA%shlibext -mba -mba-ratio=1 -S %s  | FileCheck -check-prefix=MBA %s
-; RUN: opt -load ../lib/libMBA%shlibext -mba -mba-ratio=0 -S %s  | FileCheck -check-prefix=NO_MBA %s
+; RUN: opt -load ../lib/libMBAAdd%shlibext -legacy-mba-add -mba-ratio=1 -S %s  | FileCheck -check-prefix=MBA %s
+; RUN: opt -load ../lib/libMBAAdd%shlibext -legacy-mba-add -mba-ratio=0 -S %s  | FileCheck -check-prefix=NO_MBA %s
 
 ; Verify that -mba-ratio has the expected effect.
 

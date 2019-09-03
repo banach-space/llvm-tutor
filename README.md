@@ -41,7 +41,7 @@ Available Passes
 The list of implemented passes:
    * **CallCounter** - direct call counter (static and dynamic calls, pure
      analysis and instrumentation pass, parametrisable)
-   * **MBA** - obfuscation through Mixed Boolean Arithmetic (transformation
+   * **MBAAdd** - obfuscation through Mixed Boolean Arithmetic (transformation
      pass, paramterisable)
    * **RIV** - reachable integer values (analysis pass)
    * **DuplicateBB** - reachable integer values (transformation pass,
@@ -164,8 +164,8 @@ or, for dynamic call analysis:
 ./input_for_cc
 ```
 
-### Obfuscation through mixed boolean arithmetic (**MBA**)
-The `mba` pass implements a very basic [obfuscation with mixed
+### Obfuscation through mixed boolean arithmetic (**MBAAdd**)
+The `mba-add` pass implements a very basic [obfuscation with mixed
 boolean-arithmetic](https://tel.archives-ouvertes.fr/tel-01623849/document)
 expression:
 ```
@@ -175,13 +175,13 @@ Basically, it replaces all instances of addition according to the above
 formula. There are a few LIT tests that verify that indeed this is correct. You
 can run this pass as follows:
 ```bash
-opt -load <build_dir>/lib/libMBA.so --mba inputs/input_for_mba.c -o MBA_mod.ll
+opt -load <build_dir>/lib/libMBAAdd.so --mba inputs/input_for_mba.c -o MBAAdd_mod.ll
 ```
 You can also specify the level of obfuscation on a scale of `0` to `1`, with
 `0` corresponding to no obfuscation and `1` meaning that all `add` instructions
 are to be replaced with `(a ^ b) + 2 * (a & b)`, e.g.:
 ```bash
-opt -load <build_dir>/lib/libMBA.so -mba -mba-ration=0.3 inputs/input_for_mba.c -o MBA_mod.ll
+opt -load <build_dir>/lib/libMBAAdd.so -mba -mba-ration=0.3 inputs/input_for_mba.c -o MBAAdd_mod.ll
 ```
 
 ### Reachable Integer Values (**RIV**)
