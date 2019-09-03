@@ -82,7 +82,7 @@ PreservedAnalyses MBASub::run(llvm::Function &F, llvm::FunctionAnalysisManager &
   bool Changed = false;
 
   for (auto &BB : F) {
-    Changed = runOnBasicBlock(BB);
+    Changed |= runOnBasicBlock(BB);
   }
   return (Changed ? llvm::PreservedAnalyses::none()
                   : llvm::PreservedAnalyses::all());
@@ -146,7 +146,7 @@ bool LegacyMBASub::runOnFunction(llvm::Function &F) {
   bool Changed = false;
 
   for (auto &BB : F) {
-    Changed = Impl.runOnBasicBlock(BB);
+    Changed |= Impl.runOnBasicBlock(BB);
   }
   return Changed;
 }
