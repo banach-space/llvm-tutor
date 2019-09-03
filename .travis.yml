@@ -44,4 +44,4 @@ script:
   - cd build
   - cmake -DLT_LLVM_INSTALL_DIR="$LLVM_DIR" -DLT_LIT_TOOLS_DIR="$LLVM_TOOLCHAIN"  ../
   - make -j4
-  - if [[ "$RUN_TESTS" == "True" ]]; then /Users/travis/Library/Python/2.7/bin/lit -va test/; fi
+  - if [[ "$RUN_TESTS" == "True" ]]; then /Users/travis/Library/Python/2.7/bin/lit test/; fi

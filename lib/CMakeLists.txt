@@ -2,6 +2,7 @@ add_library(CallCounter SHARED StaticCallCounter.cpp DynamicCallCounter.cpp)
 add_library(CallCounterStatic STATIC StaticCallCounter.cpp DynamicCallCounter.cpp)
 
 add_library(MBAAdd SHARED MBAAdd.cpp Ratio.cpp)
+add_library(MBASub SHARED MBASub.cpp Ratio.cpp)
 add_library(RIV SHARED RIV.cpp)
 add_library(DuplicateBB SHARED DuplicateBB.cpp Ratio.cpp)
 
@@ -14,6 +15,8 @@ add_library(DuplicateBB SHARED DuplicateBB.cpp Ratio.cpp)
 target_link_libraries(CallCounter
   "$<$<PLATFORM_ID:Darwin>:-undefined dynamic_lookup>")
 target_link_libraries(MBAAdd
+  "$<$<PLATFORM_ID:Darwin>:-undefined dynamic_lookup>")
+target_link_libraries(MBASub
   "$<$<PLATFORM_ID:Darwin>:-undefined dynamic_lookup>")
 target_link_libraries(RIV
   "$<$<PLATFORM_ID:Darwin>:-undefined dynamic_lookup>")

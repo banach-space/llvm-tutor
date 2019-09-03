@@ -164,24 +164,42 @@ or, for dynamic call analysis:
 ./input_for_cc
 ```
 
-### Obfuscation through mixed boolean arithmetic (**MBAAdd**)
-The `mba-add` pass implements a very basic [obfuscation with mixed
+### Mixed Boolean Arithmetic Transformations (**MBA**)
+These passes implement [mixed
 boolean-arithmetic](https://tel.archives-ouvertes.fr/tel-01623849/document)
-expression:
+transformations. Similar transformation are often used in code obfuscation (you
+may also know them from [Hacker's
+Delight](https://www.amazon.co.uk/Hackers-Delight-Henry-S-Warren/dp/0201914654))
+and are a great illustration of what and how LLVM passes can be used for.
+
+#### mba-sub
+The `mba-sub` pass implements this rather basic expression:
+```
+a - b == (a + ~b) + 1
+```
+Basically, it replaces all instances of integer `sub` according to the above
+formula. There are a few LIT tests that verify that indeed this is formula and
+the attached implementations are correct. You can run this pass as follows:
+```bash
+opt -load <build_dir>/lib/libMBASub.so -mba-sub inputs/input_for_sub.c -o out.ll
+```
+
+#### mba-add
+The `mba-add` pass implements a slightly more involved formula:
 ```
 a + b == (a ^ b) + 2 * (a & b)
 ```
-Basically, it replaces all instances of addition according to the above
-formula. There are a few LIT tests that verify that indeed this is correct. You
-can run this pass as follows:
+Similarly to `mba-sub`, it replaces all instances of integer `add`according to
+the above formula. There are a few LIT tests that verify that indeed this is
+correct. You can run this pass as follows:
 ```bash
-opt -load <build_dir>/lib/libMBAAdd.so --mba inputs/input_for_mba.c -o MBAAdd_mod.ll
+opt -load <build_dir>/lib/libMBAAdd.so -mba-add inputs/input_for_mba.c -o MBAAdd_mod.ll
 ```
-You can also specify the level of obfuscation on a scale of `0` to `1`, with
+You can also specify the level of _obfuscation_ on a scale of `0` to `1`, with
 `0` corresponding to no obfuscation and `1` meaning that all `add` instructions
 are to be replaced with `(a ^ b) + 2 * (a & b)`, e.g.:
 ```bash
-opt -load <build_dir>/lib/libMBAAdd.so -mba -mba-ration=0.3 inputs/input_for_mba.c -o MBAAdd_mod.ll
+opt -load <build_dir>/lib/libMBAAdd.so -mba-add -mba-ratio=0.3 inputs/input_for_mba.c -o out.ll
 ```
 
 ### Reachable Integer Values (**RIV**)
