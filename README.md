@@ -30,22 +30,21 @@ opt -load <build_dir>/lib/libCallCounter.so --static-cc -analyze <bitcode/file/t
 
 Status
 ------
-**WORK IN PROGRESS**.
+**WORK IN PROGRESS**
 
-Expect typos, but code builds fine and all tests pass. This is still early
-stages, so I might be moving the code around or renaming things. More
-functionality to come.
+The code builds fine and all tests pass, but expect typos etc. I might be
+moving the code around or renaming things. More functionality and documentation
+to come soon.
 
 Available Passes
 -----------------
-The list of implemented passes:
    * **CallCounter** - direct call counter (static and dynamic calls, pure
      analysis and instrumentation pass, parametrisable)
-   * **MBAAdd** - obfuscation through Mixed Boolean Arithmetic (transformation
-     pass, paramterisable)
-   * **RIV** - reachable integer values (analysis pass)
-   * **DuplicateBB** - reachable integer values (transformation pass,
-     parametrisable)
+   * **MBA** - two passes that implement code transformation through Mixed
+     Boolean Arithmetic expressions (transformation, paramterisable)
+   * **RIV** - reachable integer values (analysis)
+   * **DuplicateBB** - duplicates basic blocks, requires **RIV** analysis
+     results (transformation, parametrisable)
 
 For more details go to [usage](#usage).
 
@@ -114,7 +113,7 @@ cd build
 cmake -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=X86 <llvm-project/root/dir>/llvm/
 cmake --build .
 ```
-These steps are not optimal. Please refer to the official documentaion for more
+These steps are not optimal. Please refer to the official documentation for more
 hints.
 
 Platform Support
@@ -185,19 +184,20 @@ opt -load <build_dir>/lib/libMBASub.so -mba-sub inputs/input_for_sub.c -o out.ll
 ```
 
 #### mba-add
-The `mba-add` pass implements a slightly more involved formula:
+The `mba-add` pass implements a slightly more involved formula (this is only
+valid for 8 bit integers):
 ```
-a + b == (a ^ b) + 2 * (a & b)
+a + b == (((a ^ b) + 2 * (a & b)) * 39 + 23) * 151 + 111
 ```
 Similarly to `mba-sub`, it replaces all instances of integer `add`according to
-the above formula. There are a few LIT tests that verify that indeed this is
-correct. You can run this pass as follows:
+the above formula, but only for 8-bit integers. The LIT tests verify that
+both the formula and the implementations are correct. You run it like this:
 ```bash
-opt -load <build_dir>/lib/libMBAAdd.so -mba-add inputs/input_for_mba.c -o MBAAdd_mod.ll
+opt -load <build_dir>/lib/libMBAAdd.so -mba-add inputs/input_for_mba.c -o out.ll
 ```
-You can also specify the level of _obfuscation_ on a scale of `0` to `1`, with
+You can also specify the level of _obfuscation_ on a scale of `0.0` to `1.0`, with
 `0` corresponding to no obfuscation and `1` meaning that all `add` instructions
-are to be replaced with `(a ^ b) + 2 * (a & b)`, e.g.:
+are to be replaced with `(((a ^ b) + 2 * (a & b)) * 39 + 23) * 151 + 111`, e.g.:
 ```bash
 opt -load <build_dir>/lib/libMBAAdd.so -mba-add -mba-ratio=0.3 inputs/input_for_mba.c -o out.ll
 ```
