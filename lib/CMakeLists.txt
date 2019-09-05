@@ -1,5 +1,6 @@
-add_library(CallCounter SHARED StaticCallCounter.cpp DynamicCallCounter.cpp)
-add_library(CallCounterStatic STATIC StaticCallCounter.cpp DynamicCallCounter.cpp)
+add_library(StaticCallCounter SHARED StaticCallCounter.cpp)
+add_library(DynamicCallCounter SHARED DynamicCallCounter.cpp)
+add_library(DynamicCallCounterStatic STATIC DynamicCallCounter.cpp)
 
 add_library(MBAAdd SHARED MBAAdd.cpp Ratio.cpp)
 add_library(MBASub SHARED MBASub.cpp Ratio.cpp)
@@ -12,7 +13,9 @@ add_library(DuplicateBB SHARED DuplicateBB.cpp Ratio.cpp)
 #    "Undefined symbols for architecture x86_64"
 # with various LLVM symbols being undefined. Those symbols are later loaded at
 # runtime, so this error is a false positive.
-target_link_libraries(CallCounter
+target_link_libraries(StaticCallCounter
+  "$<$<PLATFORM_ID:Darwin>:-undefined dynamic_lookup>")
+target_link_libraries(DynamicCallCounter
   "$<$<PLATFORM_ID:Darwin>:-undefined dynamic_lookup>")
 target_link_libraries(MBAAdd
   "$<$<PLATFORM_ID:Darwin>:-undefined dynamic_lookup>")

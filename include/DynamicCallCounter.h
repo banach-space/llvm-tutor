@@ -2,12 +2,8 @@
 // FILE:
 //    DynamicCallCounter.h
 //
-// AUTHOR:
-//    banach-space@github
-//
 // DESCRIPTION:
-//    This pass cannnot be used through opt as it calculates the function calls
-//    at runtime.
+//   Declares the DynamicCallCounter.pass
 //
 // License: MIT
 //========================================================================
@@ -19,24 +15,23 @@
 #include "llvm/IR/CallSite.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Pass.h"
-#include "llvm/Support/raw_ostream.h"
 
 namespace lt {
 
 struct DynamicCallCounter : public llvm::ModulePass {
   static char ID;
 
-  llvm::DenseMap<llvm::Function *, uint64_t> ids;
-  llvm::DenseSet<llvm::Function *> internal;
+  llvm::DenseMap<llvm::Function *, uint64_t> IDs;
+  llvm::DenseSet<llvm::Function *> Internal;
 
   DynamicCallCounter() : llvm::ModulePass(ID) {}
 
-  bool runOnModule(llvm::Module &m) override;
+  bool runOnModule(llvm::Module &M) override;
 
   // Installs the call-counter (CC) at the the beginning of the given function
-  void installCCFunction(llvm::Function &f, llvm::Value *counter);
+  void installCCFunction(llvm::Function &Func, llvm::Value *Counter);
   // Installs the call-counter (CC) before the given call-site instruction
-  void installCCInstruction(llvm::CallSite cs, llvm::Value *counter);
+  void installCCInstruction(llvm::CallSite CS, llvm::Value *Counter);
 };
 
 }  // namespace lt

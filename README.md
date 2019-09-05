@@ -25,26 +25,30 @@ ninja
 ```
 and then run it through `opt`:
 ```bash
-opt -load <build_dir>/lib/libCallCounter.so --static-cc -analyze <bitcode/file/to/analyze>
+opt -load <build/dir>/lib/libCallCounter.so --static-cc -analyze <bitcode/file/to/analyze>
 ```
 
 Status
 ------
 **WORK IN PROGRESS**
 
-The code builds fine and all tests pass, but expect typos etc. I might be
-moving the code around or renaming things. More functionality and documentation
-to come soon.
+All examples build fine and all tests pass, but expect some typos, missing
+comments, etc. I will be refactoring the code a bit and adding new
+functionality.  More documentation to come soon.
 
 Available Passes
 -----------------
-   * **CallCounter** - direct call counter (static and dynamic calls, pure
-     analysis and instrumentation pass, parametrisable)
-   * **MBA** - two passes that implement code transformation through Mixed
-     Boolean Arithmetic expressions (transformation, paramterisable)
-   * **RIV** - reachable integer values (analysis)
+   * **StaticCallCounter** - counts direct function calls at compile time (only static
+     calls, pure analysis pass)
+   * **DynamicCallCounter** - counts direct function calls at run-time (
+     analysis + instrumentation pass)
+   * **MBASub** - code transformation for integer `sub` instructions
+     (transformation pass, parametrisable)
+   * **MBAAdd** - code transformation for 8-bit integer `add` instructions
+     (transformation pass, parametrisable)
+   * **RIV** - finds reachable integer values for each basic block (analysis pass)
    * **DuplicateBB** - duplicates basic blocks, requires **RIV** analysis
-     results (transformation, parametrisable)
+     results (transformation pass, parametrisable)
 
 For more details go to [usage](#usage).
 
@@ -147,20 +151,46 @@ build directory of LLVM-8. It is used to locate the corresponding
 Usage
 -----
 Once you've [built](#build-instructions) this project, you can experiment with
-every pass separately.
-
-### Counting Function Calls (**CallCounter**)
-The `lt-cc` executable implements two (rather) basic direct call counters:
-static, and dynamic. You can test it with one of the provided examples, e.g.:
+every pass separately. I assume that you have `clang` and `opt` available in
+your `PATH`. All passes work with LLVM files. You can generate one like this:
 ```bash
-clang  -emit-llvm -c <source_dir>/test/input_for_cc.c
-<build_dir>/bin/lt-cc -static input_for_cc.bc
+# Textual form
+clang  -emit-llvm input.c -S -o out.ll
+# Binary/bit-code form
+clang  -emit-llvm input.c -o out.bc
+```
+It doesn't matter whether your choose the textual or binary form, but obviously
+the former is more human-friendly.
+
+### Count Compile Time Function Calls (**StaticCallCounter**)
+`StaticCallCounter` will count the number of function calls in the input
+LLVM file that are visible during the compilation (i.e. if a function is
+called within a loop, that counts as one call). Only direct function calls are
+considered (TODO: Expand).
+```bash
+# Generate the LLVM file to analyze
+clang  -emit-llvm -c <source_dir>/test/input_for_cc.c -o input_for_cc.bc
+# Run the pass through opt
+opt -load <build_dir>/lib/libStaticCallCounter.dylib -static-cc -analyze input_for_cc.bc
+```
+The `static` executable is a command line wrapper that allows you to run
+`StaticCallCounter` without the need for `opt`:
+```bash
+<build_dir>/bin/static input_for_cc.bc
 ```
 
-or, for dynamic call analysis:
+### Count Run-Time Function Calls (**DynamicCallCounter**)
+`DynamicCallCounter` will count the number of run-time function calls. It does
+so by instrumenting the input `LLVM` file - it injects call-counting code that
+is executed every time a function is called. Although this pass _analyses_
+function calls, it's a transformation pass as it does modify the input file.
+You can test it with one of the provided examples, e.g.:
 ```bash
-<build_dir>/bin/lt-cc  -dynamic  input_for_cc.bc -o input_for_cc
-./input_for_cc
+# Generate the LLVM file to analyze
+clang  -emit-llvm -c <source_dir>/test/input_for_cc.c -o input_for_cc.bc
+# Instrument the input file first
+<build_dir>/bin/dynamic  -dynamic  input_for_cc.bc -o instrumented_bin
+./instrumented_bin
 ```
 
 ### Mixed Boolean Arithmetic Transformations (**MBA**)
@@ -273,6 +303,12 @@ build LLVM from sources) and for this reason the CI is configured to skip tests
 there. As far as Linux is concerned, I've only been able to run the tests on my
 host. If you encounter any problems on your machine - please let me know and I
 will try to fix that. The CI _does_ run the tests when building on Mac OS X.
+
+Credits
+-------
+This is first and foremost community effort. This project wouldn't be possible
+without the amazing LLVM online documentation, plethora of great comments in
+the source code, and the llvm-dev mailing list. Thank you!
 
 License
 --------

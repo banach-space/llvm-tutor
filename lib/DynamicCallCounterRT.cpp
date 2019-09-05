@@ -2,9 +2,6 @@
 // FILE:
 //      DynamicCallCounterRT.cpp 
 //
-// AUTHOR:
-//      banach-space@github
-//
 // DESCRIPTION:
 //     Runtime functions for the DynamicCallCounter pass. These functions
 //     are installed inside the instrumented module.

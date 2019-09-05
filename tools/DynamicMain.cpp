@@ -1,13 +1,22 @@
 //========================================================================
 // FILE:
-//    lt-cc-main.cpp
+//    DynamicMain.cpp
 //
 // DESCRIPTION:
+//    A command-line tool that counts all the dynamic/run-time function calls
+//    in the input LLVM file. It builds on top of DynamicCallCounter pass
+//
+// USAGE:
+//    # First, generate an LLVM file
+//    clang -emit-llvm <input-file> -o <output-llvm-file>
+//    # Run this tool to generate an instrumented binary
+//    <BUILD/DIR>/bin/dynamic <llvm-file-to-analyze> -o <output-bin-file>
+//    # Run the instrumented binary
+//    ./<output-bin-file>
 //
 // License: MIT
 //========================================================================
 #include "DynamicCallCounter.h"
-#include "StaticCallCounter.h"
 #include "config.h"
 
 #include "llvm/Analysis/TargetLibraryInfo.h"
@@ -33,14 +42,6 @@ using namespace llvm;
 using llvm::legacy::PassManager;
 using llvm::sys::ExecuteAndWait;
 using llvm::sys::findProgramByName;
-using std::string;
-using std::unique_ptr;
-using std::vector;
-
-enum class AnalysisType {
-  STATIC,
-  DYNAMIC,
-};
 
 //===----------------------------------------------------------------------===//
 // Command line (cl) options for lt
@@ -51,41 +52,25 @@ static cl::OptionCategory CallCounterCategory{"call counter options"};
 static cl::opt<bool, true> Debug("debug", cl::desc("Enable debug output"),
                                  cl::Hidden, cl::location(DebugFlag));
 
-static cl::opt<string> InputModule{cl::Positional,
+static cl::opt<std::string> InputModule{cl::Positional,
                                    cl::desc{"<Module to analyze>"},
                                    cl::value_desc{"bitcode filename"},
                                    cl::init(""),
                                    cl::Required,
                                    cl::cat{CallCounterCategory}};
 
-static cl::opt<AnalysisType> AnalysisTy{
-    cl::desc{"Select analyis type:"},
-    cl::values(clEnumValN(AnalysisType::STATIC, "static",
-                          "Count static direct calls."),
-               clEnumValN(AnalysisType::DYNAMIC, "dynamic",
-                          "Count dynamic direct calls.")),
-    cl::Required, cl::cat{CallCounterCategory}};
-
-static cl::opt<string> OutputModule{
+static cl::opt<std::string> OutputModule{
     "o", cl::desc{"Filename of the instrumented program"},
     cl::value_desc{"filename"}, cl::Required, cl::cat{CallCounterCategory}};
 
-enum OptLevel { O0 = 0, O1, O2, O3 };
+enum OptLevelTy { O0 = 0, O1, O2, O3 };
 
-cl::opt<OptLevel> optimizationLevel(
+cl::opt<OptLevelTy> OptLevelCl(
     cl::desc("Choose optimization level (default = 'O2'):"),
     cl::values(clEnumVal(O1, "Enable trivial optimizations"),
                clEnumVal(O2, "Enable default optimizations"),
                clEnumVal(O3, "Enable expensive optimizations")),
     cl::init(O2), cl::cat{CallCounterCategory});
-
-static cl::list<string> LibPaths{
-    "L", cl::Prefix, cl::desc{"Specify a library search path"},
-    cl::value_desc{"directory"}, cl::cat{CallCounterCategory}};
-
-static cl::list<string> Libraries{
-    "l", cl::Prefix, cl::desc{"Specify Libraries to link against"},
-    cl::value_desc{"library prefix"}, cl::cat{CallCounterCategory}};
 
 //===----------------------------------------------------------------------===//
 // The DynamicCountPrinter pass - wrappers
@@ -102,7 +87,7 @@ static void compile(Module &M, StringRef OutputPath) {
 
   // 2. Generate the optimisation level
   CodeGenOpt::Level OptLevel = CodeGenOpt::Default;
-  switch (optimizationLevel) {
+  switch (OptLevelCl) {
   default:
     report_fatal_error("Invalid optimization level\n");
   case O0:
@@ -131,7 +116,7 @@ static void compile(Module &M, StringRef OutputPath) {
   // 4. Get TargetMachine (interface to the complete target machine description)
   std::string FeaturesStr;
   TargetOptions TO = InitTargetOptionsFromCodeGenFlags();
-  unique_ptr<TargetMachine> TheMachine(TheTarget->createTargetMachine(
+  std::unique_ptr<TargetMachine> TheMachine(TheTarget->createTargetMachine(
       triple.getTriple(), MCPU, FeaturesStr, TO, getRelocModel(),
       /* CodeModel */ None, OptLevel));
   assert((nullptr != TheMachine) && "Could not allocate target machine!");
@@ -181,7 +166,7 @@ static void link(StringRef InObjFile, StringRef OutObjFile) {
 
   // Optimisation level
   std::string opt("-O");
-  opt += std::to_string(optimizationLevel);
+  opt += std::to_string(OptLevelCl);
   LinkerArgs.push_back(opt.c_str());
 
   // Output file
@@ -191,17 +176,11 @@ static void link(StringRef InObjFile, StringRef OutObjFile) {
   // Input File
   LinkerArgs.push_back(InObjFile.data());
 
-  // Search paths for libraries
-  for (auto &libPath : LibPaths) {
-    LinkerArgs.push_back("-L");
-    LinkerArgs.push_back(libPath.c_str());
-  }
-
-  // Libraries to link
-  for (auto &library : Libraries) {
-    LinkerArgs.push_back("-l");
-    LinkerArgs.push_back(library.c_str());
-  }
+  // Add lt-rt-cc
+  LinkerArgs.push_back("-L");
+  LinkerArgs.push_back(LT_RT_LIBRARY_PATH);
+  LinkerArgs.push_back("-l");
+  LinkerArgs.push_back(LT_RUNTIME_LIB);
 
   // This is needed for toStringRefArray to work
   LinkerArgs.push_back(nullptr);
@@ -220,17 +199,6 @@ static void link(StringRef InObjFile, StringRef OutObjFile) {
       ExecuteAndWait(ClangExecutable.get(), LinkerArgsStrRef, None, {}, 0, 0)) {
     report_fatal_error("Unable to link output file");
   }
-}
-
-static void generateBinary(Module &M, StringRef ExecutableOut) {
-  // Compile into an object
-  string ObjectFile = ExecutableOut.str() + ".o";
-  compile(M, ObjectFile);
-
-  // Generate the executable
-  LibPaths.push_back(LT_RT_LIBRARY_PATH);
-  Libraries.push_back(LT_RUNTIME_LIB);
-  link(ObjectFile, ExecutableOut);
 }
 
 static void saveModule(const Module &M, StringRef OutputFile) {
@@ -258,52 +226,23 @@ static void countDynamicCalls(Module &M) {
 
   // 3. Save the instrumented module and generate a binary from it
   saveModule(M, OutputModule + ".lt.bc");
-  generateBinary(M, OutputModule);
-}
 
-//===----------------------------------------------------------------------===//
-// The StaticCountPrinter pass - wrappers
-//===----------------------------------------------------------------------===//
-struct StaticCountPrinter : public ModulePass {
-  static char ID;
-  raw_ostream &OutS;
-
-  explicit StaticCountPrinter(raw_ostream &OS) : ModulePass(ID), OutS(OS) {}
-
-  bool runOnModule(Module &M) override {
-    // Prints the result of StaticCallCounter
-    getAnalysis<lt::StaticCallCounter>().print(OutS, &M);
-    return false;
-  }
-
-  // Set dependencies
-  void getAnalysisUsage(AnalysisUsage &AU) const override {
-    AU.addRequired<lt::StaticCallCounter>();
-    AU.setPreservesAll();
-  }
-};
-
-char StaticCountPrinter::ID = 0;
-
-static void countStaticCalls(Module &M) {
-  // Build up all of the passes that we want to run on the module.
-  legacy::PassManager PM;
-
-  PM.add(new lt::StaticCallCounter());
-  PM.add(new StaticCountPrinter(outs()));
-
-  PM.run(M);
+  std::string ObjectFile = OutputModule + ".o";
+  compile(M, ObjectFile);
+  link(ObjectFile, OutputModule);
 }
 
 //===----------------------------------------------------------------------===//
 // Main driver code.
 //===----------------------------------------------------------------------===//
 int main(int Argc, char **Argv) {
+  // Hide all options apart from the ones specific to this tool
   cl::HideUnrelatedOptions(CallCounterCategory);
+
   cl::ParseCommandLineOptions(Argc, Argv,
-                              "Basic command line static analysis tool\n\n"
-                              "This program will count the number of function "
+                              "Counts the number of dynamic function "
                               "calls in the input IR file\n");
+
   // Makes shure llvm_shutdown() is called:
   //  http://llvm.org/docs/ProgrammersManual.html#ending-execution-with-llvm-shutdown
   llvm_shutdown_obj SDO;
@@ -311,7 +250,7 @@ int main(int Argc, char **Argv) {
   // Parse the IR file passed on the command line.
   SMDiagnostic Err;
   LLVMContext Ctx;
-  unique_ptr<Module> M = parseIRFile(InputModule.getValue(), Err, Ctx);
+  std::unique_ptr<Module> M = parseIRFile(InputModule.getValue(), Err, Ctx);
 
   if (!M) {
     errs() << "Error reading bitcode file: " << InputModule << "\n";
@@ -319,17 +258,8 @@ int main(int Argc, char **Argv) {
     return -1;
   }
 
-  switch (AnalysisTy) {
-  case AnalysisType::DYNAMIC:
-    countDynamicCalls(*M);
-    break;
-  case AnalysisType::STATIC:
-    countStaticCalls(*M);
-    break;
-  default:
-    report_fatal_error("Invalid analysis type.\n");
-    return -1;
-  }
+  // Run the analysis and print the results
+  countDynamicCalls(*M);
 
   return 0;
 }

@@ -1,5 +1,5 @@
 ; RUN: clang -c -emit-llvm %S/../inputs/input_for_cc.c -o - \
-; RUN:   | opt -load ../lib/libCallCounter%shlibext --static-cc -analyze \
+; RUN:   | opt -load ../lib/libStaticCallCounter%shlibext --static-cc -analyze \
 ; RUN:   | FileCheck %s
 
 ; Test 'static-cc' when run through opt. This is the expected output after

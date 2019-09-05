@@ -2,26 +2,23 @@
 // FILE:
 //    StaticCallCounter.cpp
 //
-// AUTHOR:
-//    banach-space@github
-//
 // DESCRIPTION:
-//    Counts the static function calls
+//    Counts the number of direct function calls (i.e. as seen in the source
+//    code) in a file.
 //
-//    Counts the number of static direct function calls.
-//
-//    This pass can be run through lt-cc as well ass opt. For the latter:
-//      $ opt -load <BUILD_DIR>/lib/liblt-lib.so --lt -analyze <bitcode-file>
+// USAGE:
+//    This pass can be run through opt like this:
+//      opt -load <BUILD/DIR>/lib/ --cc-static -analyze <input-llvm-file>
+//    You can also run it through 'static':
+//      <BUILD/DIR>/bin/static <input-llvm-file>
 //
 // License: MIT
 //========================================================================
-#include <iomanip>
+#include "StaticCallCounter.h"
 
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/Instruction.h"
 #include "llvm/Support/Format.h"
-
-#include "StaticCallCounter.h"
 
 using namespace llvm;
 using lt::StaticCallCounter;
@@ -32,40 +29,40 @@ char StaticCallCounter::ID = 0;
 
 // Register the pass - required for (among others) opt
 RegisterPass<StaticCallCounter> X("static-cc",
-                                  "Print the static count of direct calls",
+                                  "For each function print the number of direct calls",
                                   true /* Only looks at CFG */,
                                   true /* Analysis Pass */);
 } // namespace lt
 
 // For an analysis pass, runOnModule should perform the actual analysis and
 // compute the results. The actual output, however, is produced separately.
-bool StaticCallCounter::runOnModule(Module &m) {
-  for (auto &f : m) {
-    for (auto &bb : f) {
-      for (auto &i : bb) {
+bool StaticCallCounter::runOnModule(Module &M) {
+  for (auto &Func : M) {
+    for (auto &BB : Func) {
+      for (auto &Ins : BB) {
         // As per the comments in CallSite.h (more specifically, comments for
         // the base class CallSiteBase), ImmutableCallSite constructor creates
         // a valid call-site or NULL for something which is NOT a call site.
-        auto ims = ImmutableCallSite(&i);
+        auto ICS = ImmutableCallSite(&Ins);
 
         // Check whether the instruction is actually a call/invoke
-        if (nullptr == ims.getInstruction()) {
+        if (nullptr == ICS.getInstruction()) {
           continue;
         }
 
         // Check whether the called function is directly invoked
-        auto called =
-            dyn_cast<Function>(ims.getCalledValue()->stripPointerCasts());
-        if (nullptr == called) {
+        auto DirectInvoc =
+            dyn_cast<Function>(ICS.getCalledValue()->stripPointerCasts());
+        if (nullptr == DirectInvoc) {
           continue;
         }
 
         // Update the count for the particular call
-        auto count = counts.find(called);
-        if (counts.end() == count) {
-          count = counts.insert(std::make_pair(called, 0)).first;
+        auto CallCount = DirectCalls.find(DirectInvoc);
+        if (DirectCalls.end() == CallCount) {
+          CallCount = DirectCalls.insert(std::make_pair(DirectInvoc, 0)).first;
         }
-        ++count->second;
+        ++CallCount->second;
       }
     }
   }
@@ -75,30 +72,31 @@ bool StaticCallCounter::runOnModule(Module &m) {
 
 // The print method must be implemented by “analyses” in order to print a human
 // readable version of the analysis results. 
-void StaticCallCounter::print(raw_ostream &out, Module const * /*m*/) const {
-  out << "=================================================" << "\n";
-  out << "LLVM-TUTOR: static analysis results\n";
-  out << "=================================================\n";
+// http://llvm.org/docs/WritingAnLLVMPass.html#the-print-method
+void StaticCallCounter::print(raw_ostream &OutS, Module const *) const {
+  OutS << "=================================================" << "\n";
+  OutS << "LLVM-TUTOR: static analysis results\n";
+  OutS << "=================================================\n";
   const char *str1 = "NAME";
   const char *str2 = "#N DIRECT CALLS";
-  out << format("%-20s %-10s\n", str1, str2);
-  out << "-------------------------------------------------" << "\n";
+  OutS << format("%-20s %-10s\n", str1, str2);
+  OutS << "-------------------------------------------------" << "\n";
 
   // Generate a vector of captured functions, sorted alphabetically by function
   // names. The solution implemented here is a suboptimal - a separate
   // container with functions is created for sorting.
   // TODO Make this more elegant (i.e. avoid creating a separate container)
-  std::vector<const Function*> funcNames;
-  funcNames.reserve(counts.size());
-  for (auto &kvPair : counts) {
-    funcNames.push_back(kvPair.getFirst());
+  std::vector<const Function*> FuncNames;
+  FuncNames.reserve(DirectCalls.size());
+  for (auto &CallCount : DirectCalls) {
+    FuncNames.push_back(CallCount.getFirst());
   }
-  std::sort(funcNames.begin(), funcNames.end(), [](const Function *x, const Function
+  std::sort(FuncNames.begin(), FuncNames.end(), [](const Function *x, const Function
         *y){ return (x->getName().str() < y->getName().str()); });
 
   // Print functions (alphabetically)
-  for (auto &func : funcNames) {
-    auto count = (counts.find(func))->getSecond();
-    out << format("%-20s %-10lu\n", func->getName().str().c_str(), count);
+  for (auto &Func : FuncNames) {
+    unsigned NumDirectCalls = (DirectCalls.find(Func))->getSecond();
+    OutS << format("%-20s %-10lu\n", Func->getName().str().c_str(), NumDirectCalls);
   }
 }
