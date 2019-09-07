@@ -17,7 +17,8 @@ namespace lt {
 // PassInfoMixIn is a CRTP mix-in to automatically provide informational APIs
 // needed for passes. Currently it provides only the 'name' method.
 struct MBASub : public llvm::PassInfoMixin<MBASub> {
-  llvm::PreservedAnalyses run(llvm::Function &F, llvm::FunctionAnalysisManager &);
+  llvm::PreservedAnalyses run(llvm::Function &F,
+                              llvm::FunctionAnalysisManager &);
   bool runOnBasicBlock(llvm::BasicBlock &B);
 };
 

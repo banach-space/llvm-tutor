@@ -27,7 +27,7 @@ struct StaticCallCounter : public llvm::ModulePass {
 
   void print(llvm::raw_ostream &OutS, llvm::Module const *M) const override;
 
- private:
+private:
   // Checks whether CS is indeed a CallSite and then for CallSites incrementes
   // the counter for the corresponding function.
   void handleInstruction(llvm::ImmutableCallSite CS);

@@ -4,7 +4,8 @@
 //
 // DESCRIPTION:
 //    Obfuscation for integer sub instructions through Mixed Boolean Arithmetic
-//    (MBA). This pass performs an instruction substitution based on this equality:
+//    (MBA). This pass performs an instruction substitution based on this
+//    equality:
 //      a - b == (a + ~b) + 1
 //    See formula 2.2 (j) in [1].
 //
@@ -35,21 +36,21 @@
 #include "llvm/IR/Function.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/InstrTypes.h"
-#include "llvm/Passes/PassBuilder.h"
-#include "llvm/Passes/PassPlugin.h"
+#include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Pass.h"
+#include "llvm/Passes/PassBuilder.h"
+#include "llvm/Passes/PassPlugin.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/raw_ostream.h"
-#include "llvm/Transforms/Utils/BasicBlockUtils.h"
-#include "llvm/IR/LegacyPassManager.h"
 #include "llvm/Transforms/IPO/PassManagerBuilder.h"
+#include "llvm/Transforms/Utils/BasicBlockUtils.h"
 
 #include <random>
 
 using namespace llvm;
-using lt::MBASub;
 using lt::LegacyMBASub;
+using lt::MBASub;
 
 #define DEBUG_TYPE "mba-sub"
 
@@ -78,7 +79,8 @@ llvmGetPassPluginInfo() {
   return lt::getMBASubPluginInfo();
 }
 
-PreservedAnalyses MBASub::run(llvm::Function &F, llvm::FunctionAnalysisManager &) {
+PreservedAnalyses MBASub::run(llvm::Function &F,
+                              llvm::FunctionAnalysisManager &) {
   bool Changed = false;
 
   for (auto &BB : F) {
@@ -135,12 +137,11 @@ namespace lt {
 char LegacyMBASub::ID = 0;
 
 // Register the pass - required for (among others) opt
-static RegisterPass<LegacyMBASub>
-    X("legacy-mba-sub",
-      "Mixed Boolean Arithmetic Substitution",
-      true, // doesn't modify the CFG => true
-      false // not a pure analysis pass => false
-    );
+static RegisterPass<LegacyMBASub> X("legacy-mba-sub",
+                                    "Mixed Boolean Arithmetic Substitution",
+                                    true, // doesn't modify the CFG => true
+                                    false // not a pure analysis pass => false
+);
 
 bool LegacyMBASub::runOnFunction(llvm::Function &F) {
   bool Changed = false;

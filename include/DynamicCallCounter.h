@@ -34,6 +34,6 @@ struct DynamicCallCounter : public llvm::ModulePass {
   void installCCInstruction(llvm::CallSite CS, llvm::Value *Counter);
 };
 
-}  // namespace lt
+} // namespace lt
 
 #endif

@@ -32,11 +32,11 @@ using llvm::legacy::PassManager;
 static cl::OptionCategory CallCounterCategory{"call counter options"};
 
 static cl::opt<std::string> InputModule{cl::Positional,
-                                   cl::desc{"<Module to analyze>"},
-                                   cl::value_desc{"bitcode filename"},
-                                   cl::init(""),
-                                   cl::Required,
-                                   cl::cat{CallCounterCategory}};
+                                        cl::desc{"<Module to analyze>"},
+                                        cl::value_desc{"bitcode filename"},
+                                        cl::init(""),
+                                        cl::Required,
+                                        cl::cat{CallCounterCategory}};
 
 //===----------------------------------------------------------------------===//
 // StaticCountWrapper pass

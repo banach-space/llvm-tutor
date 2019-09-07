@@ -20,6 +20,7 @@
 // A ratio in [0., 1.] interval
 class Ratio {
   double Value = 0.0;
+
 public:
   Ratio() = default;
   Ratio(double Value) : Value(Value) {}

@@ -174,11 +174,10 @@ void DuplicateBB::duplicate(BasicBlock &BB, Value *ContextValue,
   // Iterate through the original basic block and clone every instruction into
   // the 'then' and 'else' branches. Update the bindings/uses as on the fly
   // (through ThenVMap, ElseVMap, TailVMap). At this stage, all the instruction
-  // apart from PHI nodes, are stored in Tail. 
+  // apart from PHI nodes, are stored in Tail.
   for (auto IIT = Tail->begin(), IE = Tail->end(); IIT != IE; ++IIT) {
     Instruction &Instr = *IIT;
-    assert(!isa<PHINode>(&Instr) &&
-           "phi nodes have already been filtered out");
+    assert(!isa<PHINode>(&Instr) && "phi nodes have already been filtered out");
 
     // Skip terminators - duplicating them wouldn't make sense unless we want
     // to delete Tail completely.

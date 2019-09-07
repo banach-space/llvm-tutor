@@ -53,11 +53,11 @@ static cl::opt<bool, true> Debug("debug", cl::desc("Enable debug output"),
                                  cl::Hidden, cl::location(DebugFlag));
 
 static cl::opt<std::string> InputModule{cl::Positional,
-                                   cl::desc{"<Module to analyze>"},
-                                   cl::value_desc{"bitcode filename"},
-                                   cl::init(""),
-                                   cl::Required,
-                                   cl::cat{CallCounterCategory}};
+                                        cl::desc{"<Module to analyze>"},
+                                        cl::value_desc{"bitcode filename"},
+                                        cl::init(""),
+                                        cl::Required,
+                                        cl::cat{CallCounterCategory}};
 
 static cl::opt<std::string> OutputModule{
     "o", cl::desc{"Filename of the instrumented program"},
@@ -65,12 +65,12 @@ static cl::opt<std::string> OutputModule{
 
 enum OptLevelTy { O0 = 0, O1, O2, O3 };
 
-cl::opt<OptLevelTy> OptLevelCl(
-    cl::desc("Choose optimization level (default = 'O2'):"),
-    cl::values(clEnumVal(O1, "Enable trivial optimizations"),
-               clEnumVal(O2, "Enable default optimizations"),
-               clEnumVal(O3, "Enable expensive optimizations")),
-    cl::init(O2), cl::cat{CallCounterCategory});
+cl::opt<OptLevelTy>
+    OptLevelCl(cl::desc("Choose optimization level (default = 'O2'):"),
+               cl::values(clEnumVal(O1, "Enable trivial optimizations"),
+                          clEnumVal(O2, "Enable default optimizations"),
+                          clEnumVal(O3, "Enable expensive optimizations")),
+               cl::init(O2), cl::cat{CallCounterCategory});
 
 //===----------------------------------------------------------------------===//
 // The DynamicCountPrinter pass - wrappers

@@ -7,16 +7,15 @@
 //
 // License: MIT
 //=============================================================================
-#include <stdlib.h>
 #include <stdint.h>
-
+#include <stdlib.h>
 
 int8_t foo(int8_t a, int8_t b, int8_t c, int8_t d) {
 
   int8_t e = c + d;
-  int8_t f = a +b;
+  int8_t f = a + b;
 
-  return e+f;
+  return e + f;
 }
 
 int main(int argc, char *argv[]) {

@@ -28,10 +28,9 @@ namespace lt {
 char StaticCallCounter::ID = 0;
 
 // Register the pass - required for (among others) opt
-RegisterPass<StaticCallCounter> X("static-cc",
-                                  "For each function print the number of direct calls",
-                                  true /* Only looks at CFG */,
-                                  true /* Analysis Pass */);
+RegisterPass<StaticCallCounter>
+    X("static-cc", "For each function print the number of direct calls",
+      true /* Only looks at CFG */, true /* Analysis Pass */);
 } // namespace lt
 
 // For an analysis pass, runOnModule should perform the actual analysis and
@@ -71,32 +70,37 @@ bool StaticCallCounter::runOnModule(Module &M) {
 }
 
 // The print method must be implemented by “analyses” in order to print a human
-// readable version of the analysis results. 
+// readable version of the analysis results.
 // http://llvm.org/docs/WritingAnLLVMPass.html#the-print-method
 void StaticCallCounter::print(raw_ostream &OutS, Module const *) const {
-  OutS << "=================================================" << "\n";
+  OutS << "================================================="
+       << "\n";
   OutS << "LLVM-TUTOR: static analysis results\n";
   OutS << "=================================================\n";
   const char *str1 = "NAME";
   const char *str2 = "#N DIRECT CALLS";
   OutS << format("%-20s %-10s\n", str1, str2);
-  OutS << "-------------------------------------------------" << "\n";
+  OutS << "-------------------------------------------------"
+       << "\n";
 
   // Generate a vector of captured functions, sorted alphabetically by function
   // names. The solution implemented here is a suboptimal - a separate
   // container with functions is created for sorting.
   // TODO Make this more elegant (i.e. avoid creating a separate container)
-  std::vector<const Function*> FuncNames;
+  std::vector<const Function *> FuncNames;
   FuncNames.reserve(DirectCalls.size());
   for (auto &CallCount : DirectCalls) {
     FuncNames.push_back(CallCount.getFirst());
   }
-  std::sort(FuncNames.begin(), FuncNames.end(), [](const Function *x, const Function
-        *y){ return (x->getName().str() < y->getName().str()); });
+  std::sort(FuncNames.begin(), FuncNames.end(),
+            [](const Function *x, const Function *y) {
+              return (x->getName().str() < y->getName().str());
+            });
 
   // Print functions (alphabetically)
   for (auto &Func : FuncNames) {
     unsigned NumDirectCalls = (DirectCalls.find(Func))->getSecond();
-    OutS << format("%-20s %-10lu\n", Func->getName().str().c_str(), NumDirectCalls);
+    OutS << format("%-20s %-10lu\n", Func->getName().str().c_str(),
+                   NumDirectCalls);
   }
 }

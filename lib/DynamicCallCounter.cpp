@@ -16,8 +16,8 @@
 //        (i.e. it modifies the function)
 //      * for each call to an externally defined function, this pass inserts a
 //        call to lt_RUNTIME_called just before the instruction calling the
-//        function (we can't instrument externally defined functions so we modify
-//        the call site inside this module).
+//        function (we can't instrument externally defined functions so we
+//        modify the call site inside this module).
 //    The function and data types inserted here *must* match those in
 //    DynamicCallCounterRT.cpp.
 //
@@ -45,7 +45,7 @@ namespace lt {
 
 char DynamicCallCounter::ID = 0;
 
-}  // namespace lt
+} // namespace lt
 
 // Returns a map (Function* -> uint64_t).
 static DenseMap<Function *, uint64_t>
@@ -195,7 +195,7 @@ void DynamicCallCounter::installCCInstruction(CallSite CS, Value *Counter) {
   // Check if the function is internal or blacklisted.
   // (A function is blacklisted if it wasn't present in the module at the point
   // of creating the ids map, i.e. the functions from the run-time library).
-  if ((Internal.count(Called) > 0 ) || (0 == IDs.count(Called))) {
+  if ((Internal.count(Called) > 0) || (0 == IDs.count(Called))) {
     // Internal functions are counted upon the entry of each function body.
     // Blacklisted functions are not counted. Neither should proceed.
     return;

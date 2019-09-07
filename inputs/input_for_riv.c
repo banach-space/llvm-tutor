@@ -38,6 +38,4 @@ int bar() {
   return bar_var1;
 }
 
-int main(int argc, char *argv[]) {
-  return bar();
-}
+int main(int argc, char *argv[]) { return bar(); }

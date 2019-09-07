@@ -27,7 +27,8 @@
 //    CommandLine support:
 //      http://llvm.org/docs/CommandLine.html#quick-start-guide
 //
-// [1] "Defeating MBA-based Obfuscation" Ninon Eyrolles, Louis Goubin, Marion Videau
+// [1] "Defeating MBA-based Obfuscation" Ninon Eyrolles, Louis Goubin, Marion
+// Videau
 //
 // License: MIT
 //==============================================================================
@@ -37,23 +38,23 @@
 #include "llvm/IR/Function.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/InstrTypes.h"
-#include "llvm/Passes/PassBuilder.h"
-#include "llvm/Passes/PassPlugin.h"
+#include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Pass.h"
+#include "llvm/Passes/PassBuilder.h"
+#include "llvm/Passes/PassPlugin.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/raw_ostream.h"
-#include "llvm/Transforms/Utils/BasicBlockUtils.h"
-#include "llvm/IR/LegacyPassManager.h"
 #include "llvm/Transforms/IPO/PassManagerBuilder.h"
+#include "llvm/Transforms/Utils/BasicBlockUtils.h"
 
 #include <random>
 
 #include "Ratio.h"
 
 using namespace llvm;
-using lt::MBAAdd;
 using lt::LegacyMBAAdd;
+using lt::MBAAdd;
 
 #define DEBUG_TYPE "mba-add"
 
@@ -87,7 +88,8 @@ llvmGetPassPluginInfo() {
   return lt::getMBAAddPluginInfo();
 }
 
-PreservedAnalyses MBAAdd::run(llvm::Function &F, llvm::FunctionAnalysisManager &) {
+PreservedAnalyses MBAAdd::run(llvm::Function &F,
+                              llvm::FunctionAnalysisManager &) {
   bool Changed = false;
 
   for (auto &BB : F) {
@@ -146,7 +148,8 @@ bool MBAAdd::runOnBasicBlock(BasicBlock &BB) {
     auto Val2 = ConstantInt::get(BinOp->getType(), 2);
     auto Val111 = ConstantInt::get(BinOp->getType(), 111);
 
-    // Create an instruction representing `(((a ^ b) + 2 * (a & b)) * 39 + 23) * 151 + 111`
+    // Create an instruction representing `(((a ^ b) + 2 * (a & b)) * 39 + 23) *
+    // 151 + 111`
     // FIXME: Could this be done less ugly?
     Instruction *NewValue =
         // E = e2 * 151 + 111
@@ -171,8 +174,8 @@ bool MBAAdd::runOnBasicBlock(BasicBlock &BB) {
     // *and* you have an assert build.
     LLVM_DEBUG(dbgs() << *BinOp << " -> " << *NewValue << "\n");
 
-    // Replace `(a + b)` (original instructions) with `(((a ^ b) + 2 * (a & b)) * 39 + 23) * 151 + 111`
-    // (the new instruction)
+    // Replace `(a + b)` (original instructions) with `(((a ^ b) + 2 * (a & b))
+    // * 39 + 23) * 151 + 111` (the new instruction)
     ReplaceInstWithInst(BB.getInstList(), IIT, NewValue);
     Changed = true;
 
@@ -186,12 +189,11 @@ namespace lt {
 char LegacyMBAAdd::ID = 0;
 
 // Register the pass - required for (among others) opt
-static RegisterPass<LegacyMBAAdd>
-    X("legacy-mba-add",
-      "Mixed Boolean Arithmetic Substitution",
-      true, // doesn't modify the CFG => true
-      false // not a pure analysis pass => false
-    );
+static RegisterPass<LegacyMBAAdd> X("legacy-mba-add",
+                                    "Mixed Boolean Arithmetic Substitution",
+                                    true, // doesn't modify the CFG => true
+                                    false // not a pure analysis pass => false
+);
 
 bool LegacyMBAAdd::runOnFunction(llvm::Function &F) {
   bool Changed = false;
