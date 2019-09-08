@@ -5,28 +5,16 @@ llvm-tutor
 Example LLVM passes - based on **LLVM 8**
 
 **llvm-tutor** (aka **lt**) is a collection of self-contained reference LLVM
-passes developed as a tutorial. It targets novice and aspiring LLVM developers.
-It strives to be:
+passes. It's a tutorial that targets novice and aspiring LLVM developers.
+Key characteristics:
   * **Complete** - includes `CMake` build scripts, LIT tests and CI set-up
   * **Out of source** - builds against a binary LLVM installation (no need to
     build LLVM from sources)
   * **Modern** - based on the latest version of LLVM (and updated with every release)
 
-There is plenty of comments in source files, build scripts and tests - I hope
-that you'll find them helpful.
-
-tl;dr
------
-The best place to start is the `static-cc` pass implemented in
-`StaticCallCounter.cpp`. Build it first:
-```bash
-cmake G Ninja -DLT_LLVM_INSTALL_DIR=<installation/dir/of/llvm/8> <source/dir/llvm/tutor>
-ninja
-```
-and then run it through `opt`:
-```bash
-opt -load <build/dir>/lib/libCallCounter.so --static-cc -analyze <bitcode/file/to/analyze>
-```
+There's plenty of comments in the source files, build scripts and tests that
+strive to clearly document what and why is happening. For details on how to
+build and run the examples, or how to set-up your environment, read this file.
 
 Status
 ------
@@ -36,26 +24,68 @@ All examples build fine and all tests pass, but expect some typos, missing
 comments, etc. I will be refactoring the code a bit and adding new
 functionality.  More documentation to come soon.
 
+TL;DR (the reference example)
+-----------------------------
+The easiest way to start is the **HelloWorld** pass implemented in
+[HelloWorld.cpp](https://github.com/banach-space/llvm-tutor/blob/add_basic/HelloWorld/HelloWorld.cpp).
+The corresponding
+[CMakeLists.txt](https://github.com/banach-space/llvm-tutor/blob/add_basic/HelloWorld/CMakeLists.txt)
+is self-contained and is the minimum that's required for an out-of-source pass.
+
+**HelloWorld** can be used independently from other passes in this project.
+The steps for building are straightforward:
+```bash
+cd HelloWorld
+mkdir build
+cd build
+cmake -G Ninja -DLT_LLVM_INSTALL_DIR=<installation/dir/of/llvm/8> <source/dir/llvm/tutor>/HelloWorld/
+ninja
+```
+You can run it with `opt`:
+```bash
+# Generate an llvm file first
+clang -S -emit-llvm <source/dir/llvm/tutor/inputs/input_for_hello.c> -o
+input_for_hello.ll
+# Now run the pass on the output file
+opt -load libHelloWorld.dylib -hello-world -disable-output input_for_hello.ll
+```
+Here's the output that you should see:
+```bash
+Visiting: foo (takes 1 args)
+Visiting: bar (takes 2 args)
+Visiting: fez (takes 3 args)
+Visiting: main (takes 2 args)
+```
+The `disable-output` flag means that `opt` won't print the output binary.
+The `HelloWorld` pass doesn't modify the input module, so that would just
+unnecessarily clutter the output.
+
 Available Passes
 -----------------
-   * **StaticCallCounter** - counts direct function calls at compile time (only static
-     calls, pure analysis pass)
-   * **DynamicCallCounter** - counts direct function calls at run-time (
-     analysis + instrumentation pass)
-   * **MBASub** - code transformation for integer `sub` instructions
-     (transformation pass, parametrisable)
-   * **MBAAdd** - code transformation for 8-bit integer `add` instructions
-     (transformation pass, parametrisable)
-   * **RIV** - finds reachable integer values for each basic block (analysis pass)
-   * **DuplicateBB** - duplicates basic blocks, requires **RIV** analysis
-     results (transformation pass, parametrisable)
+   * [**HelloWorld**](#tldr-the-reference-example) - prints the functions in
+     the input module and prints the number of arguments for each
+   * [**StaticCallCounter**](#count-compile-time-function-calls-staticcallcounter) - counts
+     direct function calls at compile time (only static calls, pure analysis
+     pass)
+   * [**DynamicCallCounter**](#count-run-time-function-calls-dynamiccallcounter)
+     \- counts direct function calls at run-time ( analysis + instrumentation
+       pass)
+   * [**MBASub**](#mba-sub) - code transformation for integer `sub`
+     instructions (transformation pass, parametrisable)
+   * [**MBAAdd**](#mba-add) - code transformation for 8-bit integer `add`
+     instructions (transformation pass, parametrisable)
+   * [**RIV**](#reachable-integer-values-riv) - finds reachable integer values
+     for each basic block (analysis pass)
+   * [**DuplicateBB**](#duplicate-basic-blocks-duplicatebb) - duplicates basic
+     blocks, requires **RIV** analysis results (transformation pass,
+     parametrisable)
 
 For more details go to [usage](#usage).
 
 Requirements
 ------------
 These are the only requirement for **llvm-tutor**:
-  * development version of LLVM-8
+  * development version of LLVM 8
   * C++ compiler that supports C++14
   * CMake 3.4.3 or higher
 
@@ -65,7 +95,16 @@ Installing `clang-8` (and other LLVM-based tools) won't hurt, but is neither
 required nor sufficient. There are additional requirements to be able to run
 tests, which are documented [here](#test_requirements).
 
-## Obtaining LLVM-8
+### Platform Support
+This project is regularly tested on Linux and Mac OS X. It is regularly tested
+against the following configurations (extracted from the CI files:
+[.travis.yml](#https://github.com/banach-space/llvm-tutor/blob/add_basic/.travis.ci)):
+  * Linux Ubuntu 16.04
+  * Mac OS X 10.14.4
+
+TODO: Document support for Windows.
+
+### Obtaining LLVM-8
 There are two options:
 * **build from sources** (works regardless of the operating system, but can
   be slow and tricky to debug if things don't go according to plan)
@@ -75,7 +114,10 @@ There are two options:
 The packages available for Ubuntu and Mac OS X are sufficient. Windows users
 will have to build from sources.
 
-### Installing on Ubuntu
+Please refer to the CI logs (links at the top of the page) for reference
+setups.
+
+#### Installing on Ubuntu
 If you're using `Ubuntu` then install `llvm-8-dev` (other dependencies will be
 _pulled_ automatically). Note that this very recent version of LLVM is not yet
 available in the official repositories. On `Ubuntu Xenial`, you can [install
@@ -94,8 +136,8 @@ In order to run LIT tests you will have to build the dependencies from sources.
 However, you don't need them to be able to build and run the passes developed
 here.
 
-### Installing on Mac OS X
-On Darwin you can install LLVM-8 with [Homebrew](https://brew.sh/):
+#### Installing on Mac OS X
+On Darwin you can install LLVM 8 with [Homebrew](https://brew.sh/):
 ```bash
 $ brew install llvm@8
 ```
@@ -103,7 +145,7 @@ This will install all the required header files, libraries and binaries in
 `/usr/local/opt/llvm/`. Currently this will also install the binaries required
 for testing.
 
-### Building From Sources
+#### Building From Sources
 You can also choose to [build LLVM](https://llvm.org/docs/CMake.html) from
 sources. It might be required if there are no precompiled packages for your
 OS. This will work on Linux, OS X and Windows:
@@ -120,18 +162,6 @@ cmake --build .
 These steps are not optimal. Please refer to the official documentation for more
 hints.
 
-Platform Support
-----------------
-This project is regularly being tested on Linux and Mac OS X. It should build
-and run seamlessly on Windows, though some tweaks in CMake might be required.
-It is regularly tested against the following configurations (extracted from the
-CI files: `.travis.yml`):
-  * Linux Ubuntu 16.04
-  * Mac OS X 10.14.4
-
-Please refer to the CI logs (links at the top of the page) for reference
-setups.
-
 Build Instructions
 ------------------
 It is assumed that **llvm-tutor** will be built in `<build-dir>` and that the
@@ -140,12 +170,12 @@ top-level source directory is `<source-dir>`.
 You can build all the examples as follows:
 ```bash
 cd <build-dir>
-cmake -DLT_LLVM_INSTALL_DIR=<either_build_or_installation_dir_of_llvm_8>  <source_dir>
+cmake -DLT_LLVM_INSTALL_DIR=<installation/dir/of/llvm/8> <source/dir/llvm/tutor>
 make
 ```
 
 The `LT_LLVM_INSTALL_DIR` variable should be set to either the installation or
-build directory of LLVM-8. It is used to locate the corresponding
+build directory of LLVM 8. It is used to locate the corresponding
 `LLVMConfig.cmake` script.
 
 Usage
@@ -161,6 +191,9 @@ clang  -emit-llvm input.c -o out.bc
 ```
 It doesn't matter whether your choose the textual or binary form, but obviously
 the former is more human-friendly.
+
+The **HelloWorld** pass is described in [tl;dr](#tl;dr). All other passes are
+described below.
 
 ### Count Compile Time Function Calls (**StaticCallCounter**)
 `StaticCallCounter` will count the number of function calls in the input

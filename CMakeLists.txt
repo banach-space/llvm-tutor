@@ -84,10 +84,11 @@ find_package(LLVM REQUIRED CONFIG)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LT_LLVM_INSTALL_DIR}")
 
-# We incorporate the CMake features provided by LLVM:
+# Incorporate the CMake features provided by LLVM:
 list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
 include(AddLLVM)
 
+# TODO Remove once LLVM moves to C++14
 option(LLVM_ENABLE_CXX1Y  "Enable C++14" ON)
 option(LLVM_INCLUDE_TOOLS "Generate build targets for the LLVM tools." ON)
 option(LLVM_BUILD_TOOLS "Build the LLVM tools. If OFF, just generate build targets." ON)
@@ -112,3 +113,4 @@ add_definitions(${LLVM_DEFINITIONS})
 add_subdirectory(lib)
 add_subdirectory(tools)
 add_subdirectory(test)
+add_subdirectory(HelloWorld)

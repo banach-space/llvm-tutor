@@ -49,6 +49,8 @@ using llvm::sys::findProgramByName;
 static cl::OptionCategory CallCounterCategory{"call counter options"};
 
 // This enables the LLVM_DEBUG macro
+// TODO The name of the option should be different - this will crash with opt
+// built in debug mode
 static cl::opt<bool, true> Debug("debug", cl::desc("Enable debug output"),
                                  cl::Hidden, cl::location(DebugFlag));
 
