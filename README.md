@@ -129,7 +129,7 @@ cd build
 cmake -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=X86 <llvm-project/root/dir>/llvm/
 cmake --build .
 ```
-Although sufficient these steps are not optimal. Please refer to the official
+Although sufficient, these steps are not optimal. Please refer to the official
 documentation for more hints.
 
 Build Instructions
@@ -265,10 +265,10 @@ the underlying IR representation of the input module.
 ### Duplicate Basic Blocks (**DuplicateBB**)
 This pass will duplicate all basic blocks in a module, with the exception of
 basic blocks for which there are no reachable integer values (identified
-through the `RII` pass). This should only exclude the entry block in functions
+through the `RIV` pass). This should only exclude the entry block in functions
 that take no arguments and which are embedded in modules with no global values.
 Duplicates (almost) every basic block in a module. This pass depends on the
-`RII` pass, hence you need to load to modules in order to run it:
+`RIV` pass, hence you need to load to modules in order to run it:
 ```bash
 opt -load <build_dir>/lib/libRIV.so -load <build_dir>/lib/libDuplicateBB.so -riv inputs/input_for_duplicate_bb.c
 ```
