@@ -27,7 +27,7 @@ llvm_map_components_to_libnames(REQ_LLVM_LIBRARIES ${LLVM_TARGETS_TO_BUILD}
         support
 )
 
-target_link_libraries(dynamic DynamicCallCounterStatic ${REQ_LLVM_LIBRARIES})
+target_link_libraries(dynamic DynamicCallCounter ${REQ_LLVM_LIBRARIES})
 target_link_libraries(static StaticCallCounter ${REQ_LLVM_LIBRARIES})
 
 set_target_properties(dynamic

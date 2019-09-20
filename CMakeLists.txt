@@ -5,6 +5,9 @@ set(PACKAGE_NAME lt-cc)
 set(PACKAGE_VERSION 0.1)
 set(PACKAGE_STRING "${PACKAGE_NAME} ${PACKAGE_VERSION}")
 
+# LLVM is soon to move to C++14
+set(CMAKE_CXX_STANDARD 14 CACHE STRING "")
+
 #===============================================================================
 # 1. LLVM-TUTOR CONFIGURATION
 # The key (and the only really required) thing here is getting a valid value
@@ -40,10 +43,8 @@ if (NOT CMAKE_BUILD_TYPE)
 endif()
 
 # Set the build flags
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -std=c++14 -fno-rtti -Wall\
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_RELEASE} -Wall\
     -fdiagnostics-color=always")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -std=c++14 -fno-rtti -Wall\
-    -fdiagnostics-color=always -fno-omit-frame-pointer")
 
 # Copied from HandleLLVMOptions.cmake
 function(append_if condition value)
@@ -68,13 +69,17 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
 
-# And the project header and library paths
-include_directories(${CMAKE_SOURCE_DIR}/include)
-link_directories(${LIBRARY_OUTPUT_PATH})
+# This is used internally by 'dynamic'
 set(LT_RT_LIBRARY_PATH "${PROJECT_BINARY_DIR}/lib")
 
 # Config for LIT tests
 set(SHLIBEXT "${CMAKE_SHARED_LIBRARY_SUFFIX}")
+
+# LLVM is normally built without RTTI and there has to be consistency between
+# LLVm and the plugins.
+if(NOT LLVM_ENABLE_RTTI)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
+endif()
 
 #===============================================================================
 # 2. LLVM-CONFIGURATION

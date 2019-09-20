@@ -13,16 +13,12 @@ set(LT_LLVM_INSTALL_DIR "" CACHE PATH "LLVM installation directory")
 set(LT_LLVM_CMAKE_CONFIG_DIR "${LT_LLVM_INSTALL_DIR}/lib/cmake/llvm/")
 list(APPEND CMAKE_PREFIX_PATH "${LT_LLVM_CMAKE_CONFIG_DIR}")
 
-# Set the build flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -fno-rtti -Wall\
- -Werror -Wpedantic -fdiagnostics-color=always")
-
 #===============================================================================
 # 2. LLVM-CONFIGURATION
 #===============================================================================
 find_package(LLVM REQUIRED CONFIG)
 
-# We incorporate the CMake features provided by LLVM:
+# Incorporate the CMake features provided by LLVM:
 list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
 include(AddLLVM)
 
@@ -39,6 +35,12 @@ OPTION(LT_TRAVIS_DISABLE "Option description" OFF)
 
 if(LT_TRAVIS_DISABLE)
   add_definitions(-DLT_TRAVIS_DISABLE)
+endif()
+
+# LLVM is normally built without RTTI and there has to be consistency between
+# LLVm and the plugins.
+if(NOT LLVM_ENABLE_RTTI)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
 endif()
 
 #===============================================================================
