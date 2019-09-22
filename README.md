@@ -326,6 +326,26 @@ without the amazing LLVM [online documentation](http://llvm.org/docs/),
 plethora of great comments in the source code, and the llvm-dev mailing list.
 Thank you!
 
+It goes without saying that there's plenty of great presentations on YouTube,
+blog posts and GitHub projects that cover similar subjects. I've learnt a great
+deal from them - thank you all for sharing! There's one presentation/tutorial
+that has been particularly important in my journey as an aspiring LLVM
+developer and that helped to _democratise_ out-of-source pass development:
+* "Building, Testing and Debugging a Simple out-of-tree LLVM Pass" Serge
+  Guelton, Adrien Guinet
+  ([slides](https://llvm.org/devmtg/2015-10/slides/GueltonGuinet-BuildingTestingDebuggingASimpleOutOfTreePass.pdf),
+  [video](https://www.youtube.com/watch?v=BnlG-owSVTk&index=8&list=PL_R5A0lGi1AA4Lv2bBFSwhgDaHvvpVU21))
+
+Adrien and Serge came up with some great, illustrative and self-contained
+examples that are great for learning and tutoring LLVM pass development. You'll
+notice that there are similar transformation and analysis passes available in
+this projects. The implementations available here are based on the latest
+release of LLVM's API and have been refactored and documented to reflect what
+**I** (aka. banach-space) found most challenging while studying them. However,
+everything that's impressive, interesting and intriguing about those examples
+should be credited to Adrien and Serge. I take credit for the confusing,
+awkward and counter-intuitive bits :-)
+
 License
 --------
 The MIT License (MIT)
