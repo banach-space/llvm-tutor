@@ -12,12 +12,12 @@
 // USAGE:
 //    1. Legacy pass manager
 //      # Request `HelloWorld` via a dedicated flag:
-//      opt -load libHelloWorld.dylib -hello-world -disable-output <input-llvm-file>
+//      opt -load libHelloWorld.dylib -legacy-hello-world -disable-output <input-llvm-file>
 //      # `HelloWorld` will be executed as part of the optimisation pipelines
 //      opt -load libHelloWorld.dylib -O{0|1|2|3} -disable-output <input-llvm-file>
 //    2. New pass manager
 //      # Define your pass pipeline via the '-passes' flag
-//      opt -load-pass-plugin=libHelloWorld.dylib -passes="HelloWorld" -disable-output <input-llvm-file>
+//      opt -load-pass-plugin=libHelloWorld.dylib -passes="hello-world" -disable-output <input-llvm-file>
 //
 //
 // License: MIT
@@ -46,6 +46,14 @@ void visitor(Function &F) {
     errs() << F.arg_size() << " args)\n";
 }
 
+// New PM implementation
+struct HelloWorld : PassInfoMixin<HelloWorld> {
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
+    visitor(F);
+    return PreservedAnalyses::all();
+  }
+};
+
 // Legacy PM implementation
 struct LegacyHelloWorld : public FunctionPass {
   static char ID;
@@ -55,50 +63,20 @@ struct LegacyHelloWorld : public FunctionPass {
     return false;
   }
 };
-
-// New PM implementation
-struct HelloWorld : PassInfoMixin<HelloWorld> {
-  PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
-    visitor(F);
-    return PreservedAnalyses::all();
-  }
-};
-
 } // namespace
-
-//-----------------------------------------------------------------------------
-// Legacy PM Registration
-//-----------------------------------------------------------------------------
-char LegacyHelloWorld::ID = 0;
-
-static RegisterPass<LegacyHelloWorld>
-    X("hello-world", "Hello World Pass",
-      true, // doesn't modify the CFG => true
-      true  // not a pure analysis pass => false
-    );
-
-#ifndef LT_TRAVIS_DISABLE
-// This trips Travis. This is a somewhat know issues:
-//    https://github.com/sampsyo/llvm-pass-skeleton/issues/7
-// I've tried all of the suggestions, but Travis continues to seg-fault.
-static llvm::RegisterStandardPasses RegisterHelloWorld(
-    llvm::PassManagerBuilder::EP_EarlyAsPossible,
-    [](const llvm::PassManagerBuilder &Builder,
-       llvm::legacy::PassManagerBase &PM) { PM.add(new LegacyHelloWorld()); });
-#endif
 
 //-----------------------------------------------------------------------------
 // New PM Registration
 //-----------------------------------------------------------------------------
 // With this `opt` will be able to recognize HelloWorld when added to the pass
-// pipeline on the command line, e.g. via `-passes="HelloWorld"
+// pipeline on the command line, e.g. via `-passes="hello-world"
 llvm::PassPluginLibraryInfo getHelloWorldPluginInfo() {
   return {LLVM_PLUGIN_API_VERSION, "HelloWorld", LLVM_VERSION_STRING,
           [](PassBuilder &PB) {
             PB.registerPipelineParsingCallback(
                 [](StringRef Name, FunctionPassManager &FPM,
                    ArrayRef<PassBuilder::PipelineElement>) {
-                  if (Name == "HelloWorld") {
+                  if (Name == "hello-world") {
                     FPM.addPass(HelloWorld());
                     return true;
                   }
@@ -111,3 +89,26 @@ extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
 llvmGetPassPluginInfo() {
   return getHelloWorldPluginInfo();
 }
+
+//-----------------------------------------------------------------------------
+// Legacy PM Registration
+//-----------------------------------------------------------------------------
+char LegacyHelloWorld::ID = 0;
+
+static RegisterPass<LegacyHelloWorld>
+    X("legacy-hello-world", "Hello World Pass",
+      true, // doesn't modify the CFG => true
+      true  // not a pure analysis pass => false
+    );
+
+#ifndef LT_TRAVIS_DISABLE
+// This trips 'opt' installed via HomeBrew. It's a known issues:
+//    https://github.com/sampsyo/llvm-pass-skeleton/issues/7
+// I've tried all of the suggestions, but no luck. Locally I recommend either
+// building from sources or commenting this out.
+// Note: AFAIK, this is Mac OS only problem.
+static llvm::RegisterStandardPasses RegisterHelloWorld(
+    llvm::PassManagerBuilder::EP_EarlyAsPossible,
+    [](const llvm::PassManagerBuilder &Builder,
+       llvm::legacy::PassManagerBase &PM) { PM.add(new LegacyHelloWorld()); });
+#endif
