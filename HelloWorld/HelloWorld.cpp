@@ -48,6 +48,8 @@ void visitor(Function &F) {
 
 // New PM implementation
 struct HelloWorld : PassInfoMixin<HelloWorld> {
+  // Main entry point, takes IR unit to run the pass on (&F) and the
+  // corresponding pass manager (to be queried if need be)
   PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
     visitor(F);
     return PreservedAnalyses::all();
@@ -58,8 +60,10 @@ struct HelloWorld : PassInfoMixin<HelloWorld> {
 struct LegacyHelloWorld : public FunctionPass {
   static char ID;
   LegacyHelloWorld() : FunctionPass(ID) {}
+  // Main entry point - the name conveys what unit of IR this is to be run on.
   bool runOnFunction(Function &F) override {
     visitor(F);
+    // Doesn't modify the input unit of IR, hence 'false'
     return false;
   }
 };
@@ -68,8 +72,6 @@ struct LegacyHelloWorld : public FunctionPass {
 //-----------------------------------------------------------------------------
 // New PM Registration
 //-----------------------------------------------------------------------------
-// With this `opt` will be able to recognize HelloWorld when added to the pass
-// pipeline on the command line, e.g. via `-passes="hello-world"
 llvm::PassPluginLibraryInfo getHelloWorldPluginInfo() {
   return {LLVM_PLUGIN_API_VERSION, "HelloWorld", LLVM_VERSION_STRING,
           [](PassBuilder &PB) {
@@ -85,6 +87,9 @@ llvm::PassPluginLibraryInfo getHelloWorldPluginInfo() {
           }};
 }
 
+// This is the core interface for pass plugins - with this 'opt' will be able
+// to recognize HelloWorld when added to the pass pipeline on the command line,
+// i.e. via '-passes=hello-world'
 extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
 llvmGetPassPluginInfo() {
   return getHelloWorldPluginInfo();
@@ -93,15 +98,23 @@ llvmGetPassPluginInfo() {
 //-----------------------------------------------------------------------------
 // Legacy PM Registration
 //-----------------------------------------------------------------------------
+// The address of this variable is used to identify the pass. The actual value
+// doesn't matter.
 char LegacyHelloWorld::ID = 0;
 
+// Register the pass - with this 'opt' will be able to recognize
+// LegacyHelloWorld when added to the pass pipeline on the command line, i.e.
+// via '--legacy-hello-world'
 static RegisterPass<LegacyHelloWorld>
     X("legacy-hello-world", "Hello World Pass",
-      true, // doesn't modify the CFG => true
-      true  // not a pure analysis pass => false
+      true,  // This pass doesn't modify the CFG => true
+      false  // This pass is not a pure analysis pass => false
     );
 
-#ifndef LT_TRAVIS_DISABLE
+// Register LegacyHelloWorld as a step of an existing pipeline. The insertion
+// point is set to 'EP_EarlyAsPossible', which means that LegacyHelloWorld will
+// be run automatically at '-O{0|1|2|3}'.
+#ifndef LT_LEGACY_SKIP_PIPELINE_REGISTRATION
 // This trips 'opt' installed via HomeBrew. It's a known issues:
 //    https://github.com/sampsyo/llvm-pass-skeleton/issues/7
 // I've tried all of the suggestions, but no luck. Locally I recommend either

@@ -31,7 +31,7 @@ matrix:
     - os: osx
       osx_image: xcode11
       env:
-        - LLVM_DIR="/usr/local/opt/llvm/"
+        - LLVM_DIR="/usr/local/opt/llvm@8/"
         - LLVM_TOOLCHAIN="/usr/local/opt/llvm@8/bin/"
         - RUN_TESTS="True"
 
@@ -43,12 +43,12 @@ script:
   # Build HelloWorld as a standalone project
   - cd HelloWorld
   - mkdir build && cd build
-  - cmake -DLT_TRAVIS_DSIABLE=On -DLT_LLVM_INSTALL_DIR="$LLVM_DIR" -DLT_LIT_TOOLS_DIR="$LLVM_TOOLCHAIN"  ../
+  - cmake -DLT_LEGACY_SKIP_PIPELINE_REGISTRATION=On -DLT_LLVM_INSTALL_DIR="$LLVM_DIR" -DLT_LIT_TOOLS_DIR="$LLVM_TOOLCHAIN"  ../
   - make -j4
   # Build the top project and run tests
   - cd ../../
   - mkdir build
   - cd build
-  - cmake -DLT_TRAVIS_DISABLE=On -DLT_LLVM_INSTALL_DIR="$LLVM_DIR" -DLT_LIT_TOOLS_DIR="$LLVM_TOOLCHAIN"  ../
+  - cmake -DLT_LEGACY_SKIP_PIPELINE_REGISTRATION=On -DLT_LLVM_INSTALL_DIR="$LLVM_DIR" -DLT_LIT_TOOLS_DIR="$LLVM_TOOLCHAIN"  ../
   - make -j4
   - if [[ "$RUN_TESTS" == "True" ]]; then /Users/travis/Library/Python/2.7/bin/lit -va test/; fi

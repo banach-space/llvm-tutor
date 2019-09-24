@@ -30,11 +30,13 @@ include_directories(${LLVM_INCLUDE_DIRS})
 link_directories(${LLVM_LIBRARY_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
 
-# Workaround for Travis
-OPTION(LT_TRAVIS_DISABLE "Option description" OFF)
-
-if(LT_TRAVIS_DISABLE)
-  add_definitions(-DLT_TRAVIS_DISABLE)
+# Registration with any of the existing pipelines causes 'opt' to seg-fault
+# when building against LLVM installed via HomeBrew. Similar issue is discussed
+# here:  https://github.com/sampsyo/llvm-pass-skeleton/issues/7
+# I have not experienced this when building from sources.
+OPTION(LT_LEGACY_SKIP_PIPELINE_REGISTRATION "Don't register with any of the existing pipelines" OFF)
+if(LT_LEGACY_SKIP_PIPELINE_REGISTRATION)
+  add_definitions(-DLT_LEGACY_SKIP_PIPELINE_REGISTRATION)
 endif()
 
 # LLVM is normally built without RTTI and there has to be consistency between
