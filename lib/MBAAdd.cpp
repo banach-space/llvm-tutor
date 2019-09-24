@@ -6,26 +6,15 @@
 //    This pass performs a substitution for 8-bit integer add
 //    instruction based on this Mixed Boolean-Airthmetic expression:
 //      a + b == (((a ^ b) + 2 * (a & b)) * 39 + 23) * 151 + 111
-//    See formula (3) in [1]. Expressions like this can be used to obfuscate
-//    code.
+//    See formula (3) in [1].
 //
 // USAGE:
-//    This pass can be run through opt:
-//      $ opt -load <BUILD_DIR>/lib/libMBAAdd.so --mba \
-//        [-mba-ratio=<ratio>] <bitcode-file>
-//    with the optional ratio in the range [0, 1.0].
-//
-// USEFUL LINKS:
-//    Creating a new instruction:
-//      http://llvm.org/docs/ProgrammersManual.html#creating-and-inserting-new-instructions
-//    Replacing an instruction
-//      http://llvm.org/docs/ProgrammersManual.html#replacing-an-instruction-with-another-value
-//    LLVM_DEBUG support:
-//      http://llvm.org/docs/ProgrammersManual.html#the-llvm-debug-macro-and-debug-option
-//    STATISTIC support:
-//      http://llvm.org/docs/WritingAnLLVMPass.html#pass-statistics
-//    CommandLine support:
-//      http://llvm.org/docs/CommandLine.html#quick-start-guide
+//    1. Legacy pass manager:
+//      $ opt -load <BUILD_DIR>/lib/libMBAAdd.so --legacy-mba-add [-mba-ratio=<ratio>] <bitcode-file>
+//      with the optional ratio in the range [0, 1.0].
+//    2. New pass maanger:
+//      $ opt -load-pass-plugin <BUILD_DIR>/lib/libMBAAdd.so -passes=-"mba-add" <bitcode-file>
+//      The command line option is not available for the new PM
 //
 // [1] "Defeating MBA-based Obfuscation" Ninon Eyrolles, Louis Goubin, Marion
 // Videau
@@ -53,8 +42,6 @@
 #include "Ratio.h"
 
 using namespace llvm;
-using lt::LegacyMBAAdd;
-using lt::MBAAdd;
 
 #define DEBUG_TYPE "mba-add"
 
@@ -66,39 +53,9 @@ static cl::opt<Ratio, false, llvm::cl::parser<Ratio>> MBARatio{
     cl::desc("Only apply the mba pass on <ratio> of the candidates"),
     cl::value_desc("ratio"), cl::init(1.), cl::Optional};
 
-namespace lt {
-llvm::PassPluginLibraryInfo getMBAAddPluginInfo() {
-  return {LLVM_PLUGIN_API_VERSION, "mba-add", LLVM_VERSION_STRING,
-          [](PassBuilder &PB) {
-            PB.registerPipelineParsingCallback(
-                [](StringRef Name, FunctionPassManager &FPM,
-                   ArrayRef<PassBuilder::PipelineElement>) {
-                  if (Name == "mba-add") {
-                    FPM.addPass(MBAAdd());
-                    return true;
-                  }
-                  return false;
-                });
-          }};
-}
-} // namespace lt
-
-extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
-llvmGetPassPluginInfo() {
-  return lt::getMBAAddPluginInfo();
-}
-
-PreservedAnalyses MBAAdd::run(llvm::Function &F,
-                              llvm::FunctionAnalysisManager &) {
-  bool Changed = false;
-
-  for (auto &BB : F) {
-    Changed |= runOnBasicBlock(BB);
-  }
-  return (Changed ? llvm::PreservedAnalyses::none()
-                  : llvm::PreservedAnalyses::all());
-}
-
+//-----------------------------------------------------------------------------
+// MBAAdd Implementaion
+//-----------------------------------------------------------------------------
 bool MBAAdd::runOnBasicBlock(BasicBlock &BB) {
   bool Changed = false;
 
@@ -107,8 +64,8 @@ bool MBAAdd::runOnBasicBlock(BasicBlock &BB) {
   // FIXME We should be using 'Module::createRNG' here instead. However, that
   // method requires a pointer to 'Pass' on input and passes
   // for the new pass manager _do_not_ inherit from llvm::Pass. In other words,
-  // 'createRNG' cannot be used here and there's not other way of obtaining
-  // llvm::RandomNumberGenerator. Based on LLVM-8.
+  // 'createRNG' cannot be used here and there's no other way of obtaining
+  // llvm::RandomNumberGenerator. Last checked for LLVM 8.
   std::mt19937_64 RNG;
   RNG.seed(1234);
   std::uniform_real_distribution<double> Dist(0., 1.);
@@ -118,7 +75,7 @@ bool MBAAdd::runOnBasicBlock(BasicBlock &BB) {
   for (auto IIT = BB.begin(), IE = BB.end(); IIT != IE; ++IIT) {
     Instruction &Inst = *IIT;
 
-    // Skip non-binary (e.g. unary or compare) instruction
+    // Skip non-binary (e.g. unary or compare) instructions
     auto *BinOp = dyn_cast<BinaryOperator>(&Inst);
     if (!BinOp)
       continue;
@@ -151,7 +108,7 @@ bool MBAAdd::runOnBasicBlock(BasicBlock &BB) {
     // Create an instruction representing `(((a ^ b) + 2 * (a & b)) * 39 + 23) *
     // 151 + 111`
     // FIXME: Could this be done less ugly?
-    Instruction *NewValue =
+    Instruction *NewInst =
         // E = e2 * 151 + 111
         BinaryOperator::CreateAdd(
             Builder.CreateMul(
@@ -172,11 +129,11 @@ bool MBAAdd::runOnBasicBlock(BasicBlock &BB) {
 
     // The following is visible only if you pass -debug on the command line
     // *and* you have an assert build.
-    LLVM_DEBUG(dbgs() << *BinOp << " -> " << *NewValue << "\n");
+    LLVM_DEBUG(dbgs() << *BinOp << " -> " << *NewInst << "\n");
 
     // Replace `(a + b)` (original instructions) with `(((a ^ b) + 2 * (a & b))
     // * 39 + 23) * 151 + 111` (the new instruction)
-    ReplaceInstWithInst(BB.getInstList(), IIT, NewValue);
+    ReplaceInstWithInst(BB.getInstList(), IIT, NewInst);
     Changed = true;
 
     // Update the statistics
@@ -185,7 +142,43 @@ bool MBAAdd::runOnBasicBlock(BasicBlock &BB) {
   return Changed;
 }
 
-namespace lt {
+PreservedAnalyses MBAAdd::run(llvm::Function &F,
+                              llvm::FunctionAnalysisManager &) {
+  bool Changed = false;
+
+  for (auto &BB : F) {
+    Changed |= runOnBasicBlock(BB);
+  }
+  return (Changed ? llvm::PreservedAnalyses::none()
+                  : llvm::PreservedAnalyses::all());
+}
+
+//-----------------------------------------------------------------------------
+// New PM Registration
+//-----------------------------------------------------------------------------
+llvm::PassPluginLibraryInfo getMBAAddPluginInfo() {
+  return {LLVM_PLUGIN_API_VERSION, "mba-add", LLVM_VERSION_STRING,
+          [](PassBuilder &PB) {
+            PB.registerPipelineParsingCallback(
+                [](StringRef Name, FunctionPassManager &FPM,
+                   ArrayRef<PassBuilder::PipelineElement>) {
+                  if (Name == "mba-add") {
+                    FPM.addPass(MBAAdd());
+                    return true;
+                  }
+                  return false;
+                });
+          }};
+}
+
+extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
+llvmGetPassPluginInfo() {
+  return getMBAAddPluginInfo();
+}
+
+//-----------------------------------------------------------------------------
+// Legacy PM Registration
+//-----------------------------------------------------------------------------
 char LegacyMBAAdd::ID = 0;
 
 // Register the pass - required for (among others) opt
@@ -203,4 +196,3 @@ bool LegacyMBAAdd::runOnFunction(llvm::Function &F) {
   }
   return Changed;
 }
-} // namespace lt

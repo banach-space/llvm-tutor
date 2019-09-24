@@ -239,7 +239,7 @@ a + b == (((a ^ b) + 2 * (a & b)) * 39 + 23) * 151 + 111
 ```
 Similarly to `MBASub`, it replaces all instances of integer `add`according to
 the above formula, but only for 8-bit integers. The LIT tests verify that
-both the formula and the implementations are correct. You run it like this:
+both the formula and the implementations are correct. You can run it like this:
 ```bash
 opt -load <build_dir>/lib/libMBAAdd.so -mba-add inputs/input_for_mba.c -o out.ll
 ```
