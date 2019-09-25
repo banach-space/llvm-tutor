@@ -43,7 +43,7 @@ if (NOT CMAKE_BUILD_TYPE)
 endif()
 
 # Set the build flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_RELEASE} -Wall\
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall\
     -fdiagnostics-color=always")
 
 # Copied from HandleLLVMOptions.cmake
