@@ -28,25 +28,28 @@ document explains how to get started.
 
 TL;DR (the reference example)
 -----------------------------
-The **HelloWorld** pass implemented in
+**HelloWorld** implemented in
 [HelloWorld.cpp](https://github.com/banach-space/llvm-tutor/blob/master/HelloWorld/HelloWorld.cpp)
-is self-contained and the corresponding
+is a basic, self-contained example. It's a good starting point if all you want is a
+reference example. The corresponding
 [CMakeLists.txt](https://github.com/banach-space/llvm-tutor/blob/master/HelloWorld/CMakeLists.txt)
-implements the minimum set-up that's required for an out-of-source pass. It's a
-great starting point if all you want is a reference example.
+implements the minimum set-up for an out-of-source pass.
 
-The build steps for `HelloWorld` are straightforward:
+You can build **HelloWorld** like this:
 ```bash
 mkdir build
 cd build
 cmake -DLT_LLVM_INSTALL_DIR=<installation/dir/of/llvm/8> <source/dir/llvm/tutor>/HelloWorld/
 make
 ```
-You can test it with `opt`:
+Before you can test it, you need to prepare an input file:
 ```bash
 # Generate an llvm test file
-clang -S -emit-llvm <source/dir/llvm/tutor/inputs/input_for_hello.c> -o
+clang -S -emit-llvm <source/dir/llvm/tutor/>inputs/input_for_hello.c> -o
 input_for_hello.ll
+```
+Finally, run it with `opt`:
+```bash
 # Run the pass on the llvm file
 opt -load libHelloWorld.dylib -hello-world -disable-output input_for_hello.ll
 # The expected output
