@@ -10,21 +10,10 @@
 //    See formula 2.2 (j) in [1].
 //
 // USAGE:
-//    This pass can be run through opt:
-//      $ opt -load <BUILD_DIR>/lib/libMBASub.so -legacy-mba-sub <bitcode-file>
-//    with the optional ratio in the range [0, 1.0].
-//
-// USEFUL LINKS:
-//    Creating a new instruction:
-//      http://llvm.org/docs/ProgrammersManual.html#creating-and-inserting-new-instructions
-//    Replacing an instruction
-//      http://llvm.org/docs/ProgrammersManual.html#replacing-an-instruction-with-another-value
-//    LLVM_DEBUG support:
-//      http://llvm.org/docs/ProgrammersManual.html#the-llvm-debug-macro-and-debug-option
-//    STATISTIC support:
-//      http://llvm.org/docs/WritingAnLLVMPass.html#pass-statistics
-//    CommandLine support:
-//      http://llvm.org/docs/CommandLine.html#quick-start-guide
+//    1. Legacy pass manager:
+//      $ opt -load <BUILD_DIR>/lib/libMBASub.so --legacy-mba-sub <bitcode-file>
+//    2. New pass maanger:
+//      $ opt -load-pass-plugin <BUILD_DIR>/lib/libMBASub.so -passes=-"mba-sub" <bitcode-file>
 //
 //  [1] "Hacker's Delight" by Henry S. Warren, Jr.
 //
@@ -49,57 +38,23 @@
 #include <random>
 
 using namespace llvm;
-using lt::LegacyMBASub;
-using lt::MBASub;
 
 #define DEBUG_TYPE "mba-sub"
 
 STATISTIC(SubstCount, "The # of substituted instructions");
 
-namespace lt {
-/// Convenience typedef for a pass manager over functions.
-llvm::PassPluginLibraryInfo getMBASubPluginInfo() {
-  return {LLVM_PLUGIN_API_VERSION, "mba-sub", LLVM_VERSION_STRING,
-          [](PassBuilder &PB) {
-            PB.registerPipelineParsingCallback(
-                [](StringRef Name, FunctionPassManager &FPM,
-                   ArrayRef<PassBuilder::PipelineElement>) {
-                  if (Name == "mba-sub") {
-                    FPM.addPass(MBASub());
-                    return true;
-                  }
-                  return false;
-                });
-          }};
-}
-} // namespace lt
-
-extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
-llvmGetPassPluginInfo() {
-  return lt::getMBASubPluginInfo();
-}
-
-PreservedAnalyses MBASub::run(llvm::Function &F,
-                              llvm::FunctionAnalysisManager &) {
-  bool Changed = false;
-
-  for (auto &BB : F) {
-    Changed |= runOnBasicBlock(BB);
-  }
-  return (Changed ? llvm::PreservedAnalyses::none()
-                  : llvm::PreservedAnalyses::all());
-}
-
+//-----------------------------------------------------------------------------
+// MBASub Implementaion
+//-----------------------------------------------------------------------------
 bool MBASub::runOnBasicBlock(BasicBlock &BB) {
   bool Changed = false;
 
   // Loop over all instructions in the block. Replacing instructions requires
   // iterators, hence a for-range loop wouldn't be suitable.
-  for (auto IIT = BB.begin(), IE = BB.end(); IIT != IE; ++IIT) {
-    Instruction &Inst = *IIT;
+  for (auto Inst = BB.begin(), IE = BB.end(); Inst != IE; ++Inst) {
 
     // Skip non-binary (e.g. unary or compare) instruction.
-    auto *BinOp = dyn_cast<BinaryOperator>(&Inst);
+    auto *BinOp = dyn_cast<BinaryOperator>(Inst);
     if (!BinOp)
       continue;
 
@@ -124,7 +79,7 @@ bool MBASub::runOnBasicBlock(BasicBlock &BB) {
 
     // Replace `(a - b)` (original instructions) with `(a + ~b) + 1`
     // (the new instruction)
-    ReplaceInstWithInst(BB.getInstList(), IIT, NewValue);
+    ReplaceInstWithInst(BB.getInstList(), Inst, NewValue);
     Changed = true;
 
     // Update the statistics
@@ -133,15 +88,16 @@ bool MBASub::runOnBasicBlock(BasicBlock &BB) {
   return Changed;
 }
 
-namespace lt {
-char LegacyMBASub::ID = 0;
+PreservedAnalyses MBASub::run(llvm::Function &F,
+                              llvm::FunctionAnalysisManager &) {
+  bool Changed = false;
 
-// Register the pass - required for (among others) opt
-static RegisterPass<LegacyMBASub> X("legacy-mba-sub",
-                                    "Mixed Boolean Arithmetic Substitution",
-                                    true, // doesn't modify the CFG => true
-                                    false // not a pure analysis pass => false
-);
+  for (auto &BB : F) {
+    Changed |= runOnBasicBlock(BB);
+  }
+  return (Changed ? llvm::PreservedAnalyses::none()
+                  : llvm::PreservedAnalyses::all());
+}
 
 bool LegacyMBASub::runOnFunction(llvm::Function &F) {
   bool Changed = false;
@@ -151,4 +107,38 @@ bool LegacyMBASub::runOnFunction(llvm::Function &F) {
   }
   return Changed;
 }
-} // namespace lt
+
+//-----------------------------------------------------------------------------
+// New PM Registration
+//-----------------------------------------------------------------------------
+llvm::PassPluginLibraryInfo getMBASubPluginInfo() {
+  return {LLVM_PLUGIN_API_VERSION, "mba-sub", LLVM_VERSION_STRING,
+          [](PassBuilder &PB) {
+            PB.registerPipelineParsingCallback(
+                [](StringRef Name, FunctionPassManager &FPM,
+                   ArrayRef<PassBuilder::PipelineElement>) {
+                  if (Name == "mba-sub") {
+                    FPM.addPass(MBASub());
+                    return true;
+                  }
+                  return false;
+                });
+          }};
+}
+
+extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
+llvmGetPassPluginInfo() {
+  return getMBASubPluginInfo();
+}
+
+//-----------------------------------------------------------------------------
+// Legacy PM Registration
+//-----------------------------------------------------------------------------
+char LegacyMBASub::ID = 0;
+
+// Register the pass - required for (among others) opt
+static RegisterPass<LegacyMBASub> X("legacy-mba-sub",
+                                    "Mixed Boolean Arithmetic Substitution",
+                                    true, // doesn't modify the CFG => true
+                                    false // not a pure analysis pass => false
+);

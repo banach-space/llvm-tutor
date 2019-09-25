@@ -17,11 +17,12 @@
 //      The command line option is not available for the new PM
 //
 // [1] "Defeating MBA-based Obfuscation" Ninon Eyrolles, Louis Goubin, Marion
-// Videau
+//     Videau
 //
 // License: MIT
 //==============================================================================
 #include "MBAAdd.h"
+#include "Ratio.h"
 
 #include "llvm/ADT/Statistic.h"
 #include "llvm/IR/Function.h"
@@ -38,8 +39,6 @@
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 
 #include <random>
-
-#include "Ratio.h"
 
 using namespace llvm;
 
@@ -72,11 +71,9 @@ bool MBAAdd::runOnBasicBlock(BasicBlock &BB) {
 
   // Loop over all instructions in the block. Replacing instructions requires
   // iterators, hence a for-range loop wouldn't be suitable
-  for (auto IIT = BB.begin(), IE = BB.end(); IIT != IE; ++IIT) {
-    Instruction &Inst = *IIT;
-
+  for (auto Inst = BB.begin(), IE = BB.end(); Inst != IE; ++Inst) {
     // Skip non-binary (e.g. unary or compare) instructions
-    auto *BinOp = dyn_cast<BinaryOperator>(&Inst);
+    auto *BinOp = dyn_cast<BinaryOperator>(Inst);
     if (!BinOp)
       continue;
 
@@ -133,7 +130,7 @@ bool MBAAdd::runOnBasicBlock(BasicBlock &BB) {
 
     // Replace `(a + b)` (original instructions) with `(((a ^ b) + 2 * (a & b))
     // * 39 + 23) * 151 + 111` (the new instruction)
-    ReplaceInstWithInst(BB.getInstList(), IIT, NewInst);
+    ReplaceInstWithInst(BB.getInstList(), Inst, NewInst);
     Changed = true;
 
     // Update the statistics
@@ -151,6 +148,15 @@ PreservedAnalyses MBAAdd::run(llvm::Function &F,
   }
   return (Changed ? llvm::PreservedAnalyses::none()
                   : llvm::PreservedAnalyses::all());
+}
+
+bool LegacyMBAAdd::runOnFunction(llvm::Function &F) {
+  bool Changed = false;
+
+  for (auto &BB : F) {
+    Changed |= Impl.runOnBasicBlock(BB);
+  }
+  return Changed;
 }
 
 //-----------------------------------------------------------------------------
@@ -181,18 +187,8 @@ llvmGetPassPluginInfo() {
 //-----------------------------------------------------------------------------
 char LegacyMBAAdd::ID = 0;
 
-// Register the pass - required for (among others) opt
 static RegisterPass<LegacyMBAAdd> X("legacy-mba-add",
                                     "Mixed Boolean Arithmetic Substitution",
                                     true, // doesn't modify the CFG => true
                                     false // not a pure analysis pass => false
 );
-
-bool LegacyMBAAdd::runOnFunction(llvm::Function &F) {
-  bool Changed = false;
-
-  for (auto &BB : F) {
-    Changed |= Impl.runOnBasicBlock(BB);
-  }
-  return Changed;
-}

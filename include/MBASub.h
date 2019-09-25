@@ -13,7 +13,6 @@
 #include "llvm/IR/PassManager.h"
 #include "llvm/Pass.h"
 
-namespace lt {
 // PassInfoMixIn is a CRTP mix-in to automatically provide informational APIs
 // needed for passes. Currently it provides only the 'name' method.
 struct MBASub : public llvm::PassInfoMixin<MBASub> {
@@ -33,6 +32,4 @@ struct LegacyMBASub : public llvm::FunctionPass {
 
   MBASub Impl;
 };
-} // namespace lt
-
 #endif
