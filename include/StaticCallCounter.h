@@ -12,27 +12,46 @@
 
 #include "llvm/IR/CallSite.h"
 #include "llvm/IR/Module.h"
+#include "llvm/IR/PassManager.h"
 #include "llvm/Pass.h"
+#include "llvm/Support/raw_ostream.h"
 
-namespace lt {
+using ResultStaticCC = llvm::DenseMap<const llvm::Function *, unsigned>;
 
-struct StaticCallCounter : public llvm::ModulePass {
-  static char ID;
+//------------------------------------------------------------------------------
+// New PM interface
+//------------------------------------------------------------------------------
+struct StaticCallCounter : public llvm::AnalysisInfoMixin<StaticCallCounter> {
+  using Result = ResultStaticCC;
+  Result run(llvm::Module &M, llvm::ModuleAnalysisManager &);
+  Result runOnModule(llvm::Module &M);
 
-  llvm::DenseMap<const llvm::Function *, unsigned> DirectCalls;
-
-  StaticCallCounter() : llvm::ModulePass(ID) {}
-
-  bool runOnModule(llvm::Module &M) override;
-
-  void print(llvm::raw_ostream &OutS, llvm::Module const *M) const override;
-
-private:
-  // Checks whether CS is indeed a CallSite and then for CallSites incrementes
-  // the counter for the corresponding function.
-  void handleInstruction(llvm::ImmutableCallSite CS);
+  // A special type used by analysis passes to provide an address that
+  // identifies that particular analysis pass type.
+  static llvm::AnalysisKey Key;
 };
 
-} // namespace lt
+//------------------------------------------------------------------------------
+// Legacy PM interface
+//------------------------------------------------------------------------------
+struct LegacyStaticCallCounter : public llvm::ModulePass {
+  static char ID;
+  LegacyStaticCallCounter() : llvm::ModulePass(ID) {}
+  bool runOnModule(llvm::Module &M) override;
+  // The print method must be implemented by Legacy analys passes in order to
+  // print a human readable version of the analysis results:
+  //  http://llvm.org/docs/WritingAnLLVMPass.html#the-print-method
+  void print(llvm::raw_ostream &OutS, llvm::Module const *M) const override;
+
+  ResultStaticCC DirectCalls;
+  StaticCallCounter Impl;
+};
+
+//------------------------------------------------------------------------------
+// Helper functions
+//------------------------------------------------------------------------------
+// Pretty-prints the result of this analysis
+void printStaticCCResult(llvm::raw_ostream &OutS,
+                         const ResultStaticCC &DirectCalls);
 
 #endif

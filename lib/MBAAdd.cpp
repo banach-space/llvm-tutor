@@ -53,7 +53,7 @@ static cl::opt<Ratio, false, llvm::cl::parser<Ratio>> MBARatio{
     cl::value_desc("ratio"), cl::init(1.), cl::Optional};
 
 //-----------------------------------------------------------------------------
-// MBAAdd Implementaion
+// MBAAdd Implementation
 //-----------------------------------------------------------------------------
 bool MBAAdd::runOnBasicBlock(BasicBlock &BB) {
   bool Changed = false;

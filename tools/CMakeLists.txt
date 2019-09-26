@@ -25,6 +25,7 @@ llvm_map_components_to_libnames(REQ_LLVM_LIBRARIES ${LLVM_TARGETS_TO_BUILD}
         target
         mc
         support
+        passes
 )
 
 target_link_libraries(dynamic DynamicCallCounter ${REQ_LLVM_LIBRARIES})

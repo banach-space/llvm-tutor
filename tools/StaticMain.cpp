@@ -18,13 +18,12 @@
 #include "StaticCallCounter.h"
 #include "config.h"
 
-#include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IRReader/IRReader.h"
+#include "llvm/Passes/PassBuilder.h"
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/raw_ostream.h"
 
 using namespace llvm;
-using llvm::legacy::PassManager;
 
 //===----------------------------------------------------------------------===//
 // Command line options
@@ -43,35 +42,37 @@ static cl::opt<std::string> InputModule{cl::Positional,
 //
 // Runs StaticCallCounter and prints the result
 //===----------------------------------------------------------------------===//
-struct StaticCountWrapper : public ModulePass {
-  static char ID;
-  raw_ostream &OutS;
+struct StaticCCWrapper : public PassInfoMixin<StaticCCWrapper> {
+  void print(llvm::raw_ostream &OutS) const;
+  ResultStaticCC DirectCalls;
+  llvm::PreservedAnalyses run(llvm::Module &M,
+                              llvm::ModuleAnalysisManager &MAM) {
 
-  explicit StaticCountWrapper(raw_ostream &OS) : ModulePass(ID), OutS(OS) {}
-
-  bool runOnModule(Module &M) override {
-    // Prints the result of StaticCallCounter
-    getAnalysis<lt::StaticCallCounter>().print(OutS, &M);
-    return false;
-  }
-
-  // Set dependencies
-  void getAnalysisUsage(AnalysisUsage &AU) const override {
-    AU.addRequired<lt::StaticCallCounter>();
-    AU.setPreservesAll();
+    DirectCalls = MAM.getResult<StaticCallCounter>(M);
+    printStaticCCResult(errs(), DirectCalls);
+    return llvm::PreservedAnalyses::all();
   }
 };
 
-char StaticCountWrapper::ID = 0;
-
 static void countStaticCalls(Module &M) {
-  // Build up all of the passes that we want to run on the module.
-  legacy::PassManager PM;
-  PM.add(new lt::StaticCallCounter());
-  PM.add(new StaticCountWrapper(outs()));
+  // Create a module pass manager and add StaticCCWrapper to it.
+  ModulePassManager MPM;
+  StaticCCWrapper StaticWrapper;
+  MPM.addPass(StaticWrapper);
 
-  // Run them
-  PM.run(M);
+  // Create an analysis manager and register StaticCallCounter with it.
+  ModuleAnalysisManager MAM;
+  MAM.registerPass([&] { return StaticCallCounter(); });
+
+  // Register all available module analysis passes defined in PassRegisty.def.
+  // We only really need PassInstrumentationAnalysis (which is pulled by
+  // default by PassBuilder), but to keep this concise, let PassBuilder do all
+  // the _heavy-lifting_.
+  PassBuilder PB;
+  PB.registerModuleAnalyses(MAM);
+
+  // Finally, run the passes registered with MPM
+  MPM.run(M, MAM);
 }
 
 //===----------------------------------------------------------------------===//

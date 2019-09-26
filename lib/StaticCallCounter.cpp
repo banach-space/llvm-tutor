@@ -7,9 +7,10 @@
 //    code) in a file.
 //
 // USAGE:
-//    This pass can be run through opt like this:
-//      opt -load <BUILD/DIR>/lib/ --cc-static -analyze <input-llvm-file>
-//    You can also run it through 'static':
+//    1. Run through opt - legacy pass manager
+//      opt -load <BUILD/DIR>/lib/libStaticCallCounter.so --legacy-static-cc
+//      -analyze <input-llvm-file>
+//    2. You can also run it through 'static':
 //      <BUILD/DIR>/bin/static <input-llvm-file>
 //
 // License: MIT
@@ -18,24 +19,20 @@
 
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/Instruction.h"
+#include "llvm/Passes/PassBuilder.h"
+#include "llvm/Passes/PassPlugin.h"
 #include "llvm/Support/Format.h"
 
 using namespace llvm;
-using lt::StaticCallCounter;
 
-namespace lt {
+//-----------------------------------------------------------------------------
+// StaticCallCounter Implementation
+//-----------------------------------------------------------------------------
+AnalysisKey StaticCallCounter::Key;
 
-char StaticCallCounter::ID = 0;
+StaticCallCounter::Result StaticCallCounter::runOnModule(Module &M) {
+  llvm::DenseMap<const llvm::Function *, unsigned> Res;
 
-// Register the pass - required for (among others) opt
-RegisterPass<StaticCallCounter>
-    X("static-cc", "For each function print the number of direct calls",
-      true /* Only looks at CFG */, true /* Analysis Pass */);
-} // namespace lt
-
-// For an analysis pass, runOnModule should perform the actual analysis and
-// compute the results. The actual output, however, is produced separately.
-bool StaticCallCounter::runOnModule(Module &M) {
   for (auto &Func : M) {
     for (auto &BB : Func) {
       for (auto &Ins : BB) {
@@ -57,22 +54,66 @@ bool StaticCallCounter::runOnModule(Module &M) {
         }
 
         // Update the count for the particular call
-        auto CallCount = DirectCalls.find(DirectInvoc);
-        if (DirectCalls.end() == CallCount) {
-          CallCount = DirectCalls.insert(std::make_pair(DirectInvoc, 0)).first;
+        auto CallCount = Res.find(DirectInvoc);
+        if (Res.end() == CallCount) {
+          CallCount = Res.insert(std::make_pair(DirectInvoc, 0)).first;
         }
         ++CallCount->second;
       }
     }
   }
 
+  return Res;
+}
+
+StaticCallCounter::Result
+StaticCallCounter::run(llvm::Module &M, llvm::ModuleAnalysisManager &) {
+  return runOnModule(M);
+}
+
+void LegacyStaticCallCounter::print(raw_ostream &OutS, Module const *) const {
+  printStaticCCResult(OutS, DirectCalls);
+}
+
+bool LegacyStaticCallCounter::runOnModule(llvm::Module &M) {
+  DirectCalls = Impl.runOnModule(M);
   return false;
 }
 
-// The print method must be implemented by “analyses” in order to print a human
-// readable version of the analysis results.
-// http://llvm.org/docs/WritingAnLLVMPass.html#the-print-method
-void StaticCallCounter::print(raw_ostream &OutS, Module const *) const {
+//-----------------------------------------------------------------------------
+// New PM Registration
+//-----------------------------------------------------------------------------
+llvm::PassPluginLibraryInfo getStaticCallCounterPluginInfo() {
+  return {LLVM_PLUGIN_API_VERSION, "static-cc", LLVM_VERSION_STRING,
+          [](PassBuilder &PB) {
+            PB.registerAnalysisRegistrationCallback(
+                [](ModuleAnalysisManager &MAM) {
+                  MAM.registerPass([&] { return StaticCallCounter(); });
+                });
+          }};
+};
+
+extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
+llvmGetPassPluginInfo() {
+  return getStaticCallCounterPluginInfo();
+}
+
+//-----------------------------------------------------------------------------
+// Legacy PM Registration
+//-----------------------------------------------------------------------------
+char LegacyStaticCallCounter::ID = 0;
+
+// Register the pass - required for (among others) opt
+RegisterPass<LegacyStaticCallCounter>
+    X("legacy-static-cc", "For each function print the number of direct calls",
+      true, // Doesn't modify the CFG => true
+      true  // It's a pure analysis pass => true
+    );
+
+//------------------------------------------------------------------------------
+// Helper functions
+//------------------------------------------------------------------------------
+void printStaticCCResult(raw_ostream &OutS, const ResultStaticCC &DirectCalls) {
   OutS << "================================================="
        << "\n";
   OutS << "LLVM-TUTOR: static analysis results\n";
