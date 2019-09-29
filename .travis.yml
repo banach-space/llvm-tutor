@@ -5,14 +5,16 @@ language: cpp
 addons:
   apt:
     sources:
-      - sourceline: 'deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-8 main'
+      - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-9 main'
         key_url: 'http://apt.llvm.org/llvm-snapshot.gpg.key'
     packages:
-      - llvm-8
-      - llvm-8-dev
+      - llvm-9
+      - llvm-9-dev
+      - llvm-9-tools
+      - clang-9
   homebrew:
     packages:
-      - llvm@8
+      - llvm@9
     # The following error was triggered when Homebrew was _not_ updated:
     #   Error: Your Homebrew is outdated. Please run `brew update`.
     # However, updating Homebrew slows down the build considerably.
@@ -21,18 +23,32 @@ addons:
 matrix:
   include:
     - os: linux
-      dist: xenial
+      dist: bionic
       env:
-        - LLVM_DIR="/usr/lib/llvm-8/"
-        - LLVM_TOOLCHAIN=""
+        - LLVM_DIR="/usr/lib/llvm-9/"
+        - LLVM_TOOLCHAIN="/usr/lib/llvm-9/bin"
         # There's currently no way of obtaining FileCheck on Ubuntu (apart from
         # building from sources), so testing is not possible.
         - RUN_TESTS="False"
+      before_script:
+        # This is a nasty/hacky workaround for CMake Error:
+        #   at /usr/lib/llvm-9/lib/cmake/llvm/LLVMExports.cmake:1335 (message):
+        #   The imported target "CheckerDependencyHandlingAnalyzerPlugin" references
+        #   the file
+        # This looks like a bug in the LLVM 9 package for Ubuntu. Since I don't
+        # care about the missing files (I don't use them), I'll just 'touch'
+        # them to silce CMake errors.
+        # TODO: Investigate furter and report
+        - sudo touch /usr/lib/llvm-9/bin/yaml-bench
+        - sudo touch /usr/lib/llvm-9/lib/SampleAnalyzerPlugin.so
+        - sudo touch /usr/lib/llvm-9/lib/CheckerDependencyHandlingAnalyzerPlugin.so
+        - sudo touch /usr/lib/llvm-9/lib/CheckerOptionHandlingAnalyzerPlugin.so
+        - sudo touch /usr/lib/llvm-9/bin/lit-cpuid
     - os: osx
       osx_image: xcode11
       env:
-        - LLVM_DIR="/usr/local/opt/llvm@8/"
-        - LLVM_TOOLCHAIN="/usr/local/opt/llvm@8/bin/"
+        - LLVM_DIR="/usr/local/opt/llvm@9/"
+        - LLVM_TOOLCHAIN="/usr/local/opt/llvm@9/bin/"
         - RUN_TESTS="True"
 
 # AFAIK, there's no other way of obtaining LLVM's lit
@@ -43,7 +59,7 @@ script:
   # Build HelloWorld as a standalone project
   - cd HelloWorld
   - mkdir build && cd build
-  - cmake -DLT_LEGACY_SKIP_PIPELINE_REGISTRATION=On -DLT_LLVM_INSTALL_DIR="$LLVM_DIR" -DLT_LIT_TOOLS_DIR="$LLVM_TOOLCHAIN"  ../
+  - cmake -DLT_LEGACY_SKIP_PIPELINE_REGISTRATION=On -DLT_LLVM_INSTALL_DIR="$LLVM_DIR"  ../
   - make -j4
   # Build the top project and run tests
   - cd ../../

@@ -2,7 +2,7 @@ llvm-tutor
 =========
 [![Build Status](https://travis-ci.org/banach-space/llvm-tutor.svg?branch=master)](https://travis-ci.org/banach-space/llvm-tutor)
 
-Example LLVM passes - based on **LLVM 8**
+Example LLVM passes - based on **LLVM 9**
 
 **llvm-tutor** (aka **lt**) is a collection of self-contained reference LLVM
 passes. It's a tutorial that targets novice and aspiring LLVM developers.
@@ -39,7 +39,7 @@ You can build **HelloWorld** like this:
 ```bash
 mkdir build
 cd build
-cmake -DLT_LLVM_INSTALL_DIR=<installation/dir/of/llvm/8> <source/dir/llvm/tutor>/HelloWorld/
+cmake -DLT_LLVM_INSTALL_DIR=<installation/dir/of/llvm/9> <source/dir/llvm/tutor>/HelloWorld/
 make
 ```
 Before you can test it, you need to prepare an input file:
@@ -69,19 +69,19 @@ This project is regularly tested on **Linux 16.04** and **Mac OS X 10.14.4**
 (see
 [\.travis.yml](https://github.com/banach-space/llvm-tutor/blob/master/.travis.yml) for more details).
 Support for Windows is *work-in-progress*. In order to build **llvm-tutor** you will need:
-  * the development version of LLVM 8
+  * the development version of LLVM 9
   * a C++ compiler that supports C++14
   * CMake 3.4.3 or higher
 
 You will also need [opt](http://llvm.org/docs/CommandGuide/opt.html) to load
 and run the passes. It's normally bundled with LLVM development packages.
 
-Installing `clang-8` (and other LLVM-based tools) won't hurt, but is neither
+Installing `clang-9` (and other LLVM-based tools) won't hurt, but is neither
 required nor sufficient - you need the headers, libraries and `CMake` scripts
 that come with the development packages. There are additional requirements for
 tests documented [here](#test_requirements).
 
-### Obtaining LLVM-8
+### Obtaining LLVM-9
 There are two options:
 * **build from sources** (works regardless of the operating system, but can
   be slow and tricky to debug if something doesn't work)
@@ -92,16 +92,16 @@ The packages available for Ubuntu and Mac OS X are sufficient. Windows users
 will have to build from sources.
 
 #### Installing on Ubuntu
-If you're using `Ubuntu` then install `llvm-8-dev` (other dependencies will be
+If you're using `Ubuntu` then install `llvm-9-dev` (other dependencies will be
 _pulled_ automatically). Note that this very recent version of LLVM is not yet
-available in the official repositories. On `Ubuntu Xenial`, you can [install
+available in the official repositories. On `Ubuntu Bionic`, you can [install
 LLVM](https://blog.kowalczyk.info/article/k/how-to-install-latest-clang-6.0-on-ubuntu-16.04-xenial-wsl.html)
 from the official [repository](http://apt.llvm.org/):
 ```bash
 $ wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-$ sudo apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-8.0 main"
+$ sudo apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-9.0 main"
 $ sudo apt-get update
-$ sudo apt-get install -y llvm-8-dev
+$ sudo apt-get install -y llvm-9-dev
 ```
 Note that this won't install the dependencies required for [testing](#testing).
 Ubuntu maintainers have stopped those them starting with LLVM-3.8 (more info
@@ -111,9 +111,9 @@ However, you don't need them to be able to build and run the passes developed
 here.
 
 #### Installing on Mac OS X
-On Darwin you can install LLVM 8 with [Homebrew](https://brew.sh/):
+On Darwin you can install LLVM 9 with [Homebrew](https://brew.sh/):
 ```bash
-$ brew install llvm@8
+$ brew install llvm@9
 ```
 This will install all the required header files, libraries and binaries in
 `/usr/local/opt/llvm/`. Currently this will also install the binaries required
@@ -126,7 +126,7 @@ OS. This will work on Linux, OS X and Windows:
 ```bash
 git clone https://github.com/llvm/llvm-project.git
 cd llvm-project
-git checkout release/8.x
+git checkout release/9.x
 mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=X86 <llvm-project/root/dir>/llvm/
@@ -140,12 +140,12 @@ Build Instructions
 You can build all the examples as follows:
 ```bash
 cd <build/dir>
-cmake -DLT_LLVM_INSTALL_DIR=<installation/dir/of/llvm/8> <source/dir/llvm/tutor>
+cmake -DLT_LLVM_INSTALL_DIR=<installation/dir/of/llvm/9> <source/dir/llvm/tutor>
 make
 ```
 
 The `LT_LLVM_INSTALL_DIR` variable should be set to the root of either the
-installation or build directory of LLVM 8. It is used to locate the
+installation or build directory of LLVM 9. It is used to locate the
 corresponding `LLVMConfig.cmake` script that sets the include and library
 paths.
 
@@ -294,10 +294,10 @@ tools installed:
   * [**lit**](https://llvm.org/docs/CommandGuide/lit.html) (LLVM tool for executing
     the tests)
 
-Neither of the requirements are satisfied on Ubuntu Xenial - sadly there are no
-packages that would provide `opt` or `FileCheck` for LLVM 8. Although older
+Neither of the requirements are satisfied on Ubuntu Bionic - sadly there are no
+packages that would provide `opt` or `FileCheck` for LLVM 9. Although older
 versions are available (e.g. bundled with LLVM-4.0), this project has been
-developed against LLVM 8 and ideally you want a matching version of both
+developed against LLVM 9 and ideally you want a matching version of both
 `opt` and `FileCheck`.
 
 ### Running The Tests
@@ -306,7 +306,7 @@ running the tests (e.g. `FileCheck`). This is done when configuring the
 project:
 
 ```bash
-$ cmake -DLT_LLVM_INSTALL_DIR=<installation/dir/of/llvm/8>
+$ cmake -DLT_LLVM_INSTALL_DIR=<installation/dir/of/llvm/9>
 -DLT_LIT_TOOLS_DIR=<location/of/filecheck> <source_dir>
 ```
 Next, you can run the tests like this:

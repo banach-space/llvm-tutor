@@ -28,7 +28,7 @@ define i32 @foo(i32) {
 ; DUPL: define i32 @foo(i32) {
 ; DUPL:   %2 = icmp eq i32 %0, 0
 ; DUPL:   br i1 %2, label %3, label %9
-; DUPL: ; <label>:3:                                      ; preds = %1
+; DUPL: 3:                                      ; preds = %1
 ; DUPL:   %4 = alloca i32, align 4
 ; DUPL:   %5 = alloca i32, align 4
 ; DUPL:   store i32 %0, i32* %4, align 4
@@ -37,7 +37,7 @@ define i32 @foo(i32) {
 ; DUPL:   store i32 %7, i32* %5, align 4
 ; DUPL:   %8 = load i32, i32* %5, align 4
 ; DUPL:   br label %15
-; DUPL: ; <label>:9:                                      ; preds = %1
+; DUPL: 9:                                      ; preds = %1
 ; DUPL:   %10 = alloca i32, align 4
 ; DUPL:   %11 = alloca i32, align 4
 ; DUPL:   store i32 %0, i32* %10, align 4
@@ -46,7 +46,7 @@ define i32 @foo(i32) {
 ; DUPL:   store i32 %13, i32* %11, align 4
 ; DUPL:   %14 = load i32, i32* %11, align 4
 ; DUPL:   br label %15
-; DUPL: ; <label>:15:                                     ; preds = %9, %3
+; DUPL: 15:                                     ; preds = %9, %3
 ; DUPL:   %16 = phi i32* [ %4, %3 ], [ %10, %9 ]
 ; DUPL:   %17 = phi i32* [ %5, %3 ], [ %11, %9 ]
 ; DUPL:   %18 = phi i32 [ %6, %3 ], [ %12, %9 ]

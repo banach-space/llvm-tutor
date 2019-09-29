@@ -2,7 +2,7 @@
 
 ;  Verify that wrong MBA ratio triggers an adequate error
 
-; CHECK: opt: for the -mba-ratio option: '100' is not in [0., 1.] 
+; CHECK: opt: for the --mba-ratio option: '100' is not in [0., 1.] 
 
 define i32 @main(i32 %in_0, i32 %in_1, i32 %in_2, i32 %in_3, i32 %in_4) {
   %1 = add nsw i32 %in_0, %in_1
