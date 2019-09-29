@@ -204,7 +204,7 @@ The `static` executable is a command line wrapper that allows you to run
 so by instrumenting the input LLVM file - it injects call-counting code that is
 executed every time a function is called. Although this pass _analyses_
 function calls, as it does so by modifying the input file so it's a
-transformation pass .  You can test it with one of the provided examples, e.g.:
+transformation pass.  You can test it with one of the provided examples, e.g.:
 ```bash
 # Generate an LLVM file to analyze
 clang  -emit-llvm -c <source_dir>/test/input_for_cc.c -o input_for_cc.bc

@@ -27,7 +27,7 @@ extern struct {
   uint64_t count;
 } lt_RUNTIME_functionInfo[];
 
-void lt_RUNTIME_called(uint64_t id) { ++lt_RUNTIME_functionInfo[id].count; }
+void lt_RUNTIME_incrCC(uint64_t id) { ++lt_RUNTIME_functionInfo[id].count; }
 
 void lt_RUNTIME_print() {
   printf("=================================================\n"

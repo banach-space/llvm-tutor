@@ -4,7 +4,7 @@
 //
 // DESCRIPTION:
 //    A command-line tool that counts all the dynamic/run-time function calls
-//    in the input LLVM file. It builds on top of DynamicCallCounter pass
+//    in the input LLVM file. It builds on top of the DynamicCallCounter pass.
 //
 // USAGE:
 //    # First, generate an LLVM file
@@ -44,15 +44,20 @@ using llvm::sys::ExecuteAndWait;
 using llvm::sys::findProgramByName;
 
 //===----------------------------------------------------------------------===//
-// Command line (cl) options for lt
+// Command line options
 //===----------------------------------------------------------------------===//
 static cl::OptionCategory CallCounterCategory{"call counter options"};
 
 // This enables the LLVM_DEBUG macro
 // TODO The name of the option should be different - this will crash with opt
 // built in debug mode
-static cl::opt<bool, true> Debug("debug", cl::desc("Enable debug output"),
-                                 cl::Hidden, cl::location(DebugFlag));
+// static cl::opt<bool, true> Debug("debug", cl::desc("Enable debug output"),
+//                                  cl::Hidden, cl::location(DebugFlag));
+
+static cl::opt<bool>
+    SaveInstrumented("save-instrumented",
+                     cl::desc("Saves the instrumented module to disk"),
+                     cl::Optional, cl::cat{CallCounterCategory});
 
 static cl::opt<std::string> InputModule{cl::Positional,
                                         cl::desc{"<Module to analyze>"},
@@ -221,13 +226,14 @@ static void countDynamicCalls(Module &M) {
 
   // 2. Build up and run all of the passes that we want for the input module.
   legacy::PassManager PM;
-  PM.add(new lt::DynamicCallCounter());
+  PM.add(new DynamicCallCounter());
   PM.add(createVerifierPass());
 
   PM.run(M);
 
   // 3. Save the instrumented module and generate a binary from it
-  saveModule(M, OutputModule + ".lt.bc");
+  if (SaveInstrumented)
+    saveModule(M, OutputModule + ".dynamic.bc");
 
   std::string ObjectFile = OutputModule + ".o";
   compile(M, ObjectFile);
@@ -245,7 +251,7 @@ int main(int Argc, char **Argv) {
                               "Counts the number of dynamic function "
                               "calls in the input IR file\n");
 
-  // Makes shure llvm_shutdown() is called:
+  // Makes sure llvm_shutdown() is called (which cleans up LLVM objects)
   //  http://llvm.org/docs/ProgrammersManual.html#ending-execution-with-llvm-shutdown
   llvm_shutdown_obj SDO;
 
@@ -260,7 +266,8 @@ int main(int Argc, char **Argv) {
     return -1;
   }
 
-  // Run the analysis and print the results
+  // Instrument the binary and write it to the output file specified on the
+  // command line.
   countDynamicCalls(*M);
 
   return 0;

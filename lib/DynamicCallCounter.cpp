@@ -39,14 +39,11 @@
 #include "llvm/Transforms/Utils/ModuleUtils.h"
 
 using namespace llvm;
-using lt::DynamicCallCounter;
 
-namespace lt {
 
-char DynamicCallCounter::ID = 0;
-
-} // namespace lt
-
+//------------------------------------------------------------------------------
+// Helper functions
+//------------------------------------------------------------------------------
 // Returns a map (Function* -> uint64_t).
 static DenseMap<Function *, uint64_t>
 computeFunctionIDs(llvm::ArrayRef<Function *> Functions) {
@@ -63,16 +60,16 @@ computeFunctionIDs(llvm::ArrayRef<Function *> Functions) {
 
 // Returns a set of all internal (i.e. defined in this module) functions.
 static DenseSet<Function *>
-computeInternal(llvm::ArrayRef<Function *> Functions) {
-  DenseSet<Function *> Internal;
+computeInternalFuncs(llvm::ArrayRef<Function *> Functions) {
+  DenseSet<Function *> InternalFuncs;
 
   for (auto F : Functions) {
     if (!F->isDeclaration()) {
-      Internal.insert(F);
+      InternalFuncs.insert(F);
     }
   }
 
-  return Internal;
+  return InternalFuncs;
 }
 
 static llvm::Constant *createConstantString(llvm::Module &M,
@@ -90,6 +87,9 @@ static llvm::Constant *createConstantString(llvm::Module &M,
   return llvm::ConstantExpr::getInBoundsGetElementPtr(ArrayTy, AsStr, indices);
 }
 
+//-----------------------------------------------------------------------------
+// DynamicCallCounter Implementation
+//-----------------------------------------------------------------------------
 // Creates the global lt_RUNTIME_functionInfo table used by the runtime
 // library.
 static void createGlobalFunctionTable(Module &M, uint64_t NumFunctions) {
@@ -130,7 +130,7 @@ bool DynamicCallCounter::runOnModule(Module &M) {
   }
 
   IDs = computeFunctionIDs(ToCount);
-  Internal = computeInternal(ToCount);
+  InternalFuncs = computeInternalFuncs(ToCount);
   auto const NumFunctions = ToCount.size();
 
   // 2. Store the number of functions into an externally visible variable.
@@ -145,12 +145,12 @@ bool DynamicCallCounter::runOnModule(Module &M) {
   // 4. Declare the counter function
   auto *VoidTy = Type::getVoidTy(CTX);
   auto *HelperTy = FunctionType::get(VoidTy, Int64Ty, false);
-  auto *CounterFunc = M.getOrInsertFunction("lt_RUNTIME_called", HelperTy);
+  auto *IncrCC = M.getOrInsertFunction("lt_RUNTIME_incrCC", HelperTy);
 
   // 5. Declare and install the result printing function so that it prints out
   // the counts after the entire program is finished executing.
-  auto *Printer = M.getOrInsertFunction("lt_RUNTIME_print", VoidTy);
-  appendToGlobalDtors(M, llvm::cast<Function>(Printer), 0);
+  auto *ResPrintFunc = M.getOrInsertFunction("lt_RUNTIME_print", VoidTy);
+  appendToGlobalDtors(M, llvm::cast<Function>(ResPrintFunc), 0);
 
   for (auto F : ToCount) {
     // We only want to instrument internally defined functions.
@@ -158,16 +158,19 @@ bool DynamicCallCounter::runOnModule(Module &M) {
       continue;
     }
 
-    // Count each internal function - install a call to
-    // lt_RUNTIME_called at the beginning of each internal function.
-    installCCFunction(*F, CounterFunc);
+    // 1. Count each internal function - this is done by installing a call to
+    // lt_RUNTIME_incrCC at the beginning of each internal function.
+    installIncrCC(*F, IncrCC);
 
-    // Count each external function - loop over all instructions in
+    // 2. Count each external function - loop over all instructions in
     // this function and for each function call insert a call to
-    // lt_RUNTIME_called just before the call-site instruction.
+    // lt_RUNTIME_incrCC just before the call-site instruction.
     for (auto &BB : *F) {
       for (auto &I : BB) {
-        installCCInstruction(CallSite(&I), CounterFunc);
+        // As per the comments in CallSite.h (more specifically, comments for
+        // the base class CallSiteBase), CallSite constructor creates a valid
+        // call-site or NULL for something which is NOT a call site.
+        installCCInstruction(CallSite(&I), IncrCC);
       }
     }
   }
@@ -175,33 +178,50 @@ bool DynamicCallCounter::runOnModule(Module &M) {
   return true;
 }
 
-void DynamicCallCounter::installCCFunction(Function &F, Value *Counter) {
+void DynamicCallCounter::installIncrCC(Function &F, Value *IncrCC) {
+  // IRBuilder provides a uniform API for creating instructions and inserting
+  // them into a basic blocks. Here the insertion iterator is the first
+  // instruction in the F's entry basic block that is suitable for inserting a
+  // non-PHI instruction.
   IRBuilder<> builder(&*F.getEntryBlock().getFirstInsertionPt());
-  builder.CreateCall(Counter, builder.getInt64(IDs[&F]));
+
+  // Calls "lt_RUNTIME_called" (IncrCC) with the ID of F (this basically
+  // increments the number of calls to F by 1).
+  builder.CreateCall(IncrCC, builder.getInt64(IDs[&F]));
 }
 
-void DynamicCallCounter::installCCInstruction(CallSite CS, Value *Counter) {
-  // Check whether the instruction is actually a call
+void DynamicCallCounter::installCCInstruction(CallSite CS, Value *IncrCC) {
+  // STEP 1 - Make sure that this function/call-site should be counted
+  // 1.1 Check whether the instruction is actually a call (CallSite constructor
+  // would have return nullptr for non-call-site).
   if (nullptr == CS.getInstruction()) {
     return;
   }
 
-  // Check whether the called function is directly invoked
-  auto Called = dyn_cast<Function>(CS.getCalledValue()->stripPointerCasts());
-  if (nullptr == Called) {
+  // 1.2 Check whether the called function is directly invoked
+  auto CalledFunc = dyn_cast<Function>(CS.getCalledValue()->stripPointerCasts());
+  if (nullptr == CalledFunc) {
     return;
   }
 
-  // Check if the function is internal or blacklisted.
-  // (A function is blacklisted if it wasn't present in the module at the point
-  // of creating the ids map, i.e. the functions from the run-time library).
-  if ((Internal.count(Called) > 0) || (0 == IDs.count(Called))) {
-    // Internal functions are counted upon the entry of each function body.
-    // Blacklisted functions are not counted. Neither should proceed.
+  // 1.3 Internal functions are counted upon the entry of each function body (i.e.
+  // are dealt with in installIncrCC).
+  if (!(0 == InternalFuncs.count(CalledFunc))) {
     return;
   }
 
-  // External functions are counted at their invocation sites.
+  // 1.4 Functions from DynamicCallCounterRT (i.e. the instrumentation routines)
+  // won't be present in the IDs for this module and should be skipped.
+  if (0 == IDs.count(CalledFunc)) {
+    return;
+  }
+
+  // STEP 2 - Yes, we want to count this. Instrument accordingly.
   IRBuilder<> Builder(CS.getInstruction());
-  Builder.CreateCall(Counter, Builder.getInt64(IDs[Called]));
+  Builder.CreateCall(IncrCC, Builder.getInt64(IDs[CalledFunc]));
 }
+
+//-----------------------------------------------------------------------------
+// Legacy PM Registration
+//-----------------------------------------------------------------------------
+char DynamicCallCounter::ID = 0;

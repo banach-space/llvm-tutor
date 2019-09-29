@@ -86,7 +86,7 @@ int main(int Argc, char **Argv) {
                               "Counts the number of static function "
                               "calls in the input IR file\n");
 
-  // Makes shure llvm_shutdown() is called (which cleans up LLVM objects)
+  // Makes sure llvm_shutdown() is called (which cleans up LLVM objects)
   //  http://llvm.org/docs/ProgrammersManual.html#ending-execution-with-llvm-shutdown
   llvm_shutdown_obj SDO;
 
