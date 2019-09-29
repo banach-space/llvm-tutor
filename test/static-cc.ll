@@ -1,4 +1,4 @@
-; RUN: clang -c -emit-llvm %S/../inputs/input_for_cc.c -o - \
+; RUN: %clang -c -emit-llvm %S/../inputs/input_for_cc.c -o - \
 ; RUN:   | opt -load ../lib/libStaticCallCounter%shlibext --legacy-static-cc -analyze \
 ; RUN:   | FileCheck %s
 

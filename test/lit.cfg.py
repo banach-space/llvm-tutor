@@ -2,13 +2,17 @@
 
 # Configuration file for the 'lit' test runner.
 
+import platform
+
 import lit.util
 import lit.formats
+# Global instance of LLVMConfig provided by lit
 from lit.llvm import llvm_config
 from lit.llvm.subst import FindTool
 from lit.llvm.subst import ToolSubst
 
 # name: The name of this test suite.
+# (config is an instance of TestingConfig created when discovering tests)
 config.name = 'LLVM-TUTOR'
 
 # testFormat: The test format to use to interpret tests.
@@ -28,6 +32,25 @@ config.test_source_root = os.path.dirname(__file__)
 
 llvm_config.use_default_substitutions()
 
-tools = ["opt", "not", "FileCheck"]
+# On Mac OS, 'clang' installed via HomeBrew (or build from sources) won't know
+# where to look for standard headers (e.g. 'stdlib.h'). This is a workaround.
+if platform.system() == 'Darwin':
+    tool_substitutions = [
+        ToolSubst('%clang', "clang",
+            extra_args=["-isysroot",
+                "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"]),
+    ]
+else:
+    tool_substitutions = [
+        ToolSubst('%clang', "clang",
+            )]
+llvm_config.add_tool_substitutions(tool_substitutions)
+
+# The list of tools required for testing - prepend them with the path specified
+# during configuration (i.e. LT_LIT_TOOLS_DIR).
+tools = ["opt", "not", "FileCheck", "clang"]
 llvm_config.add_tool_substitutions(tools, config.llvm_tools_dir)
+
+# The extension for shared libraries depends on the platform - this takes care of
+# it.
 config.substitutions.append(('%shlibext', config.llvm_shlib_ext))

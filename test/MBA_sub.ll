@@ -1,7 +1,7 @@
-; RUN: clang -S -emit-llvm %S/../inputs/input_for_mba_sub.c -o - \
+; RUN: %clang -S -emit-llvm %S/../inputs/input_for_mba_sub.c -o - \
 ; RUN:  | opt -load ../lib/libMBASub%shlibext -legacy-mba-sub -S \
 ; RUN:  | FileCheck %s
-; RUN: clang -S -emit-llvm %S/../inputs/input_for_mba_sub.c -o - \
+; RUN: %clang -S -emit-llvm %S/../inputs/input_for_mba_sub.c -o - \
 ; RUN:  | opt -load-pass-plugin=../lib/libMBASub%shlibext -passes="mba-sub" -S \
 ; RUN:  | FileCheck %s
 

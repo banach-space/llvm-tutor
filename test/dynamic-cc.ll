@@ -1,4 +1,4 @@
-; RUN: clang -c -emit-llvm %S/../inputs/input_for_cc.c -o %t
+; RUN: %clang -c -emit-llvm %S/../inputs/input_for_cc.c -o %t
 ; RUN: ../bin/dynamic %t -o %instrumented.bin
 ; RUN: ./%instrumented.bin | FileCheck %s
 

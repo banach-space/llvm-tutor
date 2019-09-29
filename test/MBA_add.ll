@@ -1,7 +1,7 @@
-; RUN: clang -S -O1 -emit-llvm %S/../inputs/input_for_mba.c -o - \
+; RUN: %clang -S -O1 -emit-llvm %S/../inputs/input_for_mba.c -o - \
 ; RUN:  | opt -load ../lib/libMBAAdd%shlibext -legacy-mba-add -S \
 ; RUN:  | FileCheck %s
-; RUN: clang -S -O1 -emit-llvm %S/../inputs/input_for_mba.c -o - \
+; RUN: %clang -S -O1 -emit-llvm %S/../inputs/input_for_mba.c -o - \
 ; RUN:  | opt -load-pass-plugin=../lib/libMBAAdd%shlibext -passes="mba-add" -S \
 ; RUN:  | FileCheck %s
 

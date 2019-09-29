@@ -1,6 +1,6 @@
-; RUN: clang -S -emit-llvm %S/../inputs/input_for_mba.c -o - \
+; RUN: %clang -S -emit-llvm %S/../inputs/input_for_mba.c -o - \
 ; RUN:   | opt -load ../lib/libRIV%shlibext -load ../lib/libDuplicateBB%shlibext -duplicate-bb -S -o %instrumented2.ll
-; RUN: clang %instrumented2.ll -o %instrumented2.bin
+; RUN: %clang %instrumented2.ll -o %instrumented2.bin
 
 ; The program implemented in input_for_mba.c takes for inputs and adds them up,
 ; and returns the result. So if they add up to 0, then ; the binary returns `0`
