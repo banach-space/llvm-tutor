@@ -1,5 +1,3 @@
-@LIT_SITE_CFG_IN_HEADER@
-
 import sys
 
 config.llvm_tools_dir = "@LT_LIT_TOOLS_DIR@"
