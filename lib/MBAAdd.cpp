@@ -102,27 +102,34 @@ bool MBAAdd::runOnBasicBlock(BasicBlock &BB) {
     auto Val2 = ConstantInt::get(BinOp->getType(), 2);
     auto Val111 = ConstantInt::get(BinOp->getType(), 111);
 
-    // Create an instruction representing `(((a ^ b) + 2 * (a & b)) * 39 + 23) *
+    // Build an instruction representing `(((a ^ b) + 2 * (a & b)) * 39 + 23) *
     // 151 + 111`
-    // FIXME: Could this be done less ugly?
     Instruction *NewInst =
-        // E = e2 * 151 + 111
+        // E = e5 + 111
         BinaryOperator::CreateAdd(
+            Val111,
+            // e5 = e4 * 151
             Builder.CreateMul(
-                // e2 = e1 * 39 + 23
+                Val151,
+                // e4 = e2 + 23
                 Builder.CreateAdd(
+                    Val23,
+                    // e3 = e2 * 39
                     Builder.CreateMul(
-                        // e1 = (a ^ b) + 2 * (a & b)
+                        Val39,
+                        // e2 = e0 + e1
                         Builder.CreateAdd(
+                            // e0 = a ^ b
                             Builder.CreateXor(BinOp->getOperand(0),
                                               BinOp->getOperand(1)),
+                            // e1 = 2 * (a & b)
                             Builder.CreateMul(
                                 Val2, Builder.CreateAnd(BinOp->getOperand(0),
-                                                        BinOp->getOperand(1)))),
-                        Val39),
-                    Val23),
-                Val151),
-            Val111);
+                                                        BinOp->getOperand(1))))
+                    ) // e3 = e2 * 39
+                ) // e4 = e2 + 23
+            ) // e5 = e4 * 151
+        ); // E = e5 + 111
 
     // The following is visible only if you pass -debug on the command line
     // *and* you have an assert build.
