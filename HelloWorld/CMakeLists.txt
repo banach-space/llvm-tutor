@@ -22,13 +22,8 @@ find_package(LLVM REQUIRED CONFIG)
 list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
 include(AddLLVM)
 
-# TODO Remove once LLVM moves to C++14
-option(LLVM_ENABLE_CXX1Y  "Enable C++14" ON)
-
 # Now set the LLVM header and library paths:
 include_directories(${LLVM_INCLUDE_DIRS})
-link_directories(${LLVM_LIBRARY_DIRS})
-add_definitions(${LLVM_DEFINITIONS})
 
 # Registration with any of the existing pipelines causes 'opt' to seg-fault
 # when building against LLVM installed via HomeBrew. Similar issue is discussed
