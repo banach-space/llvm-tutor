@@ -38,7 +38,8 @@ if platform.system() == 'Darwin':
     tool_substitutions = [
         ToolSubst('%clang', "clang",
             extra_args=["-isysroot",
-                "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk"]),
+                # http://lists.llvm.org/pipermail/cfe-dev/2016-July/049868.html
+                "`xcrun --show-sdk-path`"]),
     ]
 else:
     tool_substitutions = [
