@@ -40,7 +40,6 @@
 
 using namespace llvm;
 
-
 //------------------------------------------------------------------------------
 // Helper functions
 //------------------------------------------------------------------------------
@@ -99,20 +98,20 @@ static void createGlobalFunctionTable(Module &M, uint64_t NumFunctions) {
   auto *Int64Ty = Type::getInt64Ty(CTX);
   auto *StringTy = Type::getInt8PtrTy(CTX);
   Type *FieldTys[] = {StringTy, Int64Ty};
-  auto *structTy = StructType::get(CTX, FieldTys, false);
+  auto *StructTy = StructType::get(CTX, FieldTys, false);
 
   // 2. Create and initialize a table of function information
   std::vector<Constant *> FunctionInfo;
   auto *Zero = ConstantInt::get(Int64Ty, 0, false);
   std::transform(
       M.begin(), M.end(), std::back_inserter(FunctionInfo),
-      [&M, Zero, structTy](auto &f) {
-        Constant *StructFields[] = {createConstantString(M, f.getName()), Zero};
-        return ConstantStruct::get(structTy, StructFields);
+      [&M, Zero, StructTy](auto &F) {
+        Constant *StructFields[] = {createConstantString(M, F.getName()), Zero};
+        return ConstantStruct::get(StructTy, StructFields);
       });
 
   // 3. Inject the table into the module as a global var
-  auto *TableTy = ArrayType::get(structTy, NumFunctions);
+  auto *TableTy = ArrayType::get(StructTy, NumFunctions);
   auto *FunctionTable = ConstantArray::get(TableTy, FunctionInfo);
   new GlobalVariable(M, TableTy, false, GlobalValue::ExternalLinkage,
                      FunctionTable, "lt_RUNTIME_functionInfo");
@@ -152,7 +151,7 @@ bool DynamicCallCounter::runOnModule(Module &M) {
   // the counts after the entire program is finished executing.
   auto *ResPrintFunc =
       M.getOrInsertFunction("lt_RUNTIME_print", VoidTy).getCallee();
-  appendToGlobalDtors(M, llvm::cast<Function>(ResPrintFunc), 0);
+  appendToGlobalDtors(M, llvm::cast<Function>(ResPrintFunc), /*Priority=*/0);
 
   for (auto F : ToCount) {
     // We only want to instrument internally defined functions.
@@ -185,11 +184,11 @@ void DynamicCallCounter::installIncrCC(Function &F, Value *IncrCC) {
   // them into a basic blocks. Here the insertion iterator is the first
   // instruction in the F's entry basic block that is suitable for inserting a
   // non-PHI instruction.
-  IRBuilder<> builder(&*F.getEntryBlock().getFirstInsertionPt());
+  IRBuilder<> Builder(&*F.getEntryBlock().getFirstInsertionPt());
 
   // Calls "lt_RUNTIME_called" (IncrCC) with the ID of F (this basically
   // increments the number of calls to F by 1).
-  builder.CreateCall(IncrCC, builder.getInt64(IDs[&F]));
+  Builder.CreateCall(IncrCC, Builder.getInt64(IDs[&F]));
 }
 
 void DynamicCallCounter::installCCInstruction(CallSite CS, Value *IncrCC) {

@@ -202,8 +202,7 @@ static void link(StringRef InObjFile, StringRef OutObjFile) {
       } errs() << "\n";);
 
   // Run the linker (via clang++)
-  if (0 !=
-      ExecuteAndWait(ClangExecutable.get(), LinkerArgsStrRef, None, {}, 0, 0)) {
+  if (0 != ExecuteAndWait(ClangExecutable.get(), LinkerArgsStrRef)) {
     report_fatal_error("Unable to link output file");
   }
 }
