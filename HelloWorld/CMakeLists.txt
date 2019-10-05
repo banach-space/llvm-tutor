@@ -18,11 +18,7 @@ list(APPEND CMAKE_PREFIX_PATH "${LT_LLVM_CMAKE_CONFIG_DIR}")
 #===============================================================================
 find_package(LLVM REQUIRED CONFIG)
 
-# Incorporate the CMake features provided by LLVM:
-list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
-include(AddLLVM)
-
-# Now set the LLVM header and library paths:
+# HelloWorld includes headers from LLVM - update the include path accordingly
 include_directories(${LLVM_INCLUDE_DIRS})
 
 # Registration with any of the existing pipelines causes 'opt' to seg-fault

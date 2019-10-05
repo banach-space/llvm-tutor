@@ -91,7 +91,6 @@ message(STATUS "Using LLVMConfig.cmake in: ${LT_LLVM_INSTALL_DIR}")
 
 # Incorporate the CMake features provided by LLVM:
 list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
-include(AddLLVM)
 
 option(LLVM_INCLUDE_TOOLS "Generate build targets for the LLVM tools." ON)
 option(LLVM_BUILD_TOOLS "Build the LLVM tools. If OFF, just generate build targets." ON)
