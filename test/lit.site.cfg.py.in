@@ -4,6 +4,7 @@ config.llvm_tools_dir = "@LT_LIT_TOOLS_DIR@"
 config.llvm_shlib_ext = "@SHLIBEXT@"
 
 import lit.llvm
+# lit_config is a global instance of LitConfig
 lit.llvm.initialize(lit_config, config)
 
 # test_exec_root: The root path where tests should be run.

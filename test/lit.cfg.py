@@ -4,11 +4,9 @@
 
 import platform
 
-import lit.util
 import lit.formats
 # Global instance of LLVMConfig provided by lit
 from lit.llvm import llvm_config
-from lit.llvm.subst import FindTool
 from lit.llvm.subst import ToolSubst
 
 # name: The name of this test suite.
@@ -30,21 +28,20 @@ config.suffixes = ['.ll', '.c']
 # test_source_root: The root path where tests are located.
 config.test_source_root = os.path.dirname(__file__)
 
-llvm_config.use_default_substitutions()
-
 # On Mac OS, 'clang' installed via HomeBrew (or build from sources) won't know
 # where to look for standard headers (e.g. 'stdlib.h'). This is a workaround.
 if platform.system() == 'Darwin':
     tool_substitutions = [
         ToolSubst('%clang', "clang",
-            extra_args=["-isysroot",
-                # http://lists.llvm.org/pipermail/cfe-dev/2016-July/049868.html
-                "`xcrun --show-sdk-path`"]),
+                  extra_args=["-isysroot",
+                              # http://lists.llvm.org/pipermail/cfe-dev/2016-July/049868.html
+                              "`xcrun --show-sdk-path`"]),
     ]
 else:
     tool_substitutions = [
         ToolSubst('%clang', "clang",
-            )]
+                 )
+    ]
 llvm_config.add_tool_substitutions(tool_substitutions)
 
 # The list of tools required for testing - prepend them with the path specified
