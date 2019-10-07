@@ -37,7 +37,7 @@ void lt_RUNTIME_print() {
   printf("-------------------------------------------------\n");
   for (size_t id = 0; id < lt_RUNTIME_numFunctions; ++id) {
     auto &info = lt_RUNTIME_functionInfo[id];
-    printf("%-20s %-10lu\n", info.name, info.count);
+    printf("%-20s %-10llu\n", info.name, info.count);
   }
   printf("-------------------------------------------------\n");
 }
