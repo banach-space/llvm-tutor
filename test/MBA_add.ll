@@ -1,12 +1,16 @@
-; RUN: %clang -S -O1 -emit-llvm %S/../inputs/input_for_mba.c -o - \
-; RUN:  | opt -load ../lib/libMBAAdd%shlibext -legacy-mba-add -S \
+; RUN: opt -load ../lib/libMBAAdd%shlibext -legacy-mba-add -S %s \
 ; RUN:  | FileCheck %s
-; RUN: %clang -S -O1 -emit-llvm %S/../inputs/input_for_mba.c -o - \
-; RUN:  | opt -load-pass-plugin=../lib/libMBAAdd%shlibext -passes="mba-add" -S \
+; RUN: opt -load-pass-plugin=../lib/libMBAAdd%shlibext -passes="mba-add" -S %s \
 ; RUN:  | FileCheck %s
 
-; The input file contains 3 additions. Verify that these are correctly
-; replaced as follows:
+define signext i8 @foo(i8 signext, i8 signext, i8 signext, i8 signext) {
+  %5 = add i8 %1, %0
+  %6 = add i8 %5, %2
+  %7 = add i8 %6, %3
+  ret i8 %7
+}
+
+; Verify that the additions in foo are correctly ; substituted with:
 ;    a + b == (((a ^ b) + 2 * (a & b)) * 39 + 23) * 151 + 111
 
 ; CHECK-LABEL: @foo
@@ -48,5 +52,3 @@
 ; CHECK-NOT:   and
 ; CHECK-NOT:   mul
 ; CHECK-NOT:   add
-
-; CHECK-LABEL: @main
