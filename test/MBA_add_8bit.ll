@@ -10,11 +10,11 @@ define signext i8 @foo(i8 signext, i8 signext, i8 signext, i8 signext) {
   ret i8 %7
 }
 
-; Verify that the additions in foo are correctly ; substituted with:
+; Verify that the additions in foo are correctly substituted with:
 ;    a + b == (((a ^ b) + 2 * (a & b)) * 39 + 23) * 151 + 111
 
 ; CHECK-LABEL: @foo
-; 1st substitution
+; 1st addition
 ; CHECK-DAG:   {{%[0-9]+}} = xor i8 {{%[0-9]+}}, {{%[0-9]+}}
 ; CHECK-DAG:   {{%[0-9]+}} = and i8 {{%[0-9]+}}, {{%[0-9]+}}
 ; CHECK-DAG:   {{%[0-9]+}} = mul i8 2, {{%[0-9]+}}
