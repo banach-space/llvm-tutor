@@ -16,7 +16,7 @@ list(APPEND CMAKE_PREFIX_PATH "${LT_LLVM_CMAKE_CONFIG_DIR}")
 #===============================================================================
 # 2. LLVM-CONFIGURATION
 #===============================================================================
-find_package(LLVM REQUIRED CONFIG)
+find_package(LLVM 9.0.0 REQUIRED CONFIG)
 
 # HelloWorld includes headers from LLVM - update the include path accordingly
 include_directories(${LLVM_INCLUDE_DIRS})

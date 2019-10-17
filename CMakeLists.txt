@@ -85,7 +85,7 @@ endif()
 # 2. LLVM-CONFIGURATION
 # As per: http://llvm.org/docs/CMake.html#embedding-llvm-in-your-project
 #===============================================================================
-find_package(LLVM REQUIRED CONFIG)
+find_package(LLVM 9.0.0 REQUIRED CONFIG)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LT_LLVM_INSTALL_DIR}")
 
