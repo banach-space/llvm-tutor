@@ -229,7 +229,7 @@ formula. The corresponding LIT tests verify that both the formula  and that the
 implementation are correct. You can run this pass as follows:
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/9>
-$LLVM_DIR/bin/clang -emit-llvm -S inputs/input_for_sub.c -o input_for_sub.ll
+$LLVM_DIR/bin/clang -emit-llvm -S inputs/input_for_mba_sub.c -o input_for_sub.ll
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libMBASub.so -mba-sub inputs/input_for_sub.ll -o out.ll
 ```
 
