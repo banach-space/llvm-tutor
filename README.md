@@ -16,23 +16,25 @@ implementation and the LIT tests verify that each pass works as expected. This
 document explains how to get started.
 
 ### Table of Contents
-[HelloWorld](#helloworld) **::**
-[Development Environment](#development-environment) **::**
-[Build Instructions](#build-instructions) **::**
-[Passes](#passes) **::**
-[Testing](#testing) **::**
-[Credits & References](#credits) **::**
-[License](#license)
+* [HelloWorld](#helloworld)
+* [Development Environment](#development-environment)
+* [Building & Testing](#building--testing)
+* [Overview Of The Passes](#overview-of-the-passes)
+* [Debugging](#debugging)
+* [Credits & References](#credits)
+* [License](#license)
 
 
 HelloWorld
------------------------------
+==========
 The **HelloWorld** pass from
 [HelloWorld.cpp](https://github.com/banach-space/llvm-tutor/blob/master/HelloWorld/HelloWorld.cpp)
-is a basic, self-contained reference example. The corresponding
+is a self-contained *reference example*. The corresponding
 [CMakeLists.txt](https://github.com/banach-space/llvm-tutor/blob/master/HelloWorld/CMakeLists.txt)
-implements the minimum set-up for an out-of-source pass. You can build
-**HelloWorld** like this:
+implements the minimum set-up for an out-of-source pass.
+
+For each function in a module, **HelloWord** prints its name and the number of
+arguments that it takes. You can build it like this:
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/9>
 mkdir build
@@ -59,8 +61,8 @@ The **HelloWorld** pass doesn't modify the input module. The `-disable-output`
 flag is used to prevent **opt** from printing the output bitcode file.
 
 Development Environment
------------------------
-### Platform Support And Requirements
+=======================
+## Platform Support And Requirements
 This project has been tested on **Linux 18.04** and **Mac OS X 10.14.4**. In
 order to build **llvm-tutor** you will need:
   * LLVM 9
@@ -78,7 +80,7 @@ installing LLVM-9):
   * [**FileCheck**](https://llvm.org/docs/CommandGuide/lit.html) (LIT
     requirement, it's used to check whether tests generate the expected output)
 
-### Installing LLVM-9 on Mac OS X
+## Installing LLVM-9 on Mac OS X
 On Darwin you can install LLVM 9 with [Homebrew](https://brew.sh/):
 ```bash
 brew install llvm@9
@@ -86,7 +88,7 @@ brew install llvm@9
 This will install all the required header files, libraries and tools in
 `/usr/local/opt/llvm/`.
 
-### Installing LLVM-9 on Ubuntu
+## Installing LLVM-9 on Ubuntu
 On Ubuntu Bionic, you can [install modern
 LLVM](https://blog.kowalczyk.info/article/k/how-to-install-latest-clang-6.0-on-ubuntu-16.04-xenial-wsl.html)
 from the official [repository](http://apt.llvm.org/):
@@ -99,7 +101,7 @@ sudo apt-get install -y llvm-9 llvm-9-dev clang-9 llvm-9-tools
 This will install all the required header files, libraries and tools in
 `/usr/lib/llvm-9/`.
 
-### Building LLVM-9 From Sources
+## Building LLVM-9 From Sources
 Building from sources can be slow and tricky to debug. It is not necessary, but
 might be your preferred way of obtaining LLVM-9. The following steps will work
 on Linux and Mac OS X:
@@ -115,8 +117,8 @@ cmake --build .
 For more details read the [official
 documentation](https://llvm.org/docs/CMake.html).
 
-Building llvm-tutor
--------------------
+Building & Testing
+===================
 You can build **llvm-tutor** (and all the provided passes) as follows:
 ```bash
 cd <build/dir>
@@ -129,18 +131,20 @@ installation or build directory of LLVM 9. It is used to locate the
 corresponding `LLVMConfig.cmake` script that is used to set the include and
 library paths.
 
-In order to run the tests, you need to install **llvm-lit** (aka **lit**) (it's
-not bundled with LLVM 9 packages). The easiest way is to use **pip**:
+In order to run the tests, you need to install **llvm-lit** (aka **lit**). It's
+not bundled with LLVM 9 packages, but you can install it with **pip**:
 ```bash
 # Install lit - note that this installs lit globally
 pip install lit
-# Run the tests
+```
+Running the tests is as simple as:
+```bash
 $ lit <build_dir>/test
 ```
 Voilà! You should see all tests passing.
 
-Passes
-------
+Overview of The Passes
+======================
    * [**HelloWorld**](#helloworld) - prints the functions in
      the input module and prints the number of arguments for each
    * [**StaticCallCounter**](#count-compile-time-function-calls-staticcallcounter) - counts
@@ -174,7 +178,7 @@ It doesn't matter whether you choose the textual or binary form, but obviously
 the former is more human-friendly. All passes, except for
 [HelloWorld](#helloworld), are described below.
 
-### Count Compile Time Function Calls (**StaticCallCounter**)
+## Count Compile Time Function Calls (**StaticCallCounter**)
 `StaticCallCounter` will count the number of function calls in the input
 LLVM file that are visible during the compilation (i.e. if a function is
 called within a loop, that counts as one call). Only direct function calls are
@@ -192,7 +196,7 @@ The `static` executable is a command line wrapper that allows you to run
 <build_dir>/bin/static input_for_cc.bc
 ```
 
-### Count Run-Time Function Calls (**DynamicCallCounter**)
+## Count Run-Time Function Calls (**DynamicCallCounter**)
 `DynamicCallCounter` will count the number of run-time function calls. It does
 so by instrumenting the input LLVM file - it injects call-counting code that is
 executed every time a function is called.
@@ -211,7 +215,7 @@ $LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/test/input_for_cc.c -o input_for
 ./instrumented_bin
 ```
 
-### Mixed Boolean Arithmetic Transformations
+## Mixed Boolean Arithmetic Transformations
 These passes implement [mixed
 boolean arithmetic](https://tel.archives-ouvertes.fr/tel-01623849/document)
 transformations. Similar transformation are often used in code obfuscation (you
@@ -219,7 +223,7 @@ may also know them from [Hacker's
 Delight](https://www.amazon.co.uk/Hackers-Delight-Henry-S-Warren/dp/0201914654))
 and are a great illustration of what and how LLVM passes can be used for.
 
-#### **MBASub**
+### **MBASub**
 The **MBASub** pass implements this rather basic expression:
 ```
 a - b == (a + ~b) + 1
@@ -233,7 +237,7 @@ $LLVM_DIR/bin/clang -emit-llvm -S inputs/input_for_mba_sub.c -o input_for_sub.ll
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libMBASub.so -mba-sub inputs/input_for_sub.ll -o out.ll
 ```
 
-#### **MBAAdd**
+### **MBAAdd**
 The **MBAAdd** pass implements a slightly more involved formula that is only
 valid for 8 bit integers:
 ```
@@ -244,7 +248,7 @@ the above identity, but only for 8-bit integers. The LIT tests verify that both
 the formula and the implementation are correct. You can run **MBAAdd** like this:
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/9>
-$LLVM_DIR/bin/clang -emit-llvm -S inputs/input_for_mba.c -o input_for_mba.ll
+$LLVM_DIR/bin/clang -O1 -emit-llvm -S inputs/input_for_mba.c -o input_for_mba.ll
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libMBAAdd.so -mba-add inputs/input_for_mba.ll -o out.ll
 ```
 You can also specify the level of _obfuscation_ on a scale of `0.0` to `1.0`, with
@@ -254,7 +258,7 @@ are to be replaced with `(((a ^ b) + 2 * (a & b)) * 39 + 23) * 151 + 111`, e.g.:
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libMBAAdd.so -mba-add -mba-ratio=0.3 inputs/input_for_mba.c -o out.ll
 ```
 
-### Reachable Integer Values (**RIV**)
+## Reachable Integer Values (**RIV**)
 For each basic block in a module, **RIV** calculates the reachable integer
 values (i.e.  values that can be used in the particular basic block).  There
 are a few LIT tests that verify that indeed this is correct. You can run this
@@ -268,7 +272,7 @@ Note that this pass, unlike previous passes, will produce information
 only about the IR representation of the original module. It won't be very
 useful if trying to understand the original C or C++ input file.
 
-### Duplicate Basic Blocks (**DuplicateBB**)
+## Duplicate Basic Blocks (**DuplicateBB**)
 This pass will duplicate all basic blocks in a module, with the exception of
 basic blocks for which there are no reachable integer values (identified
 through the **RIV** pass). An example of such a basic block is the entry block
@@ -287,8 +291,71 @@ cloning all the instructions (with the exception of [PHI
 nodes](https://en.wikipedia.org/wiki/Static_single_assignment_form)) into the
 new blocks.
 
+Debugging
+==========
+Before running a debugger, you may want to analyze the output from
+[LLVM_DEBUG](http://llvm.org/docs/ProgrammersManual.html#the-llvm-debug-macro-and-debug-option)
+and
+[STATISTIC](http://llvm.org/docs/ProgrammersManual.html#the-statistic-class-stats-option)
+macros. For example, for **MBAAdd**:
+```bash
+export LLVM_DIR=<installation/dir/of/llvm/9>
+$LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_mba.c -o input_for_mba.ll
+$LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libMBAAdd.dylib -passes=mba-add input_for_mba.ll -debug-only=mba-add -stats -o out.ll
+```
+Note the `-debug-only=mba-add` and `-stats` flags in the command line - that's
+what enables the following output:
+```bash
+  %12 = add i8 %1, %0 ->   <badref> = add i8 111, %11
+  %20 = add i8 %12, %2 ->   <badref> = add i8 111, %19
+  %28 = add i8 %20, %3 ->   <badref> = add i8 111, %27
+===-------------------------------------------------------------------------===
+                          ... Statistics Collected ...
+===-------------------------------------------------------------------------===
+
+3 mba-add - The # of substituted instructions
+```
+As you can see, you get a nice summary from **MBAAdd**. In many cases this will
+be sufficient to understand what might be going wrong.
+
+For tricker issues just use a debugger. Below I demonstrate how to debug
+[**MBAAdd**](#mbaadd). More specifically, how to set up a breakpoint on entry
+to `MBAAdd::run`. Hopefully that will be sufficient for you to start.
+
+## Mac OS X
+The default debugger on OS X is [LLDB](http://lldb.llvm.org). You will
+normally use it like this:
+```bash
+export LLVM_DIR=<installation/dir/of/llvm/9>
+$LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_mba.c -o input_for_mba.ll
+lldb -- $LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libMBAAdd.dylib -passes=mba-add input_for_mba.ll -o out.ll
+(lldb) breakpoint set --name MBAAdd::run
+(lldb) process launch
+```
+or, equivalently, by using LLDBs aliases:
+```bash
+export LLVM_DIR=<installation/dir/of/llvm/9>
+$LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_mba.c -o input_for_mba.ll
+lldb -- $LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libMBAAdd.dylib -passes=mba-add input_for_mba.ll -o out.ll
+(lldb) b MBAAdd::run
+(lldb) r
+```
+At this point, LLDB should break at the entry to `MBAAdd::run`.
+
+## Ubuntu
+On most Linux systems, [GDB](https://www.gnu.org/software/gdb/) is the most
+popular debugger. A typical session will look like this:
+```bash
+export LLVM_DIR=<installation/dir/of/llvm/9>
+$LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_mba.c -o input_for_mba.ll
+gdb --args $LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libMBAAdd.so -passes=mba-add input_for_mba.ll -o out.ll
+(gdb) b MBAAdd.cpp:MBAAdd::run
+(gdb) r
+```
+At this point, GDB should break at the entry to `MBAAdd::run`.
+
 Credits
--------
+========
 This is first and foremost a community effort. This project wouldn't be
 possible without the amazing LLVM [online
 documentation](http://llvm.org/docs/), the plethora of great comments in the
@@ -312,7 +379,7 @@ release of LLVM's API and have been refactored and documented to reflect what
 **I** (aka. banach-space) found most challenging while studying them.
 
 License
---------
+========
 The MIT License (MIT)
 
 Copyright (c) 2019 Andrzej Warzyński
