@@ -4,6 +4,7 @@ language: cpp
 # developed
 addons:
   apt:
+    update: true
     sources:
       - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-9 main'
         key_url: 'http://apt.llvm.org/llvm-snapshot.gpg.key'
@@ -69,4 +70,4 @@ script:
   - cd build
   - cmake -DLT_LEGACY_SKIP_PIPELINE_REGISTRATION=On -DLT_LLVM_INSTALL_DIR="$LLVM_DIR" -DLT_LIT_TOOLS_DIR="$LLVM_TOOLCHAIN"  ../
   - make -j4
-  - ${LIT_PATH}/lit -va test/
+  - ${LIT_PATH}/lit test/
