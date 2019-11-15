@@ -186,7 +186,7 @@ considered (TODO: Expand).
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/9>
 # Generate an LLVM file to analyze
-$LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/test/input_for_cc.c -o input_for_cc.bc
+$LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
 # Run the pass through opt
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libStaticCallCounter.dylib -static-cc -analyze input_for_cc.bc
 ```
@@ -208,7 +208,7 @@ it with one of the provided examples, e.g.:
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/9>
 # Generate an LLVM file to analyze
-$LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/test/input_for_cc.c -o input_for_cc.bc
+$LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
 # Instrument the input file first
 <build_dir>/bin/dynamic  -dynamic  input_for_cc.bc -o instrumented_bin
 # Now run the instrumented binary
