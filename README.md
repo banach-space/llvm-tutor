@@ -154,6 +154,8 @@ Overview of The Passes
    * [**StaticCallCounter**](#count-compile-time-function-calls-staticcallcounter) - counts
      direct function calls at compile time (only static calls, pure analysis
      pass)
+   * [**InjectFuncCall**](#inject-calls-to-printf-injectfunccall) - instruments
+     the input module by inserting calls to `printf` (instrumentation pass)
    * [**MBASub**](#mbasub) - code transformation for integer `sub`
      instructions (transformation pass, parametrisable)
    * [**MBAAdd**](#mbaadd) - code transformation for 8-bit integer `add`
@@ -175,9 +177,9 @@ $LLVM_DIR/bin/clang  -emit-llvm input.c -S -o out.ll
 # Binary/bit-code form
 $LLVM_DIR/bin/clang  -emit-llvm input.c -o out.bc
 ```
-It doesn't matter whether you choose the textual or binary form, but obviously
-the former is more human-friendly. All passes, except for
-[HelloWorld](#helloworld), are described below.
+It doesn't matter whether you choose the binary (without `-S`) or textual
+form (with `-S`), but obviously the latter is more human-friendly. All passes,
+except for [HelloWorld](#helloworld), are described below.
 
 ## Count Compile Time Function Calls (**StaticCallCounter**)
 `StaticCallCounter` will count the number of function calls in the input
@@ -196,6 +198,44 @@ The `static` executable is a command line wrapper that allows you to run
 ```bash
 <build_dir>/bin/static input_for_cc.bc
 ```
+
+## Inject Calls To Printf (**InjectFuncCall**)
+For every function defined in the input module, `InjectFuncCall` will add
+(_inject_) the following call to
+[`printf`](https://en.cppreference.com/w/cpp/io/c/fprintf):
+```C
+printf("(llvm-tutor) Hello from: %s\n(llvm-tutor)   number of arguments: %d\n", FuncName, FuncNumArgs)
+```
+This call is added at the beginning of each function (i.e. before any other
+instruction). `FuncName` is the name of the function and `FuncNumArgs` is the
+number of arguments that the function takes. You can test it as follows:
+
+```bash
+export LLVM_DIR=<installation/dir/of/llvm/9>
+# Generate an LLVM file to analyze
+$LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/inputs/input_for_inject.c -o input_for_inject.bc
+# Run the pass through opt
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libInjectFuncCall.dylib -legacy-inject-func-call input_for_inject.bc -o instrumented.bin
+$LLVM_DIR/bin/lli instrumented.bin 123
+```
+`instrumented.bin` will print the following output:
+```
+(llvm-tutor) Hello from: main
+(llvm-tutor)   number of arguments: 2
+(llvm-tutor) Hello from: foo
+(llvm-tutor)   number of arguments: 1
+(llvm-tutor) Hello from: bar
+(llvm-tutor)   number of arguments: 2
+(llvm-tutor) Hello from: foo
+(llvm-tutor)   number of arguments: 1
+(llvm-tutor) Hello from: fez
+(llvm-tutor)   number of arguments: 3
+(llvm-tutor) Hello from: bar
+(llvm-tutor)   number of arguments: 2
+(llvm-tutor) Hello from: foo
+(llvm-tutor)   number of arguments: 1
+```
+
 ## Mixed Boolean Arithmetic Transformations
 These passes implement [mixed
 boolean arithmetic](https://tel.archives-ouvertes.fr/tel-01623849/document)

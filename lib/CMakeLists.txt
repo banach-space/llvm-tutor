@@ -2,6 +2,7 @@
 # ======================================================
 set(LLVM_TUTOR_PLUGINS
     StaticCallCounter
+    InjectFuncCall
     MBAAdd
     MBASub
     RIV
@@ -10,6 +11,8 @@ set(LLVM_TUTOR_PLUGINS
 
 set(StaticCallCounter_SOURCES
   StaticCallCounter.cpp)
+set(InjectFuncCall_SOURCES
+  InjectFuncCall.cpp)
 set(MBAAdd_SOURCES
   MBAAdd.cpp
   Ratio.cpp)
