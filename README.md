@@ -353,7 +353,59 @@ examples that are great for learning and tutoring LLVM pass development. You'll
 notice that there are similar transformation and analysis passes available in
 this project. The implementations available here are based on the latest
 release of LLVM's API and have been refactored and documented to reflect what
-**I** (aka. banach-space) found most challenging while studying them.
+**I** (aka banach-space) found most challenging while studying them.
+
+I also want to thank Min-Yih Hsu for his [blog
+series](https://medium.com/@mshockwave/writing-llvm-pass-in-2018-preface-6b90fa67ae82)
+_"Writing LLVM Pass in 2018"_. It was invaluable in understanding how the new
+pass manager works and how to use it. Last, but not least I am very grateful to
+[Nick Sunmer](https://www.cs.sfu.ca/~wsumner/index.html) (e.g.
+[llvm-demo](https://github.com/nsumner/llvm-demo)) and [Mike
+Shah](http://www.mshah.io) (see Mike's Fosdem 2018
+[talk](http://www.mshah.io/fosdem18.html)) for sharing their knowledge online.
+I have learnt a great deal from it, thank you! I always look-up to those of us
+brave and bright enough to work in academia - thank you for driving the
+education and research forward!
+
+## References
+Below is a list of LLVM resources available outside the official online
+documentation that I have found very helpful. Where possible, the items are sorted by
+date.
+
+* **LLVM IR**
+  *  _”LLVM IR Tutorial-Phis,GEPs and other things, ohmy!”_, V.Bridgers, F.
+Piovezan, EuroLLVM, ([slides](https://llvm.org/devmtg/2019-04/slides/Tutorial-Bridgers-LLVM_IR_tutorial.pdf),
+  [video](https://www.youtube.com/watch?v=m8G_S5LwlTo&feature=youtu.be))
+  * _"Mapping High Level Constructs to LLVM IR"_, M. Rodler ([link](https://mapping-high-level-constructs-to-llvm-ir.readthedocs.io/en/latest/)) 
+* **Legacy vs New Pass Manager**
+  * _"New PM: taming a custom pipeline of Falcon JIT"_, F. Sergeev, EuroLLVM 2018
+    ([slides](http://llvm.org/devmtg/2018-04/slides/Sergeev-Taming%20a%20custom%20pipeline%20of%20Falcon%20JIT.pdf),
+     [video](https://www.youtube.com/watch?v=6X12D46sRFw))
+  * _"The LLVM Pass Manager Part 2"_, Ch. Carruth, LLVM Dev Meeting 2014
+    ([slides](https://llvm.org/devmtg/2014-10/Slides/Carruth-TheLLVMPassManagerPart2.pdf),
+     [video](http://web.archive.org/web/20160718071630/http://llvm.org/devmtg/2014-10/Videos/The%20LLVM%20Pass%20Manager%20Part%202-720.mov))a
+  * _”Passes in LLVM, Part 1”_, Ch. Carruth, EuroLLVM 2014 ([slides](https://llvm.org/devmtg/2014-04/PDFs/Talks/Passes.pdf), [video](https://www.youtube.com/watch?v=rY02LT08-J8))
+* **Examples in LLVM**
+  * Examples in LLVM source tree in
+    [llvm/examples/IRTransforms/](https://github.com/llvm/llvm-project/tree/bf142fc43347d8a35a71f46f7dda7e2a0a992e0d/llvm/examples/IRTransforms).
+    This was recently added in the following commit:
+
+```
+commit 7d0b1d77b3d4d47df477519fd1bf099b3df6f899
+Author: Florian Hahn <flo@fhahn.com>
+Date:   Tue Nov 12 14:06:12 2019 +0000
+
+[Examples] Add IRTransformations directory to examples.
+```
+* **LLVM Pass Development**
+  * _"Getting Started With LLVM: Basics "_, J. Paquette, F. Hahn, LLVM Dev Meeting 2019 (not yet uploaded)
+  * _"Writing an LLVM Pass: 101"_, A. Warzyński, LLVM Dev Meeting 2019 (not yet uploaded)
+  * _"Writing LLVM Pass in 2018"_, Min-Yih Hsu, [blog series](https://medium.com/@mshockwave/writing-llvm-pass-in-2018-preface-6b90fa67ae82)
+  * _"Building, Testing and Debugging a Simple out-of-tree LLVM Pass"_ Serge Guelton, Adrien Guinet, LLVM Dev Meeting 2015 ([slides](https://llvm.org/devmtg/2015-10/slides/GueltonGuinet-BuildingTestingDebuggingASimpleOutOfTreePass.pdf), [video](https://www.youtube.com/watch?v=BnlG-owSVTk&index=8&list=PL_R5A0lGi1AA4Lv2bBFSwhgDaHvvpVU21))
+* **LLVM Based Tools Development**
+  * _"Introduction to LLVM"_, M. Shah, Fosdem 2018, [link](http://www.mshah.io/fosdem18.html)
+  *  [llvm-demo](https://github.com/nsumner/llvm-demo), by N Sumner
+  * _"Building an LLVM-based tool. Lessons learned"_, A. Denisov, [blog post](https://lowlevelbits.org/building-an-llvm-based-tool.-lessons-learned/), [video](https://www.youtube.com/watch?reload=9&v=Yvj4G9B6pcU)
 
 License
 ========
