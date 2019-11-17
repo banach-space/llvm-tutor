@@ -185,7 +185,7 @@ export LLVM_DIR=<installation/dir/of/llvm/9>
 # Generate an LLVM file to analyze
 $LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
 # Run the pass through opt
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libStaticCallCounter.dylib -static-cc -analyze input_for_cc.bc
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libStaticCallCounter.dylib -legacy-static-cc -analyze input_for_cc.bc
 ```
 The `static` executable is a command line wrapper that allows you to run
 `StaticCallCounter` without the need for `opt`:
@@ -211,7 +211,7 @@ implementation are correct. You can run this pass as follows:
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/9>
 $LLVM_DIR/bin/clang -emit-llvm -S inputs/input_for_mba_sub.c -o input_for_sub.ll
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libMBASub.so -mba-sub inputs/input_for_sub.ll -o out.ll
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libMBASub.so -legacy-mba-sub inputs/input_for_sub.ll -o out.ll
 ```
 
 ### **MBAAdd**
@@ -226,13 +226,13 @@ the formula and the implementation are correct. You can run **MBAAdd** like this
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/9>
 $LLVM_DIR/bin/clang -O1 -emit-llvm -S inputs/input_for_mba.c -o input_for_mba.ll
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libMBAAdd.so -mba-add inputs/input_for_mba.ll -o out.ll
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libMBAAdd.so -legacy-mba-add inputs/input_for_mba.ll -o out.ll
 ```
 You can also specify the level of _obfuscation_ on a scale of `0.0` to `1.0`, with
 `0` corresponding to no obfuscation and `1` meaning that all `add` instructions
 are to be replaced with `(((a ^ b) + 2 * (a & b)) * 39 + 23) * 151 + 111`, e.g.:
 ```bash
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libMBAAdd.so -mba-add -mba-ratio=0.3 inputs/input_for_mba.c -o out.ll
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libMBAAdd.so -legacy-mba-add -mba-ratio=0.3 inputs/input_for_mba.c -o out.ll
 ```
 
 ## Reachable Integer Values (**RIV**)
