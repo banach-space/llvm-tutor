@@ -50,7 +50,7 @@ $LLVM_DIR/bin/clang -S -emit-llvm <source/dir/llvm/tutor/>inputs/input_for_hello
 Finally, run **HelloWorld** with [**opt**](http://llvm.org/docs/CommandGuide/opt.html):
 ```bash
 # Run the pass on the llvm file
-$LLVM_DIR/bin/opt -load-pass-plugin libHelloWorld.dylib -hello-world -disable-output input_for_hello.ll
+$LLVM_DIR/bin/opt -load-pass-plugin libHelloWorld.dylib -passes=hello-world -disable-output input_for_hello.ll
 # The expected output
 Visiting: foo (takes 1 args)
 Visiting: bar (takes 2 args)
