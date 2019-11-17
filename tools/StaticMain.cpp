@@ -16,7 +16,6 @@
 // License: MIT
 //========================================================================
 #include "StaticCallCounter.h"
-#include "config.h"
 
 #include "llvm/IRReader/IRReader.h"
 #include "llvm/Passes/PassBuilder.h"

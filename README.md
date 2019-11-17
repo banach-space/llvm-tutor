@@ -150,9 +150,6 @@ Overview of The Passes
    * [**StaticCallCounter**](#count-compile-time-function-calls-staticcallcounter) - counts
      direct function calls at compile time (only static calls, pure analysis
      pass)
-   * [**DynamicCallCounter**](#count-run-time-function-calls-dynamiccallcounter)
-     \- counts direct function calls at run-time ( analysis + instrumentation
-       pass)
    * [**MBASub**](#mbasub) - code transformation for integer `sub`
      instructions (transformation pass, parametrisable)
    * [**MBAAdd**](#mbaadd) - code transformation for 8-bit integer `add`
@@ -195,26 +192,6 @@ The `static` executable is a command line wrapper that allows you to run
 ```bash
 <build_dir>/bin/static input_for_cc.bc
 ```
-
-## Count Run-Time Function Calls (**DynamicCallCounter**)
-`DynamicCallCounter` will count the number of run-time function calls. It does
-so by instrumenting the input LLVM file - it injects call-counting code that is
-executed every time a function is called.
-
-Although the primary goal of this pass is to _analyse_ function calls, it also
-modifies the input file. Therefore it is a transformation pass.  You can test
-it with one of the provided examples, e.g.:
-
-```bash
-export LLVM_DIR=<installation/dir/of/llvm/9>
-# Generate an LLVM file to analyze
-$LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
-# Instrument the input file first
-<build_dir>/bin/dynamic  -dynamic  input_for_cc.bc -o instrumented_bin
-# Now run the instrumented binary
-./instrumented_bin
-```
-
 ## Mixed Boolean Arithmetic Transformations
 These passes implement [mixed
 boolean arithmetic](https://tel.archives-ouvertes.fr/tel-01623849/document)

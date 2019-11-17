@@ -56,16 +56,3 @@ foreach( plugin ${LLVM_TUTOR_PLUGINS} )
       "$<$<PLATFORM_ID:Darwin>:-undefined dynamic_lookup>"
       )
 endforeach()
-
-# CONFIGURE LIBRARIES FOR 'dynamic'
-# ================================
-add_library(DynamicCallCounter STATIC DynamicCallCounter.cpp)
-target_include_directories(
-  DynamicCallCounter
-  PUBLIC
-  "${CMAKE_CURRENT_SOURCE_DIR}/../include"
-)
-
-# This is LT_RUNTIME_LIB used by lt-cc-main.cpp
-# FIXME Create a better name for this
-add_library(lt-cc-rt DynamicCallCounterRT.cpp)
