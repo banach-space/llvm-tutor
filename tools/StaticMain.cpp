@@ -3,15 +3,15 @@
 //    StaticMain.cpp
 //
 // DESCRIPTION:
-//    A command-line tool that counts all the static calls (i.e. calls as seen
+//    A command-line tool that counts all static calls (i.e. calls as seen
 //    in the source code) in the input LLVM file. Internally it uses the
 //    StaticCallCounter pass.
 //
 // USAGE:
-//    # First, generate an LLVM file
-//    clang -emit-llvm <input-file> -o <output-llvm-file>
-//    # Run this tool
-//    <BUILD/DIR>/bin/static <output-llvm-file>
+//    # First, generate an LLVM file:
+//      clang -emit-llvm <input-file> -o <output-llvm-file>
+//    # Now you can run this tool as follows:
+//      <BUILD/DIR>/bin/static <output-llvm-file>
 //
 // License: MIT
 //========================================================================
