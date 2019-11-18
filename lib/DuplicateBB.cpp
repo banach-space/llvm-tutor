@@ -186,10 +186,6 @@ void DuplicateBB::duplicate(BasicBlock &BB, Value *ContextValue,
       continue;
     }
 
-    // once the instruction is cloned, its operand still hold reference to
-    // the original basic block
-    // we want them to refer to the cloned one! The mappings are used for
-    // this
     // Clone the instructions.
     Instruction *ThenClone = Instr.clone(), *ElseClone = Instr.clone();
 

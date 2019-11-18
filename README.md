@@ -21,6 +21,7 @@ document explains how to get started.
 * [Building & Testing](#building--testing)
 * [Overview Of The Passes](#overview-of-the-passes)
 * [Debugging](#debugging)
+* [About Pass Managers in LLVM](#about-pass-managers-in-llvm)
 * [Credits & References](#credits)
 * [License](#license)
 
@@ -211,7 +212,7 @@ implementation are correct. You can run this pass as follows:
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/9>
 $LLVM_DIR/bin/clang -emit-llvm -S inputs/input_for_mba_sub.c -o input_for_sub.ll
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libMBASub.so -legacy-mba-sub inputs/input_for_sub.ll -o out.ll
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libMBASub.so -legacy-mba-sub input_for_sub.ll -o out.ll
 ```
 
 ### **MBAAdd**
@@ -226,7 +227,7 @@ the formula and the implementation are correct. You can run **MBAAdd** like this
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/9>
 $LLVM_DIR/bin/clang -O1 -emit-llvm -S inputs/input_for_mba.c -o input_for_mba.ll
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libMBAAdd.so -legacy-mba-add inputs/input_for_mba.ll -o out.ll
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libMBAAdd.so -legacy-mba-add input_for_mba.ll -o out.ll
 ```
 You can also specify the level of _obfuscation_ on a scale of `0.0` to `1.0`, with
 `0` corresponding to no obfuscation and `1` meaning that all `add` instructions
@@ -331,6 +332,55 @@ gdb --args $LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libMBAAdd.so -pas
 ```
 At this point, GDB should break at the entry to `MBAAdd::run`.
 
+About Pass Managers in LLVM
+===========================
+LLVM is a quite complex project (to put it mildly) and passes lay at its
+center - this is true for any [multi-pass
+compiler](https://en.wikipedia.org/wiki/Multi-pass_compiler<Paste>). In order
+to manage the passes, a compiler needs a pass manager. LLVM currently enjoys
+not one, but two pass manager. This is important, because depending on which
+pass manager you decide to use, the implementation (and in particular pass
+registration) will look slightly differently. I have tried my best to make the
+distinction in the source code very clear.
+
+## Overview of Pass Managers in LLVM
+As mentioned earlier, there are two pass managers in LLVM:
+* _Legacy Pass Manager_ which currently is the default pass manager
+	* It is implemented in the _legacy_ namespace
+	* It is very well [documented](http://llvm.org/docs/WritingAnLLVMPass.html)
+		(more specifically, writing and registering a pass withing the Legacy PM is
+		very well documented)
+* _New Pass Manager_ aka [_Pass Manager_](https://github.com/llvm-mirror/llvm/blob/ff8c1be17aa3ba7bacb1ef7dcdbecf05d5ab4eb7/include/llvm/IR/PassManager.h#L458) (that's how it's referred to in the code base)
+	* I understand that it is [soon to become](http://lists.llvm.org/pipermail/llvm-dev/2019-August/134326.html) the default pass manager in LLVM
+	* The source code is very throughly commented, but otherwise I am only aware of
+		this great [blog series](https://medium.com/@mshockwave/writing-llvm-pass-in-2018-preface-6b90fa67ae82) by Min-Yih Hsu.
+
+The best approach is to implement your passes for both pass managers.
+Fortunately, once you have an implementation that works for one of them, it's
+relatively straightforward to extend it so that it works for the other one as
+well. All passes in LLVM provide an interface for both and that's what I've
+been trying to achieve here as well.
+
+## New vs Legacy PM When Running Opt
+**MBAAdd** implements interface for both pass managers. This is how you will
+use it via the legacy pass manager:
+```bash
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libMBAAdd.so -legacy-mba-add input_for_mba.ll -o out.ll
+```
+
+And this is how you run it with the new pass manager:
+```bash
+$LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libMBAAdd.so -passes=mba-add input_for_mba.ll -o out.ll
+```
+There are two differences:
+* the way you load your plugins: `-load` vs `-load-pass-plugin`
+* the way you specify which pass/plugin to run: `-legacy-mba-add` vs
+  `-passes=mba-add`
+
+The command line option is different because with the legacy pass manager you
+_register_ a new command line option with **opt** and with the new pass manager
+you just define the pass pipeline (via `-passes=`).
+
 Credits
 ========
 This is first and foremost a community effort. This project wouldn't be
@@ -351,9 +401,8 @@ developer and that helped to _democratise_ out-of-source pass development:
 Adrien and Serge came up with some great, illustrative and self-contained
 examples that are great for learning and tutoring LLVM pass development. You'll
 notice that there are similar transformation and analysis passes available in
-this project. The implementations available here are based on the latest
-release of LLVM's API and have been refactored and documented to reflect what
-**I** (aka banach-space) found most challenging while studying them.
+this project. The implementations available here reflect what **I** (aka
+banach-space) found most challenging while studying them.
 
 I also want to thank Min-Yih Hsu for his [blog
 series](https://medium.com/@mshockwave/writing-llvm-pass-in-2018-preface-6b90fa67ae82)
