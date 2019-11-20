@@ -95,7 +95,7 @@ LLVM](https://blog.kowalczyk.info/article/k/how-to-install-latest-clang-6.0-on-u
 from the official [repository](http://apt.llvm.org/):
 ```bash
 wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-sudo apt-add-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-9.0 main"
+sudo apt-add-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-9 main"
 sudo apt-get update
 sudo apt-get install -y llvm-9 llvm-9-dev clang-9 llvm-9-tools
 ```
