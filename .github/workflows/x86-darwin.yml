@@ -1,0 +1,25 @@
+name: x86-Darwin
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install Dependencies
+        run: |
+          brew install llvm@9
+          pip install lit
+      - name: Build llvm-tutor
+        run: |
+          cd HelloWorld
+          mkdir build && cd build
+          cmake -DLT_LEGACY_SKIP_PIPELINE_REGISTRATION=On -DLT_LLVM_INSTALL_DIR="/usr/local/opt/llvm@9/"  ../
+          make -j4
+          cd ../../
+          mkdir build
+          cd build
+          cmake -DLT_LEGACY_SKIP_PIPELINE_REGISTRATION=On -DLT_LLVM_INSTALL_DIR="/usr/local/opt/llvm@9/"  ../
+          make -j4
+          lit test/
