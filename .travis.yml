@@ -18,7 +18,8 @@ addons:
       - llvm@9
     # The following error was triggered when Homebrew was _not_ updated:
     #   Error: Your Homebrew is outdated. Please run `brew update`.
-    # However, updating Homebrew slows down the build considerably.
+    # Updating Homebrew every time slows down the build considerably, but seems
+    # necessary.
     update: true
 
 matrix:
@@ -28,33 +29,17 @@ matrix:
       env:
         - LLVM_DIR="/usr/lib/llvm-9/"
         - LLVM_TOOLCHAIN="/usr/lib/llvm-9/bin"
-        # There's currently no way of obtaining FileCheck on Ubuntu (apart from
-        # building from sources), so testing is not possible.
-        - RUN_TESTS="False"
       before_script:
-        # This is a nasty/hacky workaround for CMake Error:
-        #   at /usr/lib/llvm-9/lib/cmake/llvm/LLVMExports.cmake:1335 (message):
-        #   The imported target "CheckerDependencyHandlingAnalyzerPlugin" references
-        #   the file
-        # This looks like a bug in the LLVM 9 package for Ubuntu. Since I don't
-        # care about the missing files (I don't use them), I'll just 'touch'
-        # them to silce CMake errors.
-        # TODO: Investigate furter and report
-        - sudo touch /usr/lib/llvm-9/bin/yaml-bench
-        - sudo touch /usr/lib/llvm-9/lib/SampleAnalyzerPlugin.so
-        - sudo touch /usr/lib/llvm-9/lib/CheckerDependencyHandlingAnalyzerPlugin.so
-        - sudo touch /usr/lib/llvm-9/lib/CheckerOptionHandlingAnalyzerPlugin.so
-        - sudo touch /usr/lib/llvm-9/bin/lit-cpuid
         - LIT_PATH=/home/travis/.local/bin/
     - os: osx
       osx_image: xcode11
       env:
         - LLVM_DIR="/usr/local/opt/llvm@9/"
         - LLVM_TOOLCHAIN="/usr/local/opt/llvm@9/bin/"
-        - RUN_TESTS="True"
         - LIT_PATH=/Users/travis/Library/Python/2.7/bin/
 
-# AFAIK, there's no other way of obtaining LLVM's lit
+# AFAIK, there's no other way of obtaining LLVM's lit other than via `pip
+# install`
 install:
   - pip install --user lit
 
@@ -68,6 +53,6 @@ script:
   - cd ../../
   - mkdir build
   - cd build
-  - cmake -DLT_LEGACY_SKIP_PIPELINE_REGISTRATION=On -DLT_LLVM_INSTALL_DIR="$LLVM_DIR" -DLT_LIT_TOOLS_DIR="$LLVM_TOOLCHAIN"  ../
+  - cmake -DLT_LEGACY_SKIP_PIPELINE_REGISTRATION=On -DLT_LLVM_INSTALL_DIR="$LLVM_DIR"  ../
   - make -j4
   - ${LIT_PATH}/lit test/
