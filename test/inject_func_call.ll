@@ -26,7 +26,9 @@
 ; CHECK-LABEL: @bez
 ; CHECK-NEXT: %2 = call i32 (i8*, ...) @printf
 
-; CHECK: declare i32 @printf(i8* noalias nocapture, ...)
+; CHECK: declare i32 @printf(i8* nocapture readonly, ...) #0
+
+; CHECK: attributes #0 = { nounwind }
 
 define i32 @foo(i32) {
   %2 = shl nsw i32 %0, 1
