@@ -151,11 +151,13 @@ Overview of The Passes
 ======================
    * [**HelloWorld**](#helloworld) - prints the functions in
      the input module and prints the number of arguments for each
+   * [**InjectFuncCall**](#inject-calls-to-printf-injectfunccall) - instruments
+     the input module by inserting calls to `printf` (instrumentation pass)
    * [**StaticCallCounter**](#count-compile-time-function-calls-staticcallcounter) - counts
      direct function calls at compile time (only static calls, pure analysis
      pass)
-   * [**InjectFuncCall**](#inject-calls-to-printf-injectfunccall) - instruments
-     the input module by inserting calls to `printf` (instrumentation pass)
+   * [**DynamicCallCounter**](#count-run-time-function-calls-dynamiccallcounter) - counts
+     direct function calls at run-time ( analysis through instrumentation)
    * [**MBASub**](#mbasub) - code transformation for integer `sub`
      instructions (transformation pass, parametrisable)
    * [**MBAAdd**](#mbaadd) - code transformation for 8-bit integer `add`
@@ -181,24 +183,6 @@ It doesn't matter whether you choose the binary (without `-S`) or textual
 form (with `-S`), but obviously the latter is more human-friendly. All passes,
 except for [HelloWorld](#helloworld), are described below.
 
-## Count Compile Time Function Calls (**StaticCallCounter**)
-`StaticCallCounter` will count the number of function calls in the input
-LLVM file that are visible during the compilation (i.e. if a function is
-called within a loop, that counts as one call). Only direct function calls are
-considered (TODO: Expand).
-```bash
-export LLVM_DIR=<installation/dir/of/llvm/9>
-# Generate an LLVM file to analyze
-$LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
-# Run the pass through opt
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libStaticCallCounter.dylib -legacy-static-cc -analyze input_for_cc.bc
-```
-The `static` executable is a command line wrapper that allows you to run
-`StaticCallCounter` without the need for `opt`:
-```bash
-<build_dir>/bin/static input_for_cc.bc
-```
-
 ## Inject Calls To Printf (**InjectFuncCall**)
 For every function defined in the input module, `InjectFuncCall` will add
 (_inject_) the following call to
@@ -208,7 +192,10 @@ printf("(llvm-tutor) Hello from: %s\n(llvm-tutor)   number of arguments: %d\n", 
 ```
 This call is added at the beginning of each function (i.e. before any other
 instruction). `FuncName` is the name of the function and `FuncNumArgs` is the
-number of arguments that the function takes. You can test it as follows:
+number of arguments that the function takes.
+
+This pass is a _HelloWorld_ example for code instrumentation. You can test it as
+follows:
 
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/9>
@@ -235,6 +222,61 @@ $LLVM_DIR/bin/lli instrumented.bin 123
 (llvm-tutor) Hello from: foo
 (llvm-tutor)   number of arguments: 1
 ```
+As you can see the output is similar to what **HelloWorld** generates, but
+the implementation is completely different.
+
+## Count Compile Time Function Calls (**StaticCallCounter**)
+`StaticCallCounter` will count the number of function calls in the input
+LLVM file that are visible during the compilation (i.e. if a function is
+called within a loop, that counts as one call). Only direct function calls are
+considered (TODO: Expand).
+```bash
+export LLVM_DIR=<installation/dir/of/llvm/9>
+# Generate an LLVM file to analyze
+$LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
+# Run the pass through opt
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libStaticCallCounter.dylib -legacy-static-cc -analyze input_for_cc.bc
+```
+The `static` executable is a command line wrapper that allows you to run
+`StaticCallCounter` without the need for `opt`:
+```bash
+<build_dir>/bin/static input_for_cc.bc
+```
+
+## Count Run-Time Function Calls (**DynamicCallCounter**)
+`DynamicCallCounter` will count the number of run-time function calls. It does
+so by instrumenting the input LLVM file - it inserts call-counting instructions
+that are executed every time a function is called. This pass will only count
+calls to functions that are _defined_ in the input module are counted.
+
+Although the primary goal of this pass is to _analyse_ function calls, it also
+modifies the input file. Therefore it is a transformation/instrumentation pass.
+You can test	it with one of the provided examples, e.g.:
+
+```bash
+export LLVM_DIR=<installation/dir/of/llvm/9>
+# Generate an LLVM file to analyze
+$LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
+# Instrument the input file
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libDynamicCallCounter.dylib -legacy-dynamic-cc input_for_cc.bc -o instrumented_bin
+# Run the instrumented binary
+./instrumented_bin
+```
+You will see the following output:
+```
+=================================================
+LLVM-TUTOR: dynamic analysis results
+=================================================
+NAME                 #N DIRECT CALLS
+-------------------------------------------------
+foo                  13
+bar                  2
+fez                  1
+main                 1
+```
+
+If you are interested in a more introductory example for code instrumentation,
+you may want experiment with [**InjectFuncCall**](#injectfunccall) first.
 
 ## Mixed Boolean Arithmetic Transformations
 These passes implement [mixed
@@ -468,7 +510,7 @@ date.
   *  _”LLVM IR Tutorial-Phis,GEPs and other things, ohmy!”_, V.Bridgers, F.
 Piovezan, EuroLLVM, ([slides](https://llvm.org/devmtg/2019-04/slides/Tutorial-Bridgers-LLVM_IR_tutorial.pdf),
   [video](https://www.youtube.com/watch?v=m8G_S5LwlTo&feature=youtu.be))
-  * _"Mapping High Level Constructs to LLVM IR"_, M. Rodler ([link](https://mapping-high-level-constructs-to-llvm-ir.readthedocs.io/en/latest/)) 
+  * _"Mapping High Level Constructs to LLVM IR"_, M. Rodler ([link](https://mapping-high-level-constructs-to-llvm-ir.readthedocs.io/en/latest/))
 * **Legacy vs New Pass Manager**
   * _"New PM: taming a custom pipeline of Falcon JIT"_, F. Sergeev, EuroLLVM 2018
     ([slides](http://llvm.org/devmtg/2018-04/slides/Sergeev-Taming%20a%20custom%20pipeline%20of%20Falcon%20JIT.pdf),
