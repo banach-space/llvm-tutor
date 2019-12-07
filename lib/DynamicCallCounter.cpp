@@ -118,7 +118,13 @@ bool DynamicCallCounter::runOnModule(Module &M) {
     // The following is visible only if you pass -debug on the command line
     // *and* you have an assert build.
     LLVM_DEBUG(dbgs() << " Instrumented: " << F.getName() << "\n");
+
+    Instrumented = true;
   }
+
+  // Stop here if there are no function definitions in this module
+  if (false == Instrumented)
+    return Instrumented;
 
   // STEP 2: Inject the declaration of printf
   // ----------------------------------------
@@ -210,7 +216,7 @@ bool DynamicCallCounter::runOnModule(Module &M) {
   // ------------------------------------------------------------
   appendToGlobalDtors(M, PrintfWrapperF, /*Priority=*/0);
 
-  return Instrumented;
+  return true;
 }
 
 PreservedAnalyses DynamicCallCounter::run(llvm::Module &M,
