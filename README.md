@@ -37,8 +37,8 @@ is a self-contained *reference example*. The corresponding
 [CMakeLists.txt](https://github.com/banach-space/llvm-tutor/blob/master/HelloWorld/CMakeLists.txt)
 implements the minimum set-up for an out-of-source pass.
 
-For each function in a module, **HelloWord** prints its name and the number of
-arguments that it takes. You can build it like this:
+For every function defined in the input module, **HelloWord** prints its name
+and the number of arguments that it takes. You can build it like this:
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/9>
 mkdir build
@@ -56,10 +56,14 @@ Finally, run **HelloWorld** with [**opt**](http://llvm.org/docs/CommandGuide/opt
 # Run the pass on the llvm file
 $LLVM_DIR/bin/opt -load-pass-plugin libHelloWorld.dylib -passes=hello-world -disable-output input_for_hello.ll
 # The expected output
-Visiting: foo (takes 1 args)
-Visiting: bar (takes 2 args)
-Visiting: fez (takes 3 args)
-Visiting: main (takes 2 args)
+(llvm-tutor) Hello from: foo
+(llvm-tutor)   number of arguments: 1
+(llvm-tutor) Hello from: bar
+(llvm-tutor)   number of arguments: 2
+(llvm-tutor) Hello from: fez
+(llvm-tutor)   number of arguments: 3
+(llvm-tutor) Hello from: main
+(llvm-tutor)   number of arguments: 2
 ```
 The **HelloWorld** pass doesn't modify the input module. The `-disable-output`
 flag is used to prevent **opt** from printing the output bitcode file.
@@ -152,21 +156,19 @@ Overview of The Passes
    * [**HelloWorld**](#helloworld) - prints the functions in
      the input module and prints the number of arguments for each
    * [**InjectFuncCall**](#inject-calls-to-printf-injectfunccall) - instruments
-     the input module by inserting calls to `printf` (instrumentation pass)
+     the input module by inserting calls to `printf`
    * [**StaticCallCounter**](#count-compile-time-function-calls-staticcallcounter) - counts
-     direct function calls at compile time (only static calls, pure analysis
-     pass)
+     direct function calls at compile time
    * [**DynamicCallCounter**](#count-run-time-function-calls-dynamiccallcounter) - counts
-     direct function calls at run-time ( analysis through instrumentation)
+     direct function calls at run-time
    * [**MBASub**](#mbasub) - code transformation for integer `sub`
-     instructions (transformation pass, parametrisable)
+     instructions
    * [**MBAAdd**](#mbaadd) - code transformation for 8-bit integer `add`
-     instructions (transformation pass, parametrisable)
+     instructions
    * [**RIV**](#reachable-integer-values-riv) - finds reachable integer values
-     for each basic block (analysis pass)
+     for each basic block
    * [**DuplicateBB**](#duplicate-basic-blocks-duplicatebb) - duplicates basic
-     blocks, requires **RIV** analysis results (transformation pass,
-     parametrisable)
+     blocks, requires **RIV** analysis results
 
 Once you've [built](#build-instructions) this project, you can experiment with
 every pass separately. It is assumed that you have `clang` and `opt` available
@@ -181,12 +183,12 @@ $LLVM_DIR/bin/clang  -emit-llvm input.c -o out.bc
 ```
 It doesn't matter whether you choose the binary (without `-S`) or textual
 form (with `-S`), but obviously the latter is more human-friendly. All passes,
-except for [HelloWorld](#helloworld), are described below.
+except for [**HelloWorld**](#helloworld), are described below.
 
 ## Inject Calls To Printf (**InjectFuncCall**)
-For every function defined in the input module, `InjectFuncCall` will add
-(_inject_) the following call to
-[`printf`](https://en.cppreference.com/w/cpp/io/c/fprintf):
+This pass is a _HelloWorld_ example for _code instrumentation_. For every function
+defined in the input module, `InjectFuncCall` will add (_inject_) the following
+call to [`printf`](https://en.cppreference.com/w/cpp/io/c/fprintf):
 ```C
 printf("(llvm-tutor) Hello from: %s\n(llvm-tutor)   number of arguments: %d\n", FuncName, FuncNumArgs)
 ```
@@ -194,19 +196,25 @@ This call is added at the beginning of each function (i.e. before any other
 instruction). `FuncName` is the name of the function and `FuncNumArgs` is the
 number of arguments that the function takes.
 
-This pass is a _HelloWorld_ example for code instrumentation. You can test it as
-follows:
+You might have noticed that **InjectFuncCall** is somewhat similar to
+[**HelloWorld**](#helloworld) - in both cases the pass visits all functions,
+prints their names and the number of arguments. To understand the
+difference between the two, lets use `input_for_hello.c` to test
+**InjectFuncCall**:
 
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/9>
 # Generate an LLVM file to analyze
-$LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/inputs/input_for_inject.c -o input_for_inject.bc
+$LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/inputs/input_for_hello.c -o input_for_hello.bc
 # Run the pass through opt
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libInjectFuncCall.dylib -legacy-inject-func-call input_for_inject.bc -o instrumented.bin
-$LLVM_DIR/bin/lli instrumented.bin 123
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libInjectFuncCall.dylib -legacy-inject-func-call input_for_hello.bc -o instrumented.bin
 ```
-`instrumented.bin` will print the following output:
+This generates `instrumented.bin`, which is the instrumented version of
+`input_for_hello.bc`. In order to verify that **InjectFuncCall** worked as
+expected, you can either check the output file (and verify that it contains
+extra calls to `printf`) or run it:
 ```
+$LLVM_DIR/bin/lli instrumented.bin
 (llvm-tutor) Hello from: main
 (llvm-tutor)   number of arguments: 2
 (llvm-tutor) Hello from: foo
@@ -222,8 +230,18 @@ $LLVM_DIR/bin/lli instrumented.bin 123
 (llvm-tutor) Hello from: foo
 (llvm-tutor)   number of arguments: 1
 ```
-As you can see the output is similar to what **HelloWorld** generates, but
-the implementation is completely different.
+The output is indeed similar to what [**HelloWorld**](#helloworld) would
+generate. However, the number of times `Hello from` is printed is different.
+Indeed, with **InjectFuncCall** it is printed whenever a function is called,
+whereas for **HelloWorld** it is only printed once per function definition. This
+makes perfect sense and hints how different the two passes are. _Whether to
+print `Hello`_ is determined at:
+* compile time (when the pass is run) for **HelloWorld**, and
+* run-time (when the instrumented module is run) for **InjectFuncCall**.
+
+Last but not least, note that in the case of **InjectFuncCall** we had to run
+the pass with **opt** and then execute the instrumented IR module in order to see the
+output. For **HelloWorld** running the pass with **opt** was sufficient.
 
 ## Count Compile Time Function Calls (**StaticCallCounter**)
 `StaticCallCounter` will count the number of function calls in the input

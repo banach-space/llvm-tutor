@@ -41,9 +41,8 @@ namespace {
 
 // This method implements what the pass does
 void visitor(Function &F) {
-    errs() << "Visiting: ";
-    errs() << F.getName() << " (takes ";
-    errs() << F.arg_size() << " args)\n";
+    errs() << "(llvm-tutor) Hello from: "<< F.getName() << "\n";
+    errs() << "(llvm-tutor)   number of arguments: " << F.arg_size() << "\n";
 }
 
 // New PM implementation

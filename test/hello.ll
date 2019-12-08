@@ -4,10 +4,14 @@
 ; RUN:   | FileCheck %s
 
 ; Test 'hello-world' when run through opt (both new and legacy PMs)
-; CHECK: Visiting: foo (takes 1 args)
-; CHECK: Visiting: bar (takes 2 args)
-; CHECK: Visiting: fez (takes 3 args)
-; CHECK: Visiting: main (takes 2 args)
+; CHECK: (llvm-tutor) Hello from: foo
+; CHECK-NEXT: (llvm-tutor)   number of arguments: 1
+; CHECK-NEXT: (llvm-tutor) Hello from: bar
+; CHECK-NEXT: (llvm-tutor)   number of arguments: 2
+; CHECK-NEXT: (llvm-tutor) Hello from: fez
+; CHECK-NEXT: (llvm-tutor)   number of arguments: 3
+; CHECK-NEXT: (llvm-tutor) Hello from: main
+; CHECK-NEXT: (llvm-tutor)   number of arguments: 2
 
 define i32 @foo(i32) {
   %2 = shl nsw i32 %0, 1
