@@ -2,6 +2,7 @@ import sys
 
 config.llvm_tools_dir = "@LT_LLVM_INSTALL_DIR@/bin"
 config.llvm_shlib_ext = "@LT_TEST_SHLIBEXT@"
+config.llvm_shlib_dir = "@CMAKE_LIBRARY_OUTPUT_DIRECTORY@"
 
 import lit.llvm
 # lit_config is a global instance of LitConfig

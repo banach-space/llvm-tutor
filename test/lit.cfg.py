@@ -54,6 +54,8 @@ llvm_config.add_tool_substitutions(tool_substitutions)
 tools = ["opt", "lli", "not", "FileCheck", "clang"]
 llvm_config.add_tool_substitutions(tools, config.llvm_tools_dir)
 
-# The extension for shared libraries depends on the platform - this takes care of
-# it.
+# The LIT variable to hold the file extension for shared libraries (this is
+# platform dependent)
 config.substitutions.append(('%shlibext', config.llvm_shlib_ext))
+# The LIT variable to hold the location of plugins/libraries
+config.substitutions.append(('%shlibdir', config.llvm_shlib_dir))

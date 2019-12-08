@@ -1,5 +1,5 @@
-; RUN: opt -load ../lib/libRIV%shlibext -load ../lib/libDuplicateBB%shlibext -duplicate-bb -duplicate-bb-ratio=1 -S %s  | FileCheck -check-prefix=DUPL %s
-; RUN: opt -load ../lib/libRIV%shlibext -load ../lib/libDuplicateBB%shlibext -duplicate-bb -duplicate-bb-ratio=0 -S %s  | FileCheck -check-prefix=NO_DUPL %s
+; RUN: opt -load %shlibdir/libRIV%shlibext -load %shlibdir/libDuplicateBB%shlibext -duplicate-bb -duplicate-bb-ratio=1 -S %s  | FileCheck -check-prefix=DUPL %s
+; RUN: opt -load %shlibdir/libRIV%shlibext -load %shlibdir/libDuplicateBB%shlibext -duplicate-bb -duplicate-bb-ratio=0 -S %s  | FileCheck -check-prefix=NO_DUPL %s
 
 define i32 @foo(i32) {
   %2 = alloca i32, align 4

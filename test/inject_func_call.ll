@@ -1,6 +1,6 @@
-; RUN:  opt -load ../lib/libInjectFuncCall%shlibext -verify -legacy-inject-func-call -S %s\
+; RUN:  opt -load %shlibdir/libInjectFuncCall%shlibext -verify -legacy-inject-func-call -S %s\
 ; RUN:  | FileCheck %s
-; RUN:  opt -load-pass-plugin=../lib/libInjectFuncCall%shlibext -verify -passes="inject-func-call" -S %s \
+; RUN:  opt -load-pass-plugin=%shlibdir/libInjectFuncCall%shlibext -verify -passes="inject-func-call" -S %s \
 ; RUN:  | FileCheck %s
 
 ; Verify that InjectFuncCall indeed inserts calls to printf and global

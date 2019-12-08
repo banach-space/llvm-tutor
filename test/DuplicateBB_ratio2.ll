@@ -1,4 +1,4 @@
-; RUN: not opt -load ../lib/libRIV%shlibext -load ../lib/libDuplicateBB%shlibext -duplicate-bb -duplicate-bb-ratio=100 -S %s 2>&1 | FileCheck %s
+; RUN: not opt -load %shlibdir/libRIV%shlibext -load %shlibdir/libDuplicateBB%shlibext -duplicate-bb -duplicate-bb-ratio=100 -S %s 2>&1 | FileCheck %s
 
 ;  Verify that wrong DuplicateBB ratio triggers an adequate error
 

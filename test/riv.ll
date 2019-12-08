@@ -1,4 +1,4 @@
-; RUN: opt -load ../lib/libRIV%shlibext -riv -analyze -S %s  | FileCheck %s
+; RUN: opt -load %shlibdir/libRIV%shlibext -riv -analyze -S %s  | FileCheck %s
 
 ; Verifies that the result from the RIV pass for the following module is correct
 

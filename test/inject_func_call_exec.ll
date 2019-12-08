@@ -1,5 +1,5 @@
 ; RUN: %clang -c -emit-llvm %S/../inputs/input_for_inject.c -o - \
-; RUN:   | opt -load ../lib/libInjectFuncCall%shlibext -legacy-inject-func-call -verify -o instrumented.bin
+; RUN:   | opt -load %shlibdir/libInjectFuncCall%shlibext -legacy-inject-func-call -verify -o instrumented.bin
 ; RUN: not lli ./instrumented.bin 123 | FileCheck %s
 
 ; This test instruments the input file (input_for_inject.c) with InjectFuncCall and runs it via lli.

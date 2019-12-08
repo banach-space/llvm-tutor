@@ -1,4 +1,4 @@
-; RUN:  opt -load ../lib/libStaticCallCounter%shlibext --legacy-static-cc -analyze %S/Inputs/CallCounterInput.ll \
+; RUN:  opt -load %shlibdir/libStaticCallCounter%shlibext --legacy-static-cc -analyze %S/Inputs/CallCounterInput.ll \
 ; RUN:   | FileCheck %s
 
 ; Test StaticCallCounter when run through opt.

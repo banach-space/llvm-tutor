@@ -1,5 +1,5 @@
 ; RUN: %clang -S -emit-llvm %S/../inputs/input_for_mba.c -o - \
-; RUN:   | opt -load ../lib/libRIV%shlibext -load ../lib/libDuplicateBB%shlibext -duplicate-bb -S -o %instrumented2.ll
+; RUN:   | opt -load %shlibdir/libRIV%shlibext -load %shlibdir/libDuplicateBB%shlibext -duplicate-bb -S -o %instrumented2.ll
 ; RUN: %clang %instrumented2.ll -o %instrumented2.bin
 
 ; The program implemented in input_for_mba.c takes for inputs and adds them up,
