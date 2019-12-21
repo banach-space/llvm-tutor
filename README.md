@@ -14,9 +14,23 @@ tutorial that targets novice and aspiring LLVM developers. Key features:
     build LLVM from sources)
   * **Modern** - based on the latest version of LLVM (and updated with every release)
 
-The source files contain comments that will guide you through the
-implementation and the LIT tests verify that each pass works as expected. This
-document explains how to get started.
+### About
+The goal of this LLVM tutorial is to showcase the LLVM API and to demonstrate
+how fun, powerful and easy to work with it can be. The API is demonstrated
+through self-contained, testable examples which are implemented using idiomatic
+LLVM.
+
+This document explains how to set-up your environment, build the examples
+or go about debugging. It contains a high-level overview of the examples and
+demonstrates how to run them.
+
+The source files, apart from the code itself, contain comments that will guide
+you through the implementation. All examples are complemented with LIT tests
+that verify that each pass works as expected.
+
+For a most basic, introductory example you can go to
+[**HelloWorld**](https://github.com/banach-space/llvm-tutor/blob/master/HelloWorld/).
+It's an independent sub-project with a dedicated `CMake` script.
 
 ### Table of Contents
 * [HelloWorld](#helloworld)
