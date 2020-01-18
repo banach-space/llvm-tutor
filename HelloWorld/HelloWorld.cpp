@@ -110,15 +110,16 @@ static RegisterPass<LegacyHelloWorld>
       false  // This pass is not a pure analysis pass => false
     );
 
+#ifdef HELLOWORLD_OPT_PIPELINE_REG
 // Register LegacyHelloWorld as a step of an existing pipeline. The insertion
 // point is set to 'EP_EarlyAsPossible', which means that LegacyHelloWorld will
 // be run automatically at '-O{0|1|2|3}'.
-#ifndef LT_LEGACY_SKIP_PIPELINE_REGISTRATION
-// This trips 'opt' installed via HomeBrew. It's a known issues:
+//
+// NOTE: this trips 'opt' installed via HomeBrew (Mac OS). It's a known issues:
 //    https://github.com/sampsyo/llvm-pass-skeleton/issues/7
 // I've tried all of the suggestions, but no luck. Locally I recommend either
-// building from sources or commenting this out.
-// Note: AFAIK, this is Mac OS only problem.
+// building from sources or commenting this out. On Linux this always works
+// fine.
 static llvm::RegisterStandardPasses RegisterHelloWorld(
     llvm::PassManagerBuilder::EP_EarlyAsPossible,
     [](const llvm::PassManagerBuilder &Builder,

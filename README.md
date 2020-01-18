@@ -79,6 +79,41 @@ $LLVM_DIR/bin/opt -load-pass-plugin libHelloWorld.dylib -passes=hello-world -dis
 The **HelloWorld** pass doesn't modify the input module. The `-disable-output`
 flag is used to prevent **opt** from printing the output bitcode file.
 
+## Run HelloWorld automatically at any optimisation level
+**NOTE:** On MacOS this only works when building LLVM from sources. More
+information is available
+[here](https://github.com/banach-space/llvm-tutor/blob/master/HelloWorld/HelloWorld.cpp#L118).
+
+In order to run **HelloWorld** automatically at `-O{0|1|2|3}`, you have to enable
+registration with the optimisation pipelines. This is done via
+`HELLOWORLD_OPT_PIPELINE_REG` CMake variable:
+```bash
+export LLVM_DIR=<installation/dir/of/llvm/9>
+mkdir build
+cd build
+cmake -DLT_LLVM_INSTALL_DIR=$LLVM_DIR -DHELLOWORLD_OPT_PIPELINE_REG=On <source/dir/llvm/tutor>/HelloWorld/
+make
+```
+**HelloWorld** will now be run whenever an optimisation level is specified:
+```bash
+$LLVM_DIR/bin/opt -load libHelloWorld.dylib -O1 -disable-output input_for_hello.ll
+# Expected output
+(llvm-tutor) Hello from: foo
+(llvm-tutor)   number of arguments: 1
+(llvm-tutor) Hello from: bar
+(llvm-tutor)   number of arguments: 2
+(llvm-tutor) Hello from: fez
+(llvm-tutor)   number of arguments: 3
+(llvm-tutor) Hello from: main
+(llvm-tutor)   number of arguments: 2
+```
+This registration is implemented in
+[HelloWorld.cpp](https://github.com/banach-space/llvm-tutor/blob/master/HelloWorld/HelloWorld.cpp#L123).
+Note that for this to work I used the Legacy Pass Manager (the plugin was
+specified with `-load` rather than `-load-pass-plugin`).
+[Here](#about-pass-managers-in-llvm) you can read more about pass managers in
+LLVM.
+
 Development Environment
 =======================
 ## Platform Support And Requirements
@@ -512,13 +547,12 @@ LLVM is a quite complex project (to put it mildly) and passes lay at its
 center - this is true for any [multi-pass
 compiler](https://en.wikipedia.org/wiki/Multi-pass_compiler<Paste>). In order
 to manage the passes, a compiler needs a pass manager. LLVM currently enjoys
-not one, but two pass manager. This is important, because depending on which
-pass manager you decide to use, the implementation (and in particular pass
-registration) will look slightly differently. I have tried my best to make the
-distinction in the source code very clear.
+not one, but two pass managers. This is important because depending on which
+pass manager you decide to use, the implementation of your pass (and in
+particular how you _register_ it) will look slightly differently.
 
 ## Overview of Pass Managers in LLVM
-As mentioned earlier, there are two pass managers in LLVM:
+As I mentioned earlier, there are two pass managers in LLVM:
 * _Legacy Pass Manager_ which currently is the default pass manager
 	* It is implemented in the _legacy_ namespace
 	* It is very well [documented](http://llvm.org/docs/WritingAnLLVMPass.html)
@@ -526,18 +560,17 @@ As mentioned earlier, there are two pass managers in LLVM:
 		very well documented)
 * _New Pass Manager_ aka [_Pass Manager_](https://github.com/llvm-mirror/llvm/blob/ff8c1be17aa3ba7bacb1ef7dcdbecf05d5ab4eb7/include/llvm/IR/PassManager.h#L458) (that's how it's referred to in the code base)
 	* I understand that it is [soon to become](http://lists.llvm.org/pipermail/llvm-dev/2019-August/134326.html) the default pass manager in LLVM
-	* The source code is very throughly commented, but otherwise I am only aware of
-		this great [blog series](https://medium.com/@mshockwave/writing-llvm-pass-in-2018-preface-6b90fa67ae82) by Min-Yih Hsu.
+	* The source code is very throughly commented, but there is no official documentation. Min-Yih Hsu kindly wrote
+		this great [blog series](https://medium.com/@mshockwave/writing-llvm-pass-in-2018-preface-6b90fa67ae82) that you can refer to instead.
 
-The best approach is to implement your passes for both pass managers.
-Fortunately, once you have an implementation that works for one of them, it's
-relatively straightforward to extend it so that it works for the other one as
-well. All passes in LLVM provide an interface for both and that's what I've
-been trying to achieve here as well.
+If you are not sure which pass manager to use, it is probably best to make sure
+that your passes are compatible with both. Fortunately, once you have an
+implementation that works with one of them, it's relatively straightforward to
+extend it so that it works with the other one as well.
 
 ## New vs Legacy PM When Running Opt
 **MBAAdd** implements interface for both pass managers. This is how you will
-use it via the legacy pass manager:
+use it with the legacy pass manager:
 ```bash
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libMBAAdd.so -legacy-mba-add input_for_mba.ll -o out.ll
 ```
@@ -547,13 +580,13 @@ And this is how you run it with the new pass manager:
 $LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libMBAAdd.so -passes=mba-add input_for_mba.ll -o out.ll
 ```
 There are two differences:
-* the way you load your plugins: `-load` vs `-load-pass-plugin`
+* the way you load your plugin: `-load` vs `-load-pass-plugin`
 * the way you specify which pass/plugin to run: `-legacy-mba-add` vs
   `-passes=mba-add`
 
-The command line option is different because with the legacy pass manager you
-_register_ a new command line option with **opt** and with the new pass manager
-you just define the pass pipeline (via `-passes=`).
+These differences stem from the fact that in the case of Legacy Pass Manager you
+register a new command line option for **opt**, whereas  New Pass Manager
+simply requires you to define a pass pipeline (with `-passes=`).
 
 Credits
 ========

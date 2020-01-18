@@ -26,17 +26,18 @@ if(NOT LLVM_ENABLE_RTTI)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
 endif()
 
-# For LLVM installed via HomeBrew (on Darwin), 'opt' seg-faults when an
-# out-of-tree pass is registered with an existing optimisation pipeline. I have
-# not experienced this when building from sources. Similar issue is discussed
-# here:
+# The following flag is used to enable the registration of HelloWorld with the
+# optimisation pipelines.
+# NOTE: Due to a known issue with LLVM installed with HomeBrew:
 #   https://github.com/sampsyo/llvm-pass-skeleton/issues/7
-# The following flag is used as a workaround for that - it guards the
-# problematic code (which otherwise works fine on Linux and on Darwin when
-# building LLVM from sources).
-OPTION(LT_LEGACY_SKIP_PIPELINE_REGISTRATION "Don't register with any of the existing pipelines" OFF)
-if(LT_LEGACY_SKIP_PIPELINE_REGISTRATION)
-  add_definitions(-DLT_LEGACY_SKIP_PIPELINE_REGISTRATION)
+# the following flag should be set to OFF when:
+#   * working on Mac OS _and_,
+#   * using LLVM installed via HomeBrew.
+# TL;DR 'opt' seg-faults when an out-of-tree pass is registered with an
+# existing optimisation pipeline.
+OPTION(HELLOWORLD_OPT_PIPELINE_REG "Register HelloWorld with the optimisation pipelines" OFF)
+if(HELLOWORLD_OPT_PIPELINE_REG)
+  add_definitions(-DHELLOWORLD_OPT_PIPELINE_REG)
 endif()
 
 #===============================================================================
