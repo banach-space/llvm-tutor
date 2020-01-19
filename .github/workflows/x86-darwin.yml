@@ -15,11 +15,11 @@ jobs:
         run: |
           cd HelloWorld
           mkdir build && cd build
-          cmake -DLT_LEGACY_SKIP_PIPELINE_REGISTRATION=On -DLT_LLVM_INSTALL_DIR="/usr/local/opt/llvm@9/"  ../
+          cmake -DLT_LLVM_INSTALL_DIR="/usr/local/opt/llvm@9/"  ../
           make -j4
           cd ../../
           mkdir build
           cd build
-          cmake -DLT_LEGACY_SKIP_PIPELINE_REGISTRATION=On -DLT_LLVM_INSTALL_DIR="/usr/local/opt/llvm@9/"  ../
+          cmake -DLT_LLVM_INSTALL_DIR="/usr/local/opt/llvm@9/"  ../
           make -j4
           lit test/

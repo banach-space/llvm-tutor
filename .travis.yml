@@ -1,7 +1,6 @@
 language: cpp
 
-# Install LLVM-8 - the version against which this project has been
-# developed
+# Install LLVM
 addons:
   apt:
     update: true
@@ -29,7 +28,6 @@ matrix:
       env:
         - LLVM_DIR="/usr/lib/llvm-9/"
         - LLVM_TOOLCHAIN="/usr/lib/llvm-9/bin"
-      before_script:
         - LIT_PATH=/home/travis/.local/bin/
     - os: osx
       osx_image: xcode11
