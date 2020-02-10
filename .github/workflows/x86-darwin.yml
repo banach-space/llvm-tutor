@@ -11,15 +11,16 @@ jobs:
         run: |
           brew install llvm@9
           pip install lit
-      - name: Build llvm-tutor
+      - name: Build HelloWorld
         run: |
           cd HelloWorld
           mkdir build && cd build
           cmake -DLT_LLVM_INSTALL_DIR="/usr/local/opt/llvm@9/"  ../
-          make -j4
-          cd ../../
-          mkdir build
-          cd build
+          make -j2
+      - name: Build llvm-tutor + run tests
+        run: |
+          cd $GITHUB_WORKSPACE
+          mkdir build && cd build
           cmake -DLT_LLVM_INSTALL_DIR="/usr/local/opt/llvm@9/"  ../
-          make -j4
+          make -j2
           lit test/
