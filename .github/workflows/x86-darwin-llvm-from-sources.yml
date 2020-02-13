@@ -1,8 +1,8 @@
 name: x86-Darwin-llvm-from-sources
 
-on: [push]
-  # schedule:
-  #   - cron:  '0 0 * * 0, 3'
+on:
+  schedule:
+    - cron:  '0 0 * * 0,3'
 
 jobs:
   build:
