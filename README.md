@@ -164,8 +164,10 @@ Voilà! You should see all tests passing.
 
 Overview of The Passes
 ======================
-   * [**HelloWorld**](#helloworld) - prints the functions in
-     the input module and prints the number of arguments for each
+   * [**HelloWorld**](#helloworld) - prints the name and the number of
+     arguments for each function encounterd in the input module
+   * [**OpcodeCounter**](#opcodecounter) - prints the summary of the LLVM IR
+     opcodes encountered in the input function
    * [**InjectFuncCall**](#injectfunccall) - instruments
      the input module by inserting calls to `printf`
    * [**StaticCallCounter**](#staticcallcounter) - counts
@@ -194,6 +196,67 @@ $LLVM_DIR/bin/clang  -emit-llvm input.c -o out.bc
 It doesn't matter whether you choose the binary (without `-S`) or textual
 form (with `-S`), but obviously the latter is more human-friendly. All passes,
 except for [**HelloWorld**](#helloworld), are described below.
+
+## OpcodeCounter
+**OpcodeCounter** prints a summary of the LLVM IR
+[opcodes](https://github.com/llvm/llvm-project/blob/release/9.x/llvm/lib/IR/Instruction.cpp#L292)
+encountered in every function in the input module. This pass is slightly more
+complicated than **HelloWorld** and it can be [run
+automatically](#run-opcodecounter-automatically). Let's use our tried and
+tested method first.
+
+#### Run the pass
+We will use
+[input_for_cc.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_cc.c)
+to test **OpcodeCounter**:
+```bash
+export LLVM_DIR=<installation/dir/of/llvm/9>
+# Generate an LLVM file to analyze
+$LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
+# Run the pass through opt
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libOpcodeCounter.dylib -legacy-opcode-counter input_for_cc.bc
+```
+For `main` **OpcodeCounter**, prints the following summary (note that when running the pass,
+a summary for other functions defined in `input_for_cc.bc` is also printed):
+```
+=================================================
+LLVM-TUTOR: OpcodeCounter results for `main`
+=================================================
+OPCODE               #N TIMES USED
+-------------------------------------------------
+load                 2
+br                   4
+icmp                 1
+add                  1
+ret                  1
+alloca               2
+store                4
+call                 4
+-------------------------------------------------
+```
+
+#### Run OpcodeCounter Automatically
+**NOTE:** Currently this only works when building LLVM from sources. More
+information is available
+[here](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp#L114).
+
+You can configure **llvm-tutor** so that **OpcodeCounter** is run automatically
+at any optimisation level (i.e. `-O{0|1|2|3|s}`). This is achieved through 
+auto-registration with the existing pipelines, which is enabled with the
+`LT_OPT_PIPELINE_REG` CMake variable. Simply add `-DLT_OPT_PIPELINE_REG=On`
+when [building](#building--testing) **llvm-tutor**.
+
+Now you can run **OpcodeCounter** by specifying an optimisation level. Note
+that you still have to specify the plugin file to be loaded:
+```bash
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libOpcodeCounter.dylib -O1 input_for_cc.bc
+```
+This registration is implemented in
+[OpcodeCounter.cpp](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp#L118).
+Note that for this to work I used the Legacy Pass Manager (the plugin file was
+specified with `-load` rather than `-load-pass-plugin`).
+[Here](#about-pass-managers-in-llvm) you can read more about pass managers in
+LLVM.
 
 ## InjectFuncCall
 This pass is a _HelloWorld_ example for _code instrumentation_. For every function

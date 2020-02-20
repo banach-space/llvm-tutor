@@ -24,6 +24,6 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           mkdir build && cd build
-          cmake -DLT_LLVM_INSTALL_DIR="/usr/lib/llvm-9/"  ../
+          cmake -DLT_LLVM_INSTALL_DIR="/usr/lib/llvm-9/" ../
           make -j2
           lit test/

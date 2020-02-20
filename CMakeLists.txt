@@ -74,6 +74,23 @@ if (${SUPPORTS_FVISIBILITY_INLINES_HIDDEN_FLAG} EQUAL "1")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility-inlines-hidden")
 endif()
 
+# WARNING: Keep this turned off unless building LLVM from sources. When using
+# LLVM installed with HomeBrew (MacOS) or apt-get (Ubuntu), auto-registration
+# leads to a seg-fault. This is a known issue:
+#   * https://github.com/sampsyo/llvm-pass-skeleton/issues/7
+#   * https://bugs.llvm.org/show_bug.cgi?id=39321
+OPTION(LT_OPT_PIPELINE_REG "Auto-register OpcodeCounter with the optimisation pipelines" OFF)
+
+# Canonicalise LT_OPT_PIPELINE_REG as either 1 (On) or 0 (Off). This way we can
+# keep the implementation in lit.cfg.py.in (which uses it) clean and
+# straightforward.
+if(${LT_OPT_PIPELINE_REG})
+  set(LT_OPT_PIPELINE_REG 1)
+  add_definitions(-DLT_OPT_PIPELINE_REG)
+else()
+  set(LT_OPT_PIPELINE_REG 0)
+endif()
+
 # Set the build directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")

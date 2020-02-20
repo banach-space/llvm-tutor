@@ -8,6 +8,7 @@ set(LLVM_TUTOR_PLUGINS
     MBASub
     RIV
     DuplicateBB
+    OpcodeCounter
     )
 
 set(StaticCallCounter_SOURCES
@@ -27,6 +28,8 @@ set(RIV_SOURCES
 set(DuplicateBB_SOURCES
   DuplicateBB.cpp
   Ratio.cpp)
+set(OpcodeCounter_SOURCES
+  OpcodeCounter.cpp)
 
 # CONFIGURE THE PLUGIN LIBRARIES
 # ==============================
