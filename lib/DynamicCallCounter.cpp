@@ -50,9 +50,6 @@
 //========================================================================
 #include "DynamicCallCounter.h"
 
-#include "llvm/ADT/StringMap.h"
-#include "llvm/IR/BasicBlock.h"
-#include "llvm/IR/Constants.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/Passes/PassPlugin.h"

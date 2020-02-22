@@ -17,11 +17,8 @@
 //========================================================================
 #include "StaticCallCounter.h"
 
-#include "llvm/IR/BasicBlock.h"
-#include "llvm/IR/Instruction.h"
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/Passes/PassPlugin.h"
-#include "llvm/Support/Format.h"
 
 using namespace llvm;
 
@@ -71,13 +68,13 @@ StaticCallCounter::run(llvm::Module &M, llvm::ModuleAnalysisManager &) {
   return runOnModule(M);
 }
 
-void LegacyStaticCallCounter::print(raw_ostream &OutS, Module const *) const {
-  printStaticCCResult(OutS, DirectCalls);
-}
-
 bool LegacyStaticCallCounter::runOnModule(llvm::Module &M) {
   DirectCalls = Impl.runOnModule(M);
   return false;
+}
+
+void LegacyStaticCallCounter::print(raw_ostream &OutS, Module const *) const {
+  printStaticCCResult(OutS, DirectCalls);
 }
 
 //-----------------------------------------------------------------------------
