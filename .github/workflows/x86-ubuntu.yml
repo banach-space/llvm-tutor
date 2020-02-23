@@ -18,7 +18,7 @@ jobs:
         run: |
           cd HelloWorld
           mkdir build && cd build
-          cmake -DLT_LLVM_INSTALL_DIR="/usr/lib/llvm-9/" -DHELLOWORLD_OPT_PIPELINE_REG=On ../
+          cmake -DLT_LLVM_INSTALL_DIR="/usr/lib/llvm-9/" ../
           make -j2
       - name: Build llvm-tutor + run tests
         run: |

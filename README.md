@@ -79,41 +79,6 @@ $LLVM_DIR/bin/opt -load-pass-plugin libHelloWorld.dylib -passes=hello-world -dis
 The **HelloWorld** pass doesn't modify the input module. The `-disable-output`
 flag is used to prevent **opt** from printing the output bitcode file.
 
-## Run HelloWorld automatically at any optimisation level
-**NOTE:** On MacOS this only works when building LLVM from sources. More
-information is available
-[here](https://github.com/banach-space/llvm-tutor/blob/master/HelloWorld/HelloWorld.cpp#L118).
-
-In order to run **HelloWorld** automatically at `-O{0|1|2|3}`, you have to enable
-registration with the optimisation pipelines. This is done via
-`HELLOWORLD_OPT_PIPELINE_REG` CMake variable:
-```bash
-export LLVM_DIR=<installation/dir/of/llvm/9>
-mkdir build
-cd build
-cmake -DLT_LLVM_INSTALL_DIR=$LLVM_DIR -DHELLOWORLD_OPT_PIPELINE_REG=On <source/dir/llvm/tutor>/HelloWorld/
-make
-```
-**HelloWorld** will now be run whenever an optimisation level is specified:
-```bash
-$LLVM_DIR/bin/opt -load libHelloWorld.dylib -O1 -disable-output input_for_hello.ll
-# Expected output
-(llvm-tutor) Hello from: foo
-(llvm-tutor)   number of arguments: 1
-(llvm-tutor) Hello from: bar
-(llvm-tutor)   number of arguments: 2
-(llvm-tutor) Hello from: fez
-(llvm-tutor)   number of arguments: 3
-(llvm-tutor) Hello from: main
-(llvm-tutor)   number of arguments: 2
-```
-This registration is implemented in
-[HelloWorld.cpp](https://github.com/banach-space/llvm-tutor/blob/master/HelloWorld/HelloWorld.cpp#L123).
-Note that for this to work I used the Legacy Pass Manager (the plugin was
-specified with `-load` rather than `-load-pass-plugin`).
-[Here](#about-pass-managers-in-llvm) you can read more about pass managers in
-LLVM.
-
 Development Environment
 =======================
 ## Platform Support And Requirements
