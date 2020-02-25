@@ -198,8 +198,8 @@ form (with `-S`), but obviously the latter is more human-friendly. All passes,
 except for [**HelloWorld**](#helloworld), are described below.
 
 ## OpcodeCounter
-**OpcodeCounter** prints a summary of the LLVM IR
-[opcodes](https://github.com/llvm/llvm-project/blob/release/9.x/llvm/lib/IR/Instruction.cpp#L292)
+**OpcodeCounter** prints a summary of the
+[LLVM IR opcodes](https://github.com/llvm/llvm-project/blob/release/9.x/llvm/lib/IR/Instruction.cpp#L292)
 encountered in every function in the input module. This pass is slightly more
 complicated than **HelloWorld** and it can be [run
 automatically](#run-opcodecounter-automatically). Let's use our tried and
@@ -238,7 +238,7 @@ call                 4
 #### Run OpcodeCounter Automatically
 **NOTE:** Currently this only works when building LLVM from sources. More
 information is available
-[here](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp#L114).
+[here](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp#L119).
 
 You can configure **llvm-tutor** so that **OpcodeCounter** is run automatically
 at any optimisation level (i.e. `-O{0|1|2|3|s}`). This is achieved through 
@@ -252,7 +252,7 @@ that you still have to specify the plugin file to be loaded:
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libOpcodeCounter.dylib -O1 input_for_cc.bc
 ```
 This registration is implemented in
-[OpcodeCounter.cpp](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp#L118).
+[OpcodeCounter.cpp](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp#L123).
 Note that for this to work I used the Legacy Pass Manager (the plugin file was
 specified with `-load` rather than `-load-pass-plugin`).
 [Here](#about-pass-managers-in-llvm) you can read more about pass managers in
