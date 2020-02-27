@@ -3,61 +3,59 @@
 //    RIV.cpp
 //
 // DESCRIPTION:
-//    The (R)eachable (I)nteger (V)alues pass. For each basic block it creates
-//    a list of integer values reachable from that block. It uses the results
-//    of the 'dominator trees' pass.
+//    For every basic block  in the input function, this pass creates a list of
+//    integer values reachable from that block. It uses the results of the
+//    DominatorTree pass.
 //
 // ALGORITHM:
-//    ----------------------------------------------------------
-//    V = Visible values, D = Defined Values
-//    vN = set of integer values defined in basic block N
-//    ----------------------------------------------------------
+//    -------------------------------------------------------------------------
+//    v_N = set of integer values defined in basic block N (BB_N)
+//    RIV_N = set of reachable integer values for basic block N (BB_N)
+//    -------------------------------------------------------------------------
 //    STEP 1:
-//    V = 0, D = 0, I = {input args, global vals}
-//    ----------------------------------------------------------
+//    For every BB_N in F:
+//      compute v_N and store it in DefinedValuesMap
+//    -------------------------------------------------------------------------
 //    STEP 2:
-//    Iterate over all basic blocks and update V and D accordingly. On entry to
-//    each basic block, set the list of reachable integer values to V.
-//    BB 0:  v0 = ...    V = I, D = {v0}
-//            |
-//            v
-//    BB 1:  v1 = ...    V = {v0}, D = {v1}
-//            |
-//            v
-//    BB 2:  v2 = ...    V = {v0, v1}, D = {v2}
-//            |
-//            v
-//          (...)
-//    ----------------------------------------------------------
+//    Compute the RIVs for the entry block (BB_0):
+//      RIV_0 = {input args, global vars}
+//    -------------------------------------------------------------------------
+//    STEP 3: Traverse the CFG and for every BB_M that BB_N dominates,
+//    calculate RIV_M as follows:
+//      RIV_M = {RIV_N, v_N}
+//    -------------------------------------------------------------------------
 //
 // License: MIT
 //=============================================================================
 #include "RIV.h"
 
-#include "llvm/IR/Dominators.h"
+#include "llvm/Passes/PassBuilder.h"
+#include "llvm/Passes/PassPlugin.h"
 #include "llvm/Support/Format.h"
 
 #include <deque>
 
-#define DEBUG_TYPE "riv"
 using namespace llvm;
 
-char RIV::ID = 0;
-static RegisterPass<RIV> X("riv", "Compute Reachable Integer values",
-                           true, // doesn't modify the CFG => true
-                           true  // pure analysis pass => true
-);
+// DominatorTree node types used in RIV. One could use auto instead, but IMO
+// being verbose makes it easier to follow.
+using NodeTy = DomTreeNodeBase<llvm::BasicBlock> *;
+// A map that a basic block BB holds a set of pointers to values defined in BB.
+using DefValMapTy = RIV::Result;
 
-bool RIV::runOnFunction(Function &F) {
-  // For each invocation of the compiler, there's only one instance of this pass
-  // being created. As a result, the same instance of RIVMap is re-used for
-  // every function that this pass is run on. For instance, if RIV has already
-  // been run for some function 'foo', then RIVMap will contain the results for
-  // 'foo'.  Hence the map neads to be cleared before analysing afunction.
-  RIVMap.clear();
+//-----------------------------------------------------------------------------
+// RIV Implementation
+//-----------------------------------------------------------------------------
+RIV::Result RIV::buildRIV(Function &F, NodeTy CFGRoot) {
+  Result ResultMap;
 
-  // STEP 1. Compute sets of integer values defined for each Basic block
-  RIVMapTy DefinedValuesMap;
+  // Initialise a double-ended queue that will be used to traverse all BBs in F
+  std::deque<NodeTy> BBsToProcess;
+  BBsToProcess.push_back(CFGRoot);
+
+  // STEP 1: For every basic block BB compute the set of integer values defined
+  // in BB
+  DefValMapTy DefinedValuesMap;
   for (BasicBlock &BB : F) {
     auto &Values = DefinedValuesMap[&BB];
     for (Instruction &Inst : BB)
@@ -65,91 +63,138 @@ bool RIV::runOnFunction(Function &F) {
         Values.insert(&Inst);
   }
 
-  // STEP 2. Compute the reachable integer values
-  // Arguments and globals are always live
-  auto &HeadValues = RIVMap[&F.getEntryBlock()];
+  // STEP 2: Compute the RIVs for the entry BB. This will include global
+  // variables and input arguments.
+  auto &EntryBBValues = ResultMap[&F.getEntryBlock()];
+
+  auto &Globals = F.getParent()->getGlobalList();
+  for (auto &global : Globals) {
+    EntryBBValues.insert(global.getOperand(0));
+  }
+
   for (Argument &Arg : F.args())
-    HeadValues.insert(&Arg);
+    if (Arg.getType()->isIntegerTy())
+      EntryBBValues.insert(&Arg);
 
-  // Get the result from the Dominance Tree pass
-  auto *Root =
-      getAnalysis<DominatorTreeWrapperPass>().getDomTree().getRootNode();
-  std::deque<decltype(Root)> NodesToProcess;
-  NodesToProcess.push_back(Root);
+  // STEP 3: Traverse the CFG for every BB in F calculate its RIVs
+  while (!BBsToProcess.empty()) {
+    auto *Parent = BBsToProcess.back();
+    BBsToProcess.pop_back();
 
-  LLVM_DEBUG(errs() << "In Function: " << F.getName() << "\n");
+    // Get the values defined in Parent
+    auto &ParentDefs = DefinedValuesMap[Parent->getBlock()];
+    // Get the RIV set of for Parent
+    // (Since RIVMap is updated on every iteration, its contents are likely to
+    // be moved around when resizing. This means that we need a copy of it
+    // (i.e. a reference is not sufficient).
+    llvm::SmallPtrSet<llvm::Value *, 8> ParentRIVs =
+        ResultMap[Parent->getBlock()];
 
-  while (!NodesToProcess.empty()) {
-    auto *NodeToProcess = NodesToProcess.back();
-    NodesToProcess.pop_back();
-    LLVM_DEBUG(errs() << "processing BB " << NodeToProcess->getBlock() << "\n");
-    for (auto *Child : *NodeToProcess) {
-      LLVM_DEBUG(errs() << "updating dominated child " << Child->getBlock()
-                        << "\n");
-      NodesToProcess.push_back(Child);
-      {
-        // Add defined values to dominated nodes
-        auto &Values = DefinedValuesMap[NodeToProcess->getBlock()];
-        RIVMap[Child->getBlock()].insert(Values.begin(), Values.end());
-      }
-      {
-        // Add inherited values from dominating node
-        auto &Values = RIVMap[NodeToProcess->getBlock()];
-        RIVMap[Child->getBlock()].insert(Values.begin(), Values.end());
-      }
+    // Loop over all BBs that Parent dominates and update their RIV sets
+    for (NodeTy Child : *Parent) {
+      BBsToProcess.push_back(Child);
+      auto ChildBB = Child->getBlock();
+
+      // Add values defined in Parent to the current child's set of RIV
+      ResultMap[ChildBB].insert(ParentDefs.begin(), ParentDefs.end());
+
+      // Add Parent's set of RIVs to the current child's RIV
+      ResultMap[ChildBB].insert(ParentRIVs.begin(), ParentRIVs.end());
     }
   }
 
-  // Analysis pass => doesn't modify F => return false
+  return ResultMap;
+}
+
+RIV::Result RIV::run(llvm::Function &F, llvm::FunctionAnalysisManager &FAM) {
+  auto *DT = FAM.getCachedResult<DominatorTreeAnalysis>(F);
+  Result Res = buildRIV(F, DT->getRootNode());
+  printRIVResult(llvm::errs(), Res);
+
+  return Res;
+}
+
+bool LegacyRIV::runOnFunction(llvm::Function &F) {
+  // Clear the results from previous runs.
+  RIVMap.clear();
+
+  // Get the entry node for the CFG for the input function
+  NodeTy Root =
+      getAnalysis<DominatorTreeWrapperPass>().getDomTree().getRootNode();
+
+  RIVMap = Impl.buildRIV(F, Root);
+
   return false;
 }
 
-// Some guidance for PassManager:
-//    * addRequired<DominatorTreeWrapperPass>() - needs the results from
-//    Dominator Tree Pass
-//    * setPreservesAll() - does not modify the LLVM program
-//  More info:
-// http://llvm.org/docs/WritingAnLLVMPass.html#specifying-interactions-between-passes
-void RIV::getAnalysisUsage(AnalysisUsage &Info) const {
-  Info.addRequired<DominatorTreeWrapperPass>();
-  Info.setPreservesAll();
+void LegacyRIV::print(raw_ostream &out, Module const *) const {
+  printRIVResult(out, RIVMap);
 }
 
-RIV::RIVMapTy const &RIV::getRIVMap() const { return RIVMap; }
+//-----------------------------------------------------------------------------
+// New PM Registration
+//-----------------------------------------------------------------------------
+AnalysisKey RIV::Key;
 
-void RIV::print(raw_ostream &out, Module const *) const {
-  out << "=================================================\n";
-  out << "LLVM-TUTOR: RIV analysis results\n";
-  out << "=================================================\n";
+llvm::PassPluginLibraryInfo getRIVPluginInfo() {
+  return {LLVM_PLUGIN_API_VERSION, "riv", LLVM_VERSION_STRING,
+          [](PassBuilder &PB) {
+            PB.registerAnalysisRegistrationCallback(
+                [](FunctionAnalysisManager &FAM) {
+                  FAM.registerPass([&] { return RIV(); });
+                });
+          }};
+};
+
+extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
+llvmGetPassPluginInfo() {
+  return getRIVPluginInfo();
+}
+
+//-----------------------------------------------------------------------------
+// Legacy PM Registration
+//-----------------------------------------------------------------------------
+// This method defines how this pass interacts with other passes
+void LegacyRIV::getAnalysisUsage(AnalysisUsage &AU) const {
+  // Request the results from Dominator Tree Pass
+  AU.addRequired<DominatorTreeWrapperPass>();
+  // We do not modify the input module
+  AU.setPreservesAll();
+}
+
+char LegacyRIV::ID = 0;
+static RegisterPass<LegacyRIV> X(/*PassArg=*/"legacy-riv",
+                                 /*Name=*/"Compute Reachable Integer values",
+                                 /*CFGOnly=*/true,
+                                 /*is_analysis*/ true);
+
+//------------------------------------------------------------------------------
+// Helper functions
+//------------------------------------------------------------------------------
+void printRIVResult(raw_ostream &OutS, const RIV::Result &RIVMap) {
+  OutS << "=================================================\n";
+  OutS << "LLVM-TUTOR: RIV analysis results\n";
+  OutS << "=================================================\n";
 
   const char *Str1 = "BB id";
   const char *Str2 = "Reachable Ineger Values";
-  out << format("%-6s %-30s\n", Str1, Str2);
-  out << "-------------------------------------------------\n";
+  OutS << format("%-10s %-30s\n", Str1, Str2);
+  OutS << "-------------------------------------------------\n";
 
   const char *EmptyStr = "";
 
-  // Generate a map of RIVs, sorted by BB ids.
-  // TODO Make this more elegant (i.e. avoid creating a separate container)
-  std::map<int, llvm::SmallPtrSet<llvm::Value *, 8>> RIVMapAlt;
-  for (auto const &KvPair : RIVMap) {
+  for (auto const &KV : RIVMap) {
     std::string DummyStr;
     raw_string_ostream BBIdStream(DummyStr);
-    KvPair.first->printAsOperand(BBIdStream, false);
-    // Strip the leading '%' and turn into an int
-    int BBId = stoi(BBIdStream.str().erase(0, 1));
-
-    RIVMapAlt[BBId].insert(KvPair.second.begin(), KvPair.second.end());
-  }
-
-  // Print the results, sorted by BB id
-  for (auto const &KV : RIVMapAlt) {
-    out << format("BB %-6d %-30s\n", KV.first, EmptyStr);
+    KV.first->printAsOperand(BBIdStream, false);
+    OutS << format("BB %-12s %-30s\n", BBIdStream.str().c_str(), EmptyStr);
     for (auto const &IntegerValue : KV.second) {
       std::string DummyStr;
       raw_string_ostream InstrStr(DummyStr);
       IntegerValue->print(InstrStr);
-      out << format("%-6s %-30s\n", EmptyStr, InstrStr.str().c_str());
+      OutS << format("%-12s %-30s\n", EmptyStr, InstrStr.str().c_str());
     }
   }
+
+  OutS << "\n\n";
 }

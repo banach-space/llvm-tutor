@@ -241,7 +241,7 @@ information is available
 [here](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp#L119).
 
 You can configure **llvm-tutor** so that **OpcodeCounter** is run automatically
-at any optimisation level (i.e. `-O{0|1|2|3|s}`). This is achieved through 
+at any optimisation level (i.e. `-O{0|1|2|3|s}`). This is achieved through
 auto-registration with the existing pipelines, which is enabled with the
 `LT_OPT_PIPELINE_REG` CMake variable. Simply add `-DLT_OPT_PIPELINE_REG=On`
 when [building](#building--testing) **llvm-tutor**.
@@ -466,9 +466,21 @@ $LLVM_DIR/bin/opt -load <build_dir>/lib/libMBAAdd.so -legacy-mba-add -mba-ratio=
 ```
 
 ## RIV
-For each basic block in a module, **RIV** calculates the reachable integer
-values (i.e. values that can be used in the particular basic block).  There
-are a few LIT tests that verify that indeed this is correct.
+**RIV** is an analysis pass that for each [basic
+block](http://llvm.org/docs/ProgrammersManual.html#the-basicblock-class) BB in
+the input function computes the set reachable integer values, i.e. the integer
+values that are visible (i.e. can be used) in BB. Since the pass operates on
+the LLVM IR representation of the input file, it takes into account all values
+that have [integer type](https://llvm.org/docs/LangRef.html#integer-type) in
+the [LLVM IR](https://llvm.org/docs/LangRef.html) sense. In particular, since
+at the LLVM IR level booleans are represented as 1-bit wide integers (i.e.
+`i1`), you will notice that booleans are also included in the result.
+
+This pass demonstrates how to request results from other analysis passes in
+LLVM. In particular, it relies on the [Dominator
+Tree](https://en.wikipedia.org/wiki/Dominator_(graph_theory)) analysis pass
+from LLVM, which is is used to obtain the dominance tree for the basic blocks
+in the input function.
 
 #### Run the pass
 We will use
@@ -476,12 +488,51 @@ We will use
 to test **RIV**:
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/9>
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libRIV.so -riv inputs/input_for_riv.c
+$LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_riv.c -o input_for_riv.ll
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libRIV.so -legacy-riv inputs/input_for_riv.ll
 ```
-
-Note that this pass, unlike previous examples, will produce information about
-the IR representation of the original module only. It won't be very useful if trying
-to understand the original C or C++ input file.
+You will see the following output:
+```
+=================================================
+LLVM-TUTOR: RIV analysis results
+=================================================
+BB id      Reachable Ineger Values
+-------------------------------------------------
+BB %entry
+             i32 %a
+             i32 %b
+             i32 %c
+BB %if.then
+               %add = add nsw i32 %a, 123
+               %cmp = icmp sgt i32 %a, 0
+             i32 %a
+             i32 %b
+             i32 %c
+BB %if.end8
+               %add = add nsw i32 %a, 123
+               %cmp = icmp sgt i32 %a, 0
+             i32 %a
+             i32 %b
+             i32 %c
+BB %if.then2
+               %mul = mul nsw i32 %b, %a
+               %div = sdiv i32 %b, %c
+               %cmp1 = icmp eq i32 %mul, %div
+               %add = add nsw i32 %a, 123
+               %cmp = icmp sgt i32 %a, 0
+             i32 %a
+             i32 %b
+             i32 %c
+BB %if.else
+               %mul = mul nsw i32 %b, %a
+               %div = sdiv i32 %b, %c
+               %cmp1 = icmp eq i32 %mul, %div
+               %add = add nsw i32 %a, 123
+               %cmp = icmp sgt i32 %a, 0
+             i32 %a
+             i32 %b
+             i32 %c
+```
 
 ## DuplicateBB
 This pass will duplicate all basic blocks in a module, with the exception of

@@ -1,41 +1,28 @@
 //=============================================================================
 // FILE:
-//      input_for_rvi.c
+//      input_for_riv.c
 //
 // DESCRIPTION:
 //      Sample input file for RIV analysis.
 //
 // License: MIT
 //=============================================================================
-int fez() {
-  int foo_var1 = 1;
-  int foo_var2 = 2;
-  int foo_var3 = foo_var1 + foo_var2;
+int foo(int a, int b, int c) {
+  int result = 123 + a;
 
-  if (foo_var1)
-    foo_var2 = 3;
-
-  return foo_var3;
-}
-
-int foo(int a) {
-  int foo_var1 = 1;
-  int foo_var2 = 2;
-  int foo_var3 = foo_var1 + foo_var2;
-
-  return foo_var3;
-}
-
-int bar() {
-  int bar_var1 = foo(1);
-
-  int ii = 0;
-  for (ii = 0; ii < 10; ii++) {
-    int bar_var2 = ii;
-    bar_var1 += bar_var2;
+  if (a > 0) {
+    int d = a * b;
+    int e = b / c;
+    if (d == e) {
+      int f = d * e;
+      result = result - 2*f;
+    } else {
+      int g = 987;
+      result = g * c * e;
+    }
+  } else {
+    result = 321;
   }
 
-  return bar_var1;
+  return result;
 }
-
-int main(int argc, char *argv[]) { return bar(); }

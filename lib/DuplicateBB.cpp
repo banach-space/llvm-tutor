@@ -88,7 +88,7 @@ bool DuplicateBB::runOnFunction(Function &F) {
   std::uniform_real_distribution<double> Dist(0., 1.);
 
   // Get the result of RIV
-  auto const &RIVResult = getAnalysis<RIV>().getRIVMap();
+  auto const &RIVResult = getAnalysis<LegacyRIV>().getRIVMap();
 
   // The list of BBs to duplicate. For each BB, also stores a context variable
   // that can be used for the boolean condition for the 'if-then-else'
@@ -225,5 +225,5 @@ void DuplicateBB::duplicate(BasicBlock &BB, Value *ContextValue,
 // More info:
 // http://llvm.org/docs/WritingAnLLVMPass.html#specifying-interactions-between-passes
 void DuplicateBB::getAnalysisUsage(AnalysisUsage &Info) const {
-  Info.addRequired<RIV>();
+  Info.addRequired<LegacyRIV>();
 }
