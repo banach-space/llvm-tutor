@@ -8,50 +8,60 @@
 //    suitable for cloning iff its set of RIVs (Reachable Integer Values) is
 //    non-empty.
 //
-//    If BB is suitable for cloning, two new basic blocks are created that
-//    replace BB: BB-if-then and BB-else. In order to decide which new
-//    BasicBlock to jump to, an if-then-else construct is inserted where
-//    originally BB would start:
+//    If BB is suitable for cloning, in total four new basic blocks are created
+//    that replace BB:
+//      * lt-clone-1 and lt-clone-2 are clones of BB
+//      * lt-if-then-else contains an `if-then-else` statement that's used to
+//        decide which out of the two clones to branch two
+//      * lt-tail contains PHI nodes and is used to merge lt-clone-1 and
+//        lt-clone-2
+//    This if-then-else basic blocks contains an IR equivalent of the following
+//    pseudo code:
 //      if (var == 0)
 //        goto BB-if-then
 //      else
 //        goto BB-else
-//    `var` is a randomly chosen variable from the RIV set for BB. If `var` is
-//    a GlobalValue (i.e. global variable), then BB won't be duplicated
-//    (because global variables are often constant, and constant values lead to
-//    trivial `if` conditions, e.g. if (some_const_val == 0)).
+//    `var` is a randomly chosen variable from the RIV set for BB. If `var`
+//    happens to be a GlobalValue (i.e. global variable), BB won't be
+//    duplicated. That's because global variables are often constants, and
+//    constant values lead to trivial `if` conditions (e.g. if ( 0 == 0 )).
+//
+//    All newly created basic blocks are suffixed with the original basic
+//    block's numeric ID.
 //
 //  ALGORITHM:
 //    --------------------------------------------------------------------------
-//    The following CFG graph presents function 'F' before and after applying
-//    DuplicateBB. BB0 is the entry block. Assume that:
-//      * F takes no arguments (i.e. BB0 is not duplicated)
-//      * BB1 and BB1 are suitable for cloning
-//      * var_BB1 and var_BB2 are integers from the sets of RIVs for BB1 and
-//        BB2, respectively
+//    The following CFG graph represents function 'F' before and after applying
+//    DuplicateBB. Assume that:
+//      * F takes no arguments so [ entry ] is not duplicated
+//      * [ BB1 ] and [ BB2 ] are suitable for cloning
 //    --------------------------------------------------------------------------
-//    F - BEFORE     F - AFTER
+//    F - BEFORE     (equivalence)          F - AFTER
 //    --------------------------------------------------------------------------
-//      BB0             BB0
-//       |               |
-//       v               v
-//      BB1     if (var_BB1 == 0)     <---- inserted by DuplicateBB
-//       |              / \
-//       |            /     \
-//       |     BB1-if-then  BB1-else  <---- clones of BB1
-//       |            \     /
-//       |              \ /
-//       |               v
-//       v             TAIL           <---- PHIs to merge BB1-if-then & BB1-else
-//      BB2      if (var_BB2 == 0)    <---- inserted by DuplicateBB
-//       |              / \
-//       |            /     \
-//       |      BB2-then   BB2-else   <---- clones of BB2
-//       |            \     /
-//       |              \ /
-//       |               v
-//       v             TAIL           <---- PHIs to merge BB2-if-then & BB2-else
-//     TERM            TERM           <---- terminator instruction
+//    [ entry ]                              [ entry ]
+//        |                                      |
+//        v            _________                 v
+//        |           |                  [ if-then-else-1 ]
+//        |           |                         / \
+//        |           |                       /     \
+//        |           |          [ lt-clone-1-1 ] [ lt-clone-2-1 ]
+//     [ BB1 ]       <                        \     /
+//        |           |                         \ /
+//        |           |                          v
+//        |           |                    [ lt-tail-1 ]
+//        |           |_________                 |
+//        v            _________                 v
+//        |           |                 [ lt-if-then-else-2 ]
+//        |           |                         / \
+//        |           |                       /     \
+//        |           |          [ lt-clone-1-2 ] [ lt-clone-2-2 ]
+//     [ BB2 ]       <                        \     /
+//        |           |                         \ /
+//        |           |                          v
+//        |           |                   [ lt-tail-2 ]
+//        |           |_________                 |
+//        v                                      v
+//      (...)                                  (...)
 //    --------------------------------------------------------------------------
 //
 // License: MIT
