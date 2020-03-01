@@ -25,8 +25,6 @@ using namespace llvm;
 //-----------------------------------------------------------------------------
 // StaticCallCounter Implementation
 //-----------------------------------------------------------------------------
-AnalysisKey StaticCallCounter::Key;
-
 StaticCallCounter::Result StaticCallCounter::runOnModule(Module &M) {
   llvm::DenseMap<const llvm::Function *, unsigned> Res;
 
@@ -80,6 +78,8 @@ void LegacyStaticCallCounter::print(raw_ostream &OutS, Module const *) const {
 //-----------------------------------------------------------------------------
 // New PM Registration
 //-----------------------------------------------------------------------------
+AnalysisKey StaticCallCounter::Key;
+
 llvm::PassPluginLibraryInfo getStaticCallCounterPluginInfo() {
   return {LLVM_PLUGIN_API_VERSION, "static-cc", LLVM_VERSION_STRING,
           [](PassBuilder &PB) {
