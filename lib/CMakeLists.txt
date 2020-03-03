@@ -26,8 +26,7 @@ set(MBASub_SOURCES
 set(RIV_SOURCES
   RIV.cpp)
 set(DuplicateBB_SOURCES
-  DuplicateBB.cpp
-  Ratio.cpp)
+  DuplicateBB.cpp)
 set(OpcodeCounter_SOURCES
   OpcodeCounter.cpp)
 
