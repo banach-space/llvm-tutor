@@ -67,10 +67,9 @@ RIV::Result RIV::buildRIV(Function &F, NodeTy CFGRoot) {
   // variables and input arguments.
   auto &EntryBBValues = ResultMap[&F.getEntryBlock()];
 
-  auto &Globals = F.getParent()->getGlobalList();
-  for (auto &global : Globals) {
-    EntryBBValues.insert(global.getOperand(0));
-  }
+  for (auto &Global : F.getParent()->getGlobalList())
+    if (Global.getValueType()->isIntegerTy())
+      EntryBBValues.insert(&Global);
 
   for (Argument &Arg : F.args())
     if (Arg.getType()->isIntegerTy())
@@ -107,7 +106,7 @@ RIV::Result RIV::buildRIV(Function &F, NodeTy CFGRoot) {
 }
 
 RIV::Result RIV::run(llvm::Function &F, llvm::FunctionAnalysisManager &FAM) {
-  auto *DT = FAM.getCachedResult<DominatorTreeAnalysis>(F);
+  DominatorTree *DT = &FAM.getResult<DominatorTreeAnalysis>(F);
   Result Res = buildRIV(F, DT->getRootNode());
   printRIVResult(llvm::errs(), Res);
 
