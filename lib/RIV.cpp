@@ -108,7 +108,6 @@ RIV::Result RIV::buildRIV(Function &F, NodeTy CFGRoot) {
 RIV::Result RIV::run(llvm::Function &F, llvm::FunctionAnalysisManager &FAM) {
   DominatorTree *DT = &FAM.getResult<DominatorTreeAnalysis>(F);
   Result Res = buildRIV(F, DT->getRootNode());
-  printRIVResult(llvm::errs(), Res);
 
   return Res;
 }
