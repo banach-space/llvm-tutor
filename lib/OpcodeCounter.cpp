@@ -18,12 +18,12 @@
 //    1. Legacy PM
 //      opt -load libOpcodeCounter.dylib -legacy-opcode-counter\
 //        -disable-output <input-llvm-file>
-//    2. New PM
-//      opt -load-pass-plugin=libOpcodeCounter.dylib -passes="opcode-count" \
-//        -disable-output <input-llvm-file>
-//    3. Automatically through an optimisation pipeline
+//    2. Automatically through an optimisation pipeline - legacy PM
 //      opt -load libOpcodeCounter.dylib -O{0|1|2|3|s} -disable-output \
 //        <input-llvm-file>
+//    3. Automatically through an optimisation pipeline - new PM
+//      opt -load-pass-plugin libOpcodeCounter.dylib --passes='default<O1>'\
+//        -disable-output <input-llvm-file>
 //
 // License: MIT
 //=============================================================================
@@ -75,17 +75,23 @@ bool LegacyOpcodeCounter::runOnFunction(llvm::Function &Func) {
 //-----------------------------------------------------------------------------
 // New PM Registration
 //-----------------------------------------------------------------------------
+#ifdef LT_OPT_PIPELINE_REG
+// Register OpcodeCounter as a step of an existing pipeline. The insertion
+// point is specified by the 'registerVectorizerStartEPCallback' callback.
+// More specifically, OpcodeCounter will be run automatically whenever the
+// vectoriser is used (i.e. when using '-O{1|2|3|s}'.
+//
+// NOTE: this trips 'opt' installed via HomeBrew (Mac OS) and apt-get (Ubuntu).
+// It's a known issues:
+//    https://github.com/sampsyo/llvm-pass-skeleton/issues/7
+//    https://bugs.llvm.org/show_bug.cgi?id=39321
 llvm::PassPluginLibraryInfo getOpcodeCounterPluginInfo() {
   return {LLVM_PLUGIN_API_VERSION, "OpcodeCounter", LLVM_VERSION_STRING,
           [](PassBuilder &PB) {
-            PB.registerPipelineParsingCallback(
-                [](StringRef Name, FunctionPassManager &FPM,
-                   ArrayRef<PassBuilder::PipelineElement>) {
-                  if (Name == "opcode-counter") {
-                    FPM.addPass(OpcodeCounter());
-                    return true;
-                  }
-                  return false;
+            PB.registerVectorizerStartEPCallback(
+                [](llvm::FunctionPassManager &PM,
+                   llvm::PassBuilder::OptimizationLevel Level) {
+                  PM.addPass(OpcodeCounter());
                 });
           }};
 }
@@ -94,22 +100,17 @@ extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
 llvmGetPassPluginInfo() {
   return getOpcodeCounterPluginInfo();
 }
+#endif
 
 //-----------------------------------------------------------------------------
 // Legacy PM Registration
 //-----------------------------------------------------------------------------
-// The address of this variable is used to identify the pass. The actual value
-// doesn't matter.
 char LegacyOpcodeCounter::ID = 0;
 
-// Register the pass - with this 'opt' will be able to recognize
-// LegacyOpcodeCounter when added to the pass pipeline on the command line, i.e.
-// via '--legacy-opcode-count'
-static RegisterPass<LegacyOpcodeCounter>
-    X("legacy-opcode-counter", "OpcodeCounter Pass",
-      true, // This pass doesn't modify the CFG => true
-      false // This pass is not a pure analysis pass => false
-    );
+static RegisterPass<LegacyOpcodeCounter> X(/*PassArg=*/"legacy-opcode-counter",
+                                           /*Name=*/"OpcodeCounter Pass",
+                                           /*CFGOnly=*/true,
+                                           /*is_analysis=*/false);
 
 #ifdef LT_OPT_PIPELINE_REG
 // Register LegacyOpcodeCounter as a step of an existing pipeline. The insertion

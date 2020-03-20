@@ -241,22 +241,30 @@ information is available
 [here](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp#L119).
 
 You can configure **llvm-tutor** so that **OpcodeCounter** is run automatically
-at any optimisation level (i.e. `-O{0|1|2|3|s}`). This is achieved through
+at any optimisation level (i.e. `-O{1|2|3|s}`). This is achieved through
 auto-registration with the existing pipelines, which is enabled with the
 `LT_OPT_PIPELINE_REG` CMake variable. Simply add `-DLT_OPT_PIPELINE_REG=On`
 when [building](#building--testing) **llvm-tutor**.
 
-Now you can run **OpcodeCounter** by specifying an optimisation level. Note
-that you still have to specify the plugin file to be loaded:
+Once built, you can run **OpcodeCounter** by specifying an optimisation level.
+Note that you still have to specify the plugin file to be loaded:
 ```bash
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libOpcodeCounter.dylib -O1 input_for_cc.bc
 ```
-This registration is implemented in
-[OpcodeCounter.cpp](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp#L123).
-Note that for this to work I used the Legacy Pass Manager (the plugin file was
-specified with `-load` rather than `-load-pass-plugin`).
-[Here](#about-pass-managers-in-llvm) you can read more about pass managers in
-LLVM.
+Here I used the Legacy Pass Manager (the plugin file was specified with
+`-load` rather than `-load-pass-plugin`), but the auto-registration also works with
+the New Pass Manager:
+```bash
+$LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libOpcodeCounter.dylib --passes='default<O1>' input_for_cc.bc
+```
+
+This is implemented in
+[OpcodeCounter.cpp](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp),
+on
+[line 88](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp#L88) for the New PM, and on
+[line 123](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp#L123) for the Legacy PM.
+This [section](#about-pass-managers-in-llvm) contains more information about
+the pass managers in LLVM.
 
 ## InjectFuncCall
 This pass is a _HelloWorld_ example for _code instrumentation_. For every function

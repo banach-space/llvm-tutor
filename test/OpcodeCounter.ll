@@ -1,7 +1,5 @@
 ; RUN:  opt -load %shlibdir/libOpcodeCounter%shlibext --legacy-opcode-counter %S/Inputs/CallCounterInput.ll -disable-output 2>&1\
 ; RUN:   | FileCheck %s
-; RUN:  opt -load-pass-plugin %shlibdir/libOpcodeCounter%shlibext -passes="opcode-counter" %S/Inputs/CallCounterInput.ll -disable-output 2>&1\
-; RUN:   | FileCheck %s
 
 ; Test 'opcode-counter' when run through opt (both new PM and legacy PM)
 
