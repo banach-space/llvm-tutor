@@ -550,20 +550,91 @@ function that:
 * takes no arguments and
 * is embedded in a module that defines no global values.
 
-Basic blocks are duplicated by inserting an `if-then-else` construct and
-cloning all the instructions (with the exception of [PHI
-nodes](https://en.wikipedia.org/wiki/Static_single_assignment_form)) into the
-new blocks.
+Basic blocks are duplicated by first inserting an `if-then-else` construct and
+then cloning all the instructions from the original basic block (with the
+exception of [PHI
+nodes](https://en.wikipedia.org/wiki/Static_single_assignment_form)) into two
+new basic blocks (clones of the original basic block). The `if-then-else`
+construct is introduced as a non-trivial mechanism that decides which of the
+cloned basic blocks to branch to. This condition is equivalent to:
+```cpp
+if (var == 0)
+  goto clone 1
+else
+  goto clone 2
+```
+in which:
+* `var` is a randomly picked variable from the `RIV` set for the current basic
+  block
+* `clone 1` and `clone 2` are labels for the cloned basic blocks.
+
+The complete transformation looks like this:
+```c
+BEFORE:           AFTER:
+-------           ------
+                    [ if-then-else ]
+                         /  \
+[ BB ]    --->    [clone 1] [clone 2]
+                         \  /
+                       [ tail ]
+
+LEGEND:
+-------
+[BB]           - the original basic block
+[if-then-else] - a new basic block that contains the if-then-else statement (inserted by DuplicateBB)
+[clone 1|2]    - two new basic blocks that are clones of BB (inserted by DuplicateBB)
+[tail]         - the new basic block that merges [clone 1] and [clone 2] (inserted by DuplicateBB)
+```
+As depicted above, **DuplicateBB** replaces qualifying basic blocks with 4 new
+basic blocks. This is implemented through LLVM's
+[SplitBlockAndInsertIfThenElse](https://github.com/llvm/llvm-project/blob/release/9.x/llvm/include/llvm/Transforms/Utils/BasicBlockUtils.h#L315).
+**DuplicateBB** does all the necessary preparation and clean-up. In other
+words, it's an elaborate wrapper for LLVM's `SplitBlockAndInsertIfThenElse`.
 
 #### Run the pass
-This pass depends on the **RIV** pass, hence you need to load it too in order
-for **DuplicateBB** to work. We will use
+This pass depends on the **RIV** pass, which also needs be loaded in order for
+**DuplicateBB** to work. Lets use
 [input_for_duplicate_bb.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_duplicate_bb.c)
-to test it:
+as our sample input. First, generate the LLVM file:
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/9>
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libRIV.so -load <build_dir>/lib/libDuplicateBB.so -riv inputs/input_for_duplicate_bb.c
+$LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_duplicate_bb.c -o input_for_duplicate_bb.ll
 ```
+
+Function `foo` in `input_for_duplicate_bb.ll` should look like this (all metadata has been stripped):
+```assembly
+define i32 @foo(i32) {
+  ret i32 1
+}
+```
+Note that there's only one basic block (the _entry_ block) and that `foo` takes
+one argument (this means that the result from **RIV** will be a non-empty set).
+We will now apply **DuplicateBB** to `foo`:
+```bash
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libRIV.so -load <build_dir>/lib/libDuplicateBB.so -legacy-duplicate-bb inputs/input_for_duplicate_bb.ll
+```
+After the instrumentation `foo` will look like this (all metadata has been stripped):
+```assembly
+define i32 @foo(i32) {
+lt-if-then-else-0:
+  %2 = icmp eq i32 %0, 0
+  br i1 %2, label %lt-if-then-0, label %lt-else-0
+
+clone-0-0:
+  br label %lt-tail-0
+
+clone-1-0:
+  br label %lt-tail-0
+
+lt-tail-0:
+  ret i32 1
+}
+```
+There are four basic blocks instead of one. All new basic blocks end with a
+numeric id of the original basic block (`0` in this case). `lt-if-then-else-0`
+contains the new `if-then-else` condition. `clone-0-0` and `clone-1-0` are
+clones of the original basic block in `foo`. `lt-tail-0` is the extra basic
+block that's required to merge `clone-0-0` and `clone-1-0`.
 
 Debugging
 ==========

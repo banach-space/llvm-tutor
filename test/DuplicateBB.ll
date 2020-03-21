@@ -10,14 +10,15 @@ define i32 @foo(i32) {
 }
 
 ; CHECK-LABEL: foo
-; CHECK-NEXT:   %2 = icmp eq i32 %0, 0
-; CHECK: br i1 %2, label %lt-if-then-0, label %lt-else-0
+; CHECK-NEXT: lt-if-then-else-0:
+; CHECK-NEXT: %1 = icmp eq i32 %0, 0
+; CHECK: br i1 %1, label %lt-clone-1-0, label %lt-clone-2-0
 
-; CHECK: lt-if-then-0:
-; CHECK-NEXT:   br label %3
+; CHECK: lt-clone-1-0:
+; CHECK-NEXT:   br label %lt-tail-0
 
-; CHECK: lt-else-0:
-; CHECK-NEXT:   br label %3
+; CHECK: lt-clone-2-0:
+; CHECK-NEXT:   br label %lt-tail-0
 
-; CHECK: 3:
+; CHECK: lt-tail-0:
 ; CHECK-NEXT:   ret i32 1

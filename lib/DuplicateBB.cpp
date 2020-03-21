@@ -143,15 +143,18 @@ void DuplicateBB::cloneBB(BasicBlock &BB, Value *ContextValue,
   Instruction *ThenTerm = nullptr;
   Instruction *ElseTerm = nullptr;
   SplitBlockAndInsertIfThenElse(Cond, &*BBHead, &ThenTerm, &ElseTerm);
+  BasicBlock *Tail = ThenTerm->getSuccessor(0);
+
+  assert(Tail == ElseTerm->getSuccessor(0) && "Inconsistent CFG");
 
   // Give the new basic blocks some meaningful names. This is not required, but
   // makes the output easier to read.
   std::string DuplicatedBBId = std::to_string(DuplicateBBCount);
-  ThenTerm->getParent()->setName("lt-if-then-" + DuplicatedBBId);
-  ElseTerm->getParent()->setName("lt-else-" + DuplicatedBBId);
-
-  BasicBlock *Tail = ThenTerm->getSuccessor(0);
-  assert(Tail == ElseTerm->getSuccessor(0));
+  ThenTerm->getParent()->setName("lt-clone-1-" + DuplicatedBBId);
+  ElseTerm->getParent()->setName("lt-clone-2-" + DuplicatedBBId);
+  Tail->setName("lt-tail-" + DuplicatedBBId);
+  ThenTerm->getParent()->getSinglePredecessor()->setName("lt-if-then-else-" +
+                                                         DuplicatedBBId);
 
   // Variables to keep track of the new bindings
   ValueToValueMapTy TailVMap, ThenVMap, ElseVMap;
