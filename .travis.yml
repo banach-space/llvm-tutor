@@ -14,6 +14,10 @@ addons:
       - llvm-9-tools
       - clang-9
 
+env:
+  - CONFIGURATION=Debug
+  - CONFIGURATION=Release
+
 compiler:
   - clang
   - gcc
@@ -27,12 +31,12 @@ script:
   # Build HelloWorld as a standalone project
   - cd HelloWorld
   - mkdir build && cd build
-  - cmake -DLT_LLVM_INSTALL_DIR=/usr/lib/llvm-9/ ../
+  - cmake -DLT_LLVM_INSTALL_DIR=/usr/lib/llvm-9/ -DCMAKE_BUILD_TYPE=$CONFIGURATION ../
   - make -j4
   # Build the top project and run tests
   - cd ../../
   - mkdir build
   - cd build
-  - cmake -DLT_LLVM_INSTALL_DIR=/usr/lib/llvm-9/ ../
+  - cmake -DLT_LLVM_INSTALL_DIR=/usr/lib/llvm-9/ -DCMAKE_BUILD_TYPE=$CONFIGURATION ../
   - make -j4
   - lit test/

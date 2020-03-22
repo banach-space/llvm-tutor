@@ -69,7 +69,7 @@
 
 #define DEBUG_TYPE "duplicate-bb"
 
-STATISTIC(DuplicateBBCount, "The # of duplicated blocks");
+STATISTIC(DuplicateBBCountStats, "The # of duplicated blocks");
 
 using namespace llvm;
 
@@ -234,6 +234,7 @@ PreservedAnalyses DuplicateBB::run(llvm::Function &F,
     cloneBB(*std::get<0>(BB_Ctx), std::get<1>(BB_Ctx), ReMapper);
   }
 
+  DuplicateBBCountStats = DuplicateBBCount;
   return (Targets.empty() ? llvm::PreservedAnalyses::none()
                           : llvm::PreservedAnalyses::all());
 }
@@ -252,6 +253,7 @@ bool LegacyDuplicateBB::runOnFunction(llvm::Function &F) {
     Impl.cloneBB(*std::get<0>(BB_Ctx), std::get<1>(BB_Ctx), ReMapper);
   }
 
+  DuplicateBBCountStats = Impl.DuplicateBBCount;
   return (Targets.empty() ? false : true);
 }
 
