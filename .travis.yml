@@ -1,4 +1,5 @@
 language: cpp
+dist: bionic
 
 # Install LLVM
 addons:
@@ -12,29 +13,10 @@ addons:
       - llvm-9-dev
       - llvm-9-tools
       - clang-9
-  homebrew:
-    packages:
-      - llvm@9
-    # The following error was triggered when Homebrew was _not_ updated:
-    #   Error: Your Homebrew is outdated. Please run `brew update`.
-    # Updating Homebrew every time slows down the build considerably, but seems
-    # necessary.
-    update: true
 
-matrix:
-  include:
-    - os: linux
-      dist: bionic
-      env:
-        - LLVM_DIR="/usr/lib/llvm-9/"
-        - LLVM_TOOLCHAIN="/usr/lib/llvm-9/bin"
-        - LIT_PATH=/home/travis/.local/bin/
-    - os: osx
-      osx_image: xcode11
-      env:
-        - LLVM_DIR="/usr/local/opt/llvm@9/"
-        - LLVM_TOOLCHAIN="/usr/local/opt/llvm@9/bin/"
-        - LIT_PATH=/Users/travis/Library/Python/2.7/bin/
+compiler:
+  - clang
+  - gcc
 
 # AFAIK, there's no other way of obtaining LLVM's lit other than via `pip
 # install`
@@ -45,12 +27,12 @@ script:
   # Build HelloWorld as a standalone project
   - cd HelloWorld
   - mkdir build && cd build
-  - cmake  -DLT_LLVM_INSTALL_DIR="$LLVM_DIR"  ../
+  - cmake -DLT_LLVM_INSTALL_DIR=/usr/lib/llvm-9/ ../
   - make -j4
   # Build the top project and run tests
   - cd ../../
   - mkdir build
   - cd build
-  - cmake -DLT_LLVM_INSTALL_DIR="$LLVM_DIR"  ../
+  - cmake -DLT_LLVM_INSTALL_DIR=/usr/lib/llvm-9/ ../
   - make -j4
-  - ${LIT_PATH}/lit test/
+  - lit test/
