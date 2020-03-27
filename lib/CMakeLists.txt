@@ -9,6 +9,7 @@ set(LLVM_TUTOR_PLUGINS
     RIV
     DuplicateBB
     OpcodeCounter
+    MergeBB
     )
 
 set(StaticCallCounter_SOURCES
@@ -29,6 +30,8 @@ set(DuplicateBB_SOURCES
   DuplicateBB.cpp)
 set(OpcodeCounter_SOURCES
   OpcodeCounter.cpp)
+set(MergeBB_SOURCES
+  MergeBB.cpp)
 
 # CONFIGURE THE PLUGIN LIBRARIES
 # ==============================
