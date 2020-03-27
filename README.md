@@ -182,6 +182,7 @@ Overview of The Passes
      for each basic block
    * [**DuplicateBB**](#duplicatebb) - duplicates basic
      blocks, requires **RIV** analysis results
+   * [**MergeBB**](#mergebb) - merges duplicated basic blocks
 
 Once you've [built](#build-instructions) this project, you can experiment with
 every pass separately. All passes work with LLVM files. You can generate one
@@ -205,7 +206,7 @@ complicated than **HelloWorld** and it can be [run
 automatically](#run-opcodecounter-automatically). Let's use our tried and
 tested method first.
 
-#### Run the pass
+### Run the pass
 We will use
 [input_for_cc.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_cc.c)
 to test **OpcodeCounter**:
@@ -277,7 +278,7 @@ This call is added at the beginning of each function (i.e. before any other
 instruction). `FuncName` is the name of the function and `FuncNumArgs` is the
 number of arguments that the function takes.
 
-#### Run the pass
+### Run the pass
 We will use
 [input_for_hello.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_hello.c)
 to test **InjectFuncCall**:
@@ -311,7 +312,7 @@ $LLVM_DIR/bin/lli instrumented.bin
 (llvm-tutor)   number of arguments: 1
 ```
 
-#### InjectFuncCall vs HelloWorld
+### InjectFuncCall vs HelloWorld
 You might have noticed that **InjectFuncCall** is somewhat similar to
 [**HelloWorld**](#helloworld). In both cases the pass visits all functions,
 prints their names and the number of arguments. The difference between the two
@@ -336,7 +337,7 @@ during the compilation) function calls in the input LLVM module. If a function
 is called within a loop, that will always be counted as one function call, no
 matter how many times the loop iterates. Only direct function calls are counted.
 
-#### Run the pass
+### Run the pass
 We will use
 [input_for_cc.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_cc.c)
 to test **StaticCallCounter**:
@@ -359,7 +360,7 @@ fez                  1
 foo                  3
 ```
 
-#### Run the pass through `static`
+### Run the pass through `static`
 `static` is an LLVM based tool implemented in
 [StaticMain.cpp](https://github.com/banach-space/llvm-tutor/blob/master/tools/StaticMain.cpp).
 It is a command line wrapper that allows you to run **StaticCallCounter** without
@@ -379,7 +380,7 @@ This pass builds on top of ideas presented in
 [**InjectFuncCall**](#injectfunccall). You may want to experiment with that
 example first.
 
-#### Run the pass
+### Run the pass
 We will use
 [input_for_cc.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_cc.c)
 to test **DynamicCallCounter**:
@@ -411,7 +412,7 @@ fez                  1
 main                 1
 ```
 
-#### DynamicCallCounter vs StaticCallCounter
+### DynamicCallCounter vs StaticCallCounter
 The number of function calls reported by **DynamicCallCounter** and
 **StaticCallCounter** are different, but both results are correct. They
 correspond to _run-time_ and _compile-time_ function calls respectively. Note
@@ -490,7 +491,7 @@ Tree](https://en.wikipedia.org/wiki/Dominator_(graph_theory)) analysis pass
 from LLVM, which is is used to obtain the dominance tree for the basic blocks
 in the input function.
 
-#### Run the pass
+### Run the pass
 We will use
 [input_for_riv.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_riv.c)
 to test **RIV**:
@@ -570,13 +571,13 @@ in which:
 
 The complete transformation looks like this:
 ```c
-BEFORE:           AFTER:
--------           ------
-                    [ if-then-else ]
-                         /  \
-[ BB ]    --->    [clone 1] [clone 2]
-                         \  /
-                       [ tail ]
+BEFORE:                     AFTER:
+-------                     ------
+                              [ if-then-else ]
+             DuplicateBB           /  \
+[ BB ]      ------------>   [clone 1] [clone 2]
+                                   \  /
+                                 [ tail ]
 
 LEGEND:
 -------
@@ -591,7 +592,7 @@ basic blocks. This is implemented through LLVM's
 **DuplicateBB** does all the necessary preparation and clean-up. In other
 words, it's an elaborate wrapper for LLVM's `SplitBlockAndInsertIfThenElse`.
 
-#### Run the pass
+### Run the pass
 This pass depends on the **RIV** pass, which also needs be loaded in order for
 **DuplicateBB** to work. Lets use
 [input_for_duplicate_bb.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_duplicate_bb.c)
@@ -611,7 +612,7 @@ Note that there's only one basic block (the _entry_ block) and that `foo` takes
 one argument (this means that the result from **RIV** will be a non-empty set).
 We will now apply **DuplicateBB** to `foo`:
 ```bash
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libRIV.so -load <build_dir>/lib/libDuplicateBB.so -legacy-duplicate-bb inputs/input_for_duplicate_bb.ll
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libRIV.so -load <build_dir>/lib/libDuplicateBB.so -legacy-duplicate-bb input_for_duplicate_bb.ll
 ```
 After the instrumentation `foo` will look like this (all metadata has been stripped):
 ```assembly
@@ -620,10 +621,10 @@ lt-if-then-else-0:
   %2 = icmp eq i32 %0, 0
   br i1 %2, label %lt-if-then-0, label %lt-else-0
 
-clone-0-0:
+clone-1-0:
   br label %lt-tail-0
 
-clone-1-0:
+clone-2-0:
   br label %lt-tail-0
 
 lt-tail-0:
@@ -632,9 +633,116 @@ lt-tail-0:
 ```
 There are four basic blocks instead of one. All new basic blocks end with a
 numeric id of the original basic block (`0` in this case). `lt-if-then-else-0`
-contains the new `if-then-else` condition. `clone-0-0` and `clone-1-0` are
+contains the new `if-then-else` condition. `clone-1-0` and `clone-2-0` are
 clones of the original basic block in `foo`. `lt-tail-0` is the extra basic
-block that's required to merge `clone-0-0` and `clone-1-0`.
+block that's required to merge `clone-1-0` and `clone-2-0`.
+
+## MergeBB
+**MergeBB** will merge qualifying basic blocks that are identical. To some
+extent, this pass reverts the transformations introduced by **DuplicateBB**.
+This is illustrated below:
+```c
+BEFORE:                     AFTER DuplicateBB:                 AFTER MergeBB:
+-------                     ------------------                 --------------
+                              [ if-then-else ]                 [ if-then-else* ]
+             DuplicateBB           /  \               MergeBB         |
+[ BB ]      ------------>   [clone 1] [clone 2]      -------->    [ clone ]
+                                   \  /                               |
+                                 [ tail ]                         [ tail* ]
+
+LEGEND:
+-------
+[BB]           - the original basic block
+[if-then-else] - a new basic block that contains the if-then-else statement (**DuplicateBB**)
+[clone 1|2]    - two new basic blocks that are clones of BB (**DuplicateBB**)
+[tail]         - the new basic block that merges [clone 1] and [clone 2] (**DuplicateBB**)
+[clone]        - [clone 1] and [clone 2] after merging, this block should be very similar to [BB] (**MergeBB**)
+[label*]       - [label] after being updated by **MergeBB**
+```
+Recall that **DuplicateBB** replaces all qualifying basic block with four new
+basic blocks, two of which are clones of the original block.  **MergeBB** will
+merge those two clones back together, but it will not remove the remaining two
+blocks added by **DuplicateBB** (it will update them though).
+
+### Run the pass
+Lets use the following IR implementation of `foo` as input. Note that basic
+blocks 3 and 5 are identical and can safely be merged:
+```assembly
+define i32 @foo(i32) {
+  %2 = icmp eq i32 %0, 19
+  br i1 %2, label %3, label %5
+
+; <label>:3:
+  %4 = add i32 %0,  13
+  br label %7
+
+; <label>:5:
+  %6 = add i32 %0,  13
+  br label %7
+
+; <label>:7:
+  %8 = phi i32 [ %4, %3 ], [ %6, %5 ]
+  ret i32 %8
+}
+```
+We will now apply **MergeBB** to `foo`:
+```bash
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libMergeBB.so -legacy-merge-bb foo.ll
+```
+After the instrumentation `foo` will look like this (all metadata has been stripped):
+```assembly
+define i32 @foo(i32) {
+  %2 = icmp eq i32 %0, 19
+  br i1 %2, label %3, label %3
+
+3:
+  %4 = add i32 %0, 13
+  br label %5
+
+5:
+  ret i32 %4
+}
+```
+As you can see, basic blocks 3 and 5 from the input module have been merged
+into one basic block.
+```bash
+export LLVM_DIR=<installation/dir/of/llvm/9>
+$LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_duplicate_bb.c -o input_for_duplicate_bb.ll
+```
+
+### Run MergeBB on the output from DuplicateBB
+It is really interesting to see the effect of **MergeBB** on the output from
+**DuplicateBB**. Lets start with the same input as we used for **DuplicateBB**:
+```bash
+export LLVM_DIR=<installation/dir/of/llvm/9>
+$LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_duplicate_bb.c -o input_for_duplicate_bb.ll
+```
+
+Now we will apply **DuplicateBB** _and_ **MergeBB** (in this order) to `foo`.
+Recall that **DuplicateBB** requires **RIV**, which means that in total we have
+to load three plugins:
+```bash
+$LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libRIV.so -load-pass-plugin <build_dir>/lib/libMergeBB.so -load-pass-plugin <build-dir>/lib/libDuplicateBB.so -passes=duplicate-bb,merge-bb input_for_duplicate_bb.ll
+```
+And here's the output:
+```assembly
+define i32 @foo(i32) {
+lt-if-then-else-0:
+  %1 = icmp eq i32 %0, 0
+  br i1 %1, label %lt-clone-2-0, label %lt-clone-2-0
+
+lt-clone-2-0:
+  br label %lt-tail-0
+
+lt-tail-0:
+  ret i32 1
+}
+```
+Compare this with the [output generated by **DuplicateBB**](#run-the-pass-7).
+Only one of the clones, `lt-clone-2-0`, has been  preserved, and
+`lt-if-then-else-0` has been updated accordingly. Regardless of the value of of
+the `if` condition (more precisely, variable `%1`), the control flow jumps to
+`lt-clone-2-0`.
 
 Debugging
 ==========
