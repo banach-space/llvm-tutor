@@ -1,5 +1,3 @@
-; REQUIRES: opt-pipeline
-
 ; RUN: opt -mtriple=x86_64-- -load %shlibdir/libOpcodeCounter%shlibext -O0 -debug-pass=Structure  %s -o /dev/null 2>&1 | FileCheck --check-prefixes=CHECK-O1 %s
 ; RUN: opt -mtriple=x86_64-- -load %shlibdir/libOpcodeCounter%shlibext -O1 -debug-pass=Structure  %s -o /dev/null 2>&1 | FileCheck --check-prefixes=CHECK-O1 %s
 ; RUN: opt -mtriple=x86_64-- -load %shlibdir/libOpcodeCounter%shlibext -O2 -debug-pass=Structure  %s -o /dev/null 2>&1 | FileCheck --check-prefixes=CHECK-O2 %s

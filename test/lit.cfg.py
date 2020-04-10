@@ -40,7 +40,9 @@ if platform.system() == 'Darwin':
         ToolSubst('%clang', "clang",
                   extra_args=["-isysroot",
                               # http://lists.llvm.org/pipermail/cfe-dev/2016-July/049868.html
-                              "`xcrun --show-sdk-path`"]),
+                              "`xcrun --show-sdk-path`",
+                              # https://github.com/Homebrew/homebrew-core/issues/52461
+                              "-mlinker-version=0"]),
     ]
 else:
     tool_substitutions = [

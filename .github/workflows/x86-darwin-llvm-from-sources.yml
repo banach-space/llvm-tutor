@@ -30,7 +30,7 @@ jobs:
           export PATH=$GITHUB_WORKSPACE:$PATH
           git clone https://github.com/llvm/llvm-project
           cd llvm-project
-          git checkout release/9.x
+          git checkout release/10.x
           mkdir build && cd build
           cmake -G Ninja -D CMAKE_MAKE_PROGRAM=$GITHUB_WORKSPACE/ninja \
             -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS="clang" \

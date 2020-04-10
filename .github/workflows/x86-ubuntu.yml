@@ -10,20 +10,20 @@ jobs:
       - name: Install Dependencies
         run: |
           wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-          sudo apt-add-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-9 main"
+          sudo apt-add-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main"
           sudo apt-get update
-          sudo apt-get install -y llvm-9 llvm-9-dev clang-9 llvm-9-tools
+          sudo apt-get install -y llvm-10 llvm-10-dev clang-10 llvm-10-tools
           sudo pip install lit
       - name: Build HelloWorld
         run: |
           cd HelloWorld
           mkdir build && cd build
-          cmake -DLT_LLVM_INSTALL_DIR="/usr/lib/llvm-9/" ../
+          cmake -DLT_LLVM_INSTALL_DIR="/usr/lib/llvm-10/" ../
           make -j2
       - name: Build llvm-tutor + run tests
         run: |
           cd $GITHUB_WORKSPACE
           mkdir build && cd build
-          cmake -DLT_LLVM_INSTALL_DIR="/usr/lib/llvm-9/" ../
+          cmake -DLT_LLVM_INSTALL_DIR="/usr/lib/llvm-10/" ../
           make -j2
           lit test/

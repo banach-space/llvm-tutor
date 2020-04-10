@@ -9,18 +9,21 @@ jobs:
       - uses: actions/checkout@v1
       - name: Install Dependencies
         run: |
-          brew install llvm@9
+          brew update
+          brew install llvm@10
+          brew upgrade llvm
           pip install lit
+          ls /usr/local/opt/
       - name: Build HelloWorld
         run: |
           cd HelloWorld
           mkdir build && cd build
-          cmake -DLT_LLVM_INSTALL_DIR="/usr/local/opt/llvm@9/"  ../
+          cmake -DLT_LLVM_INSTALL_DIR="/usr/local/opt/llvm/"  ../
           make -j2
       - name: Build llvm-tutor + run tests
         run: |
           cd $GITHUB_WORKSPACE
           mkdir build && cd build
-          cmake -DLT_LLVM_INSTALL_DIR="/usr/local/opt/llvm@9/"  ../
+          cmake -DLT_LLVM_INSTALL_DIR="/usr/local/opt/llvm/"  ../
           make -j2
           lit test/

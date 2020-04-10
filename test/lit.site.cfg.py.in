@@ -11,9 +11,5 @@ lit.llvm.initialize(lit_config, config)
 # test_exec_root: The root path where tests should be run.
 config.test_exec_root = os.path.join("@CMAKE_CURRENT_BINARY_DIR@")
 
-config.opt_pipeline = @LT_OPT_PIPELINE_REG@
-if config.opt_pipeline:
-    config.available_features.add("opt-pipeline")
-
 # Let the main config do the real work.
 lit_config.load_config(config, "@LT_TEST_SRC_DIR@/lit.cfg.py")

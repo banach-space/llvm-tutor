@@ -5,7 +5,7 @@ llvm-tutor
 [![Build Status](https://github.com/banach-space/llvm-tutor/workflows/x86-Darwin/badge.svg?branch=master)](https://github.com/banach-space/llvm-tutor/actions?query=workflow%3Ax86-Darwin+branch%3Amaster)
 
 
-Example LLVM passes - based on **LLVM 9**
+Example LLVM passes - based on **LLVM 10**
 
 **llvm-tutor** is a collection of self-contained reference LLVM passes. It's a
 tutorial that targets novice and aspiring LLVM developers. Key features:
@@ -51,7 +51,7 @@ implements the minimum set-up for an out-of-source pass.
 For every function defined in the input module, **HelloWord** prints its name
 and the number of arguments that it takes. You can build it like this:
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/9>
+export LLVM_DIR=<installation/dir/of/llvm/10>
 mkdir build
 cd build
 cmake -DLT_LLVM_INSTALL_DIR=$LLVM_DIR <source/dir/llvm/tutor>/HelloWorld/
@@ -84,50 +84,68 @@ Development Environment
 ## Platform Support And Requirements
 This project has been tested on **Linux 18.04** and **Mac OS X 10.14.4**. In
 order to build **llvm-tutor** you will need:
-  * LLVM 9
+  * LLVM 10
   * C++ compiler that supports C++14
   * CMake 3.4.3 or higher
 
 In order to run the passes, you will need:
-  * **clang-9** (to generate input LLVM files)
+  * **clang-10** (to generate input LLVM files)
   * **opt** (to run the passes)
 
 There are additional requirements for tests (these will be satisfied by
-installing LLVM 9):
+installing LLVM 10):
   * [**lit**](https://llvm.org/docs/CommandGuide/lit.html) (aka **llvm-lit**,
     LLVM tool for executing the tests)
   * [**FileCheck**](https://llvm.org/docs/CommandGuide/lit.html) (LIT
     requirement, it's used to check whether tests generate the expected output)
 
-## Installing LLVM 9 on Mac OS X
-On Darwin you can install LLVM 9 with [Homebrew](https://brew.sh/):
+## Installing LLVM 10 on Mac OS X
+On Darwin you can install LLVM 10 with [Homebrew](https://brew.sh/):
 ```bash
-brew install llvm@9
+brew install llvm@10
 ```
-This will install all the required header files, libraries and tools in
-`/usr/local/opt/llvm/`.
+If you already have an older version of LLVM installed, you can upgrade it to
+LLVM 10 like this:
+```bash
+brew upgrade llvm
+```
 
-## Installing LLVM 9 on Ubuntu
+Once the installation (or upgrade) is complete, all the required header files,
+libraries and tools will be located in `/usr/local/opt/llvm/`.
+
+#### Note for Mac OS Mojave users
+If your default linker is older then the one used to build LLVM 10, you may
+need to pass `-mlinker-version=0` to `clang-10` for it to work. Otherwise you
+may see errors like this:
+```bash
+ld: unknown option: -platform_version
+clang-10: error: linker command failed with exit code 1 (use -v to see invocation)
+```
+
+This is a known [issue](https://github.com/Homebrew/homebrew-core/issues/52461)
+that will only affect you if installing with `brew`.
+
+## Installing LLVM 10 on Ubuntu
 On Ubuntu Bionic, you can [install modern
 LLVM](https://blog.kowalczyk.info/article/k/how-to-install-latest-clang-6.0-on-ubuntu-16.04-xenial-wsl.html)
 from the official [repository](http://apt.llvm.org/):
 ```bash
 wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-sudo apt-add-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-9 main"
+sudo apt-add-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main"
 sudo apt-get update
-sudo apt-get install -y llvm-9 llvm-9-dev clang-9 llvm-9-tools
+sudo apt-get install -y llvm-10 llvm-10-dev clang-10 llvm-10-tools
 ```
 This will install all the required header files, libraries and tools in
-`/usr/lib/llvm-9/`.
+`/usr/lib/llvm-10/`.
 
-## Building LLVM 9 From Sources
+## Building LLVM 10 From Sources
 Building from sources can be slow and tricky to debug. It is not necessary, but
-might be your preferred way of obtaining LLVM 9. The following steps will work
+might be your preferred way of obtaining LLVM 10. The following steps will work
 on Linux and Mac OS X:
 ```bash
 git clone https://github.com/llvm/llvm-project.git
 cd llvm-project
-git checkout release/9.x
+git checkout release/10.x
 mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=X86 <llvm-project/root/dir>/llvm/
@@ -141,17 +159,17 @@ Building & Testing
 You can build **llvm-tutor** (and all the provided passes) as follows:
 ```bash
 cd <build/dir>
-cmake -DLT_LLVM_INSTALL_DIR=<installation/dir/of/llvm/9> <source/dir/llvm/tutor>
+cmake -DLT_LLVM_INSTALL_DIR=<installation/dir/of/llvm/10> <source/dir/llvm/tutor>
 make
 ```
 
 The `LT_LLVM_INSTALL_DIR` variable should be set to the root of either the
-installation or build directory of LLVM 9. It is used to locate the
+installation or build directory of LLVM 10. It is used to locate the
 corresponding `LLVMConfig.cmake` script that is used to set the include and
 library paths.
 
 In order to run the tests, you need to install **llvm-lit** (aka **lit**). It's
-not bundled with LLVM 9 packages, but you can install it with **pip**:
+not bundled with LLVM 10 packages, but you can install it with **pip**:
 ```bash
 # Install lit - note that this installs lit globally
 pip install lit
@@ -188,7 +206,7 @@ Once you've [built](#build-instructions) this project, you can experiment with
 every pass separately. All passes work with LLVM files. You can generate one
 like this:
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/9>
+export LLVM_DIR=<installation/dir/of/llvm/10>
 # Textual form
 $LLVM_DIR/bin/clang  -emit-llvm input.c -S -o out.ll
 # Binary/bit-code form
@@ -200,7 +218,7 @@ except for [**HelloWorld**](#helloworld), are described below.
 
 ## OpcodeCounter
 **OpcodeCounter** prints a summary of the
-[LLVM IR opcodes](https://github.com/llvm/llvm-project/blob/release/9.x/llvm/lib/IR/Instruction.cpp#L292)
+[LLVM IR opcodes](https://github.com/llvm/llvm-project/blob/release/10.x/llvm/lib/IR/Instruction.cpp#L292)
 encountered in every function in the input module. This pass is slightly more
 complicated than **HelloWorld** and it can be [run
 automatically](#run-opcodecounter-automatically). Let's use our tried and
@@ -211,7 +229,7 @@ We will use
 [input_for_cc.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_cc.c)
 to test **OpcodeCounter**:
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/9>
+export LLVM_DIR=<installation/dir/of/llvm/10>
 # Generate an LLVM file to analyze
 $LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
 # Run the pass through opt
@@ -284,7 +302,7 @@ We will use
 to test **InjectFuncCall**:
 
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/9>
+export LLVM_DIR=<installation/dir/of/llvm/10>
 # Generate an LLVM file to analyze
 $LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/inputs/input_for_hello.c -o input_for_hello.bc
 # Run the pass through opt
@@ -342,7 +360,7 @@ We will use
 [input_for_cc.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_cc.c)
 to test **StaticCallCounter**:
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/9>
+export LLVM_DIR=<installation/dir/of/llvm/10>
 # Generate an LLVM file to analyze
 $LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
 # Run the pass through opt
@@ -385,7 +403,7 @@ We will use
 [input_for_cc.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_cc.c)
 to test **DynamicCallCounter**:
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/9>
+export LLVM_DIR=<installation/dir/of/llvm/10>
 # Generate an LLVM file to analyze
 $LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
 # Instrument the input file
@@ -443,7 +461,7 @@ We will use
 [input_for_mba_sub.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_mba_sub.c)
 to test **MBASub**:
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/9>
+export LLVM_DIR=<installation/dir/of/llvm/10>
 $LLVM_DIR/bin/clang -emit-llvm -S inputs/input_for_mba_sub.c -o input_for_sub.ll
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libMBASub.so -legacy-mba-sub input_for_sub.ll -o out.ll
 ```
@@ -463,7 +481,7 @@ We will use
 [input_for_add.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_mba.c)
 to test **MBAAdd**:
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/9>
+export LLVM_DIR=<installation/dir/of/llvm/10>
 $LLVM_DIR/bin/clang -O1 -emit-llvm -S inputs/input_for_mba.c -o input_for_mba.ll
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libMBAAdd.so -legacy-mba-add input_for_mba.ll -o out.ll
 ```
@@ -496,7 +514,7 @@ We will use
 [input_for_riv.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_riv.c)
 to test **RIV**:
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/9>
+export LLVM_DIR=<installation/dir/of/llvm/10>
 $LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_riv.c -o input_for_riv.ll
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libRIV.so -legacy-riv inputs/input_for_riv.ll
 ```
@@ -588,7 +606,7 @@ LEGEND:
 ```
 As depicted above, **DuplicateBB** replaces qualifying basic blocks with 4 new
 basic blocks. This is implemented through LLVM's
-[SplitBlockAndInsertIfThenElse](https://github.com/llvm/llvm-project/blob/release/9.x/llvm/include/llvm/Transforms/Utils/BasicBlockUtils.h#L315).
+[SplitBlockAndInsertIfThenElse](https://github.com/llvm/llvm-project/blob/release/10.x/llvm/include/llvm/Transforms/Utils/BasicBlockUtils.h#L326).
 **DuplicateBB** does all the necessary preparation and clean-up. In other
 words, it's an elaborate wrapper for LLVM's `SplitBlockAndInsertIfThenElse`.
 
@@ -598,7 +616,7 @@ This pass depends on the **RIV** pass, which also needs be loaded in order for
 [input_for_duplicate_bb.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_duplicate_bb.c)
 as our sample input. First, generate the LLVM file:
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/9>
+export LLVM_DIR=<installation/dir/of/llvm/10>
 $LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_duplicate_bb.c -o input_for_duplicate_bb.ll
 ```
 
@@ -706,7 +724,7 @@ define i32 @foo(i32) {
 As you can see, basic blocks 3 and 5 from the input module have been merged
 into one basic block.
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/9>
+export LLVM_DIR=<installation/dir/of/llvm/10>
 $LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_duplicate_bb.c -o input_for_duplicate_bb.ll
 ```
 
@@ -714,7 +732,7 @@ $LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_duplicate_bb.c -o input_f
 It is really interesting to see the effect of **MergeBB** on the output from
 **DuplicateBB**. Lets start with the same input as we used for **DuplicateBB**:
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/9>
+export LLVM_DIR=<installation/dir/of/llvm/10>
 $LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_duplicate_bb.c -o input_for_duplicate_bb.ll
 ```
 
@@ -752,7 +770,7 @@ and
 [STATISTIC](http://llvm.org/docs/ProgrammersManual.html#the-statistic-class-stats-option)
 macros. For example, for **MBAAdd**:
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/9>
+export LLVM_DIR=<installation/dir/of/llvm/10>
 $LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_mba.c -o input_for_mba.ll
 $LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libMBAAdd.dylib -passes=mba-add input_for_mba.ll -debug-only=mba-add -stats -o out.ll
 ```
@@ -779,7 +797,7 @@ to `MBAAdd::run`. Hopefully that will be sufficient for you to start.
 The default debugger on OS X is [LLDB](http://lldb.llvm.org). You will
 normally use it like this:
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/9>
+export LLVM_DIR=<installation/dir/of/llvm/10>
 $LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_mba.c -o input_for_mba.ll
 lldb -- $LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libMBAAdd.dylib -passes=mba-add input_for_mba.ll -o out.ll
 (lldb) breakpoint set --name MBAAdd::run
@@ -787,7 +805,7 @@ lldb -- $LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libMBAAdd.dylib -pas
 ```
 or, equivalently, by using LLDBs aliases:
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/9>
+export LLVM_DIR=<installation/dir/of/llvm/10>
 $LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_mba.c -o input_for_mba.ll
 lldb -- $LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libMBAAdd.dylib -passes=mba-add input_for_mba.ll -o out.ll
 (lldb) b MBAAdd::run
@@ -799,7 +817,7 @@ At this point, LLDB should break at the entry to `MBAAdd::run`.
 On most Linux systems, [GDB](https://www.gnu.org/software/gdb/) is the most
 popular debugger. A typical session will look like this:
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/9>
+export LLVM_DIR=<installation/dir/of/llvm/10>
 $LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_mba.c -o input_for_mba.ll
 gdb --args $LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libMBAAdd.so -passes=mba-add input_for_mba.ll -o out.ll
 (gdb) b MBAAdd.cpp:MBAAdd::run
@@ -811,7 +829,7 @@ About Pass Managers in LLVM
 ===========================
 LLVM is a quite complex project (to put it mildly) and passes lay at its
 center - this is true for any [multi-pass
-compiler](https://en.wikipedia.org/wiki/Multi-pass_compiler<Paste>). In order
+compiler](https://en.wikipedia.org/wiki/Multi-pass_compiler). In order
 to manage the passes, a compiler needs a pass manager. LLVM currently enjoys
 not one, but two pass managers. This is important because depending on which
 pass manager you decide to use, the implementation of your pass (and in
@@ -905,20 +923,11 @@ Piovezan, EuroLLVM, ([slides](https://llvm.org/devmtg/2019-04/slides/Tutorial-Br
      [video](https://www.youtube.com/watch?v=6X12D46sRFw))
   * _"The LLVM Pass Manager Part 2"_, Ch. Carruth, LLVM Dev Meeting 2014
     ([slides](https://llvm.org/devmtg/2014-10/Slides/Carruth-TheLLVMPassManagerPart2.pdf),
-     [video](http://web.archive.org/web/20160718071630/http://llvm.org/devmtg/2014-10/Videos/The%20LLVM%20Pass%20Manager%20Part%202-720.mov))a
+     [video](http://web.archive.org/web/20160718071630/http://llvm.org/devmtg/2014-10/Videos/The%20LLVM%20Pass%20Manager%20Part%202-720.mov))
   * _”Passes in LLVM, Part 1”_, Ch. Carruth, EuroLLVM 2014 ([slides](https://llvm.org/devmtg/2014-04/PDFs/Talks/Passes.pdf), [video](https://www.youtube.com/watch?v=rY02LT08-J8))
 * **Examples in LLVM**
   * Examples in LLVM source tree in
-    [llvm/examples/IRTransforms/](https://github.com/llvm/llvm-project/tree/bf142fc43347d8a35a71f46f7dda7e2a0a992e0d/llvm/examples/IRTransforms).
-    This was recently added in the following commit:
-
-```
-commit 7d0b1d77b3d4d47df477519fd1bf099b3df6f899
-Author: Florian Hahn <flo@fhahn.com>
-Date:   Tue Nov 12 14:06:12 2019 +0000
-
-[Examples] Add IRTransformations directory to examples.
-```
+    [llvm/examples/IRTransforms/](https://github.com/llvm/llvm-project/tree/release/10.x/llvm/examples/IRTransforms)
 * **LLVM Pass Development**
   * _"Getting Started With LLVM: Basics "_, J. Paquette, F. Hahn, LLVM Dev Meeting 2019 [video](https://www.youtube.com/watch?v=3QQuhL-dSys&t=826s)
   * _"Writing an LLVM Pass: 101"_, A. Warzyński, LLVM Dev Meeting 2019 [video](https://www.youtube.com/watch?v=ar7cJl2aBuU)

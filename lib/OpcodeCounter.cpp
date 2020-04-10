@@ -75,16 +75,10 @@ bool LegacyOpcodeCounter::runOnFunction(llvm::Function &Func) {
 //-----------------------------------------------------------------------------
 // New PM Registration
 //-----------------------------------------------------------------------------
-#ifdef LT_OPT_PIPELINE_REG
 // Register OpcodeCounter as a step of an existing pipeline. The insertion
 // point is specified by the 'registerVectorizerStartEPCallback' callback.
 // More specifically, OpcodeCounter will be run automatically whenever the
 // vectoriser is used (i.e. when using '-O{1|2|3|s}'.
-//
-// NOTE: this trips 'opt' installed via HomeBrew (Mac OS) and apt-get (Ubuntu).
-// It's a known issues:
-//    https://github.com/sampsyo/llvm-pass-skeleton/issues/7
-//    https://bugs.llvm.org/show_bug.cgi?id=39321
 llvm::PassPluginLibraryInfo getOpcodeCounterPluginInfo() {
   return {LLVM_PLUGIN_API_VERSION, "OpcodeCounter", LLVM_VERSION_STRING,
           [](PassBuilder &PB) {
@@ -100,7 +94,6 @@ extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
 llvmGetPassPluginInfo() {
   return getOpcodeCounterPluginInfo();
 }
-#endif
 
 //-----------------------------------------------------------------------------
 // Legacy PM Registration
@@ -112,22 +105,15 @@ static RegisterPass<LegacyOpcodeCounter> X(/*PassArg=*/"legacy-opcode-counter",
                                            /*CFGOnly=*/true,
                                            /*is_analysis=*/false);
 
-#ifdef LT_OPT_PIPELINE_REG
 // Register LegacyOpcodeCounter as a step of an existing pipeline. The insertion
 // point is set to 'EP_EarlyAsPossible', which means that LegacyOpcodeCounter
 // will be run automatically at '-O{0|1|2|3}'.
-//
-// NOTE: this trips 'opt' installed via HomeBrew (Mac OS) and apt-get (Ubuntu).
-// It's a known issues:
-//    https://github.com/sampsyo/llvm-pass-skeleton/issues/7
-//    https://bugs.llvm.org/show_bug.cgi?id=39321
 static llvm::RegisterStandardPasses
     RegisterOpcodeCounter(llvm::PassManagerBuilder::EP_EarlyAsPossible,
                           [](const llvm::PassManagerBuilder &Builder,
                              llvm::legacy::PassManagerBase &PM) {
                             PM.add(new LegacyOpcodeCounter());
                           });
-#endif
 
 //------------------------------------------------------------------------------
 // Helper functions

@@ -6,13 +6,13 @@ addons:
   apt:
     update: true
     sources:
-      - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-9 main'
+      - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main'
         key_url: 'http://apt.llvm.org/llvm-snapshot.gpg.key'
     packages:
-      - llvm-9
-      - llvm-9-dev
-      - llvm-9-tools
-      - clang-9
+      - llvm-10
+      - llvm-10-dev
+      - llvm-10-tools
+      - clang-10
 
 env:
   - CONFIGURATION=Debug
@@ -31,12 +31,12 @@ script:
   # Build HelloWorld as a standalone project
   - cd HelloWorld
   - mkdir build && cd build
-  - cmake -DLT_LLVM_INSTALL_DIR=/usr/lib/llvm-9/ -DCMAKE_BUILD_TYPE=$CONFIGURATION ../
+  - cmake -DLT_LLVM_INSTALL_DIR=/usr/lib/llvm-10/ -DCMAKE_BUILD_TYPE=$CONFIGURATION ../
   - make -j4
   # Build the top project and run tests
   - cd ../../
   - mkdir build
   - cd build
-  - cmake -DLT_LLVM_INSTALL_DIR=/usr/lib/llvm-9/ -DCMAKE_BUILD_TYPE=$CONFIGURATION ../
+  - cmake -DLT_LLVM_INSTALL_DIR=/usr/lib/llvm-10/ -DCMAKE_BUILD_TYPE=$CONFIGURATION ../
   - make -j4
   - lit test/

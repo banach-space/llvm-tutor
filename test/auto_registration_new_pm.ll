@@ -1,5 +1,3 @@
-; REQUIRES: opt-pipeline
-
 ; RUN: opt -load-pass-plugin %shlibdir/libOpcodeCounter%shlibext --passes='default<O1>' -debug-pass-manager  %s -o /dev/null 2>&1 | FileCheck --check-prefixes=CHECK-O1 %s
 ; RUN: opt -load-pass-plugin %shlibdir/libOpcodeCounter%shlibext --passes='default<O2>' -debug-pass-manager  %s -o /dev/null 2>&1 | FileCheck --check-prefixes=CHECK-O2 %s
 ; RUN: opt -load-pass-plugin %shlibdir/libOpcodeCounter%shlibext --passes='default<O3>' -debug-pass-manager  %s -o /dev/null 2>&1 | FileCheck --check-prefixes=CHECK-O3 %s
