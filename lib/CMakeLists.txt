@@ -46,7 +46,7 @@ foreach( plugin ${LLVM_TUTOR_PLUGINS} )
     # Configure include directories for 'plugin'
     target_include_directories(
       ${plugin}
-      PUBLIC
+      PRIVATE
       "${CMAKE_CURRENT_SOURCE_DIR}/../include"
     )
 
