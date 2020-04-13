@@ -9,10 +9,10 @@ Example LLVM passes - based on **LLVM 10**
 
 **llvm-tutor** is a collection of self-contained reference LLVM passes. It's a
 tutorial that targets novice and aspiring LLVM developers. Key features:
-  * **Complete** - includes `CMake` build scripts, LIT tests and CI set-up
-  * **Out of source** - builds against a binary LLVM installation (no need to
-    build LLVM from sources)
-  * **Modern** - based on the latest version of LLVM (and updated with every release)
+
+* **Complete** - includes `CMake` build scripts, LIT tests and CI set-up
+* **Out of source** - builds against a binary LLVM installation (no need to build LLVM from sources)
+* **Modern** - based on the latest version of LLVM (and updated with every release)
 
 ### Overview
 LLVM implements a very rich, powerful and popular API. However, like many
@@ -48,8 +48,11 @@ is a self-contained *reference example*. The corresponding
 [CMakeLists.txt](https://github.com/banach-space/llvm-tutor/blob/master/HelloWorld/CMakeLists.txt)
 implements the minimum set-up for an out-of-source pass.
 
+
+
 For every function defined in the input module, **HelloWord** prints its name
 and the number of arguments that it takes. You can build it like this:
+
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
 mkdir build
@@ -57,12 +60,16 @@ cd build
 cmake -DLT_LLVM_INSTALL_DIR=$LLVM_DIR <source/dir/llvm/tutor>/HelloWorld/
 make
 ```
+
 Before you can test it, you need to prepare an input file:
+
 ```bash
 # Generate an LLVM test file
 $LLVM_DIR/bin/clang -S -emit-llvm <source/dir/llvm/tutor/>inputs/input_for_hello.c -o input_for_hello.ll
 ```
+
 Finally, run **HelloWorld** with [**opt**](http://llvm.org/docs/CommandGuide/opt.html):
+
 ```bash
 # Run the pass
 $LLVM_DIR/bin/opt -load-pass-plugin libHelloWorld.dylib -passes=hello-world -disable-output input_for_hello.ll
@@ -76,6 +83,7 @@ $LLVM_DIR/bin/opt -load-pass-plugin libHelloWorld.dylib -passes=hello-world -dis
 (llvm-tutor) Hello from: main
 (llvm-tutor)   number of arguments: 2
 ```
+
 The **HelloWorld** pass doesn't modify the input module. The `-disable-output`
 flag is used to prevent **opt** from printing the output bitcode file.
 
@@ -101,11 +109,14 @@ installing LLVM 10):
 
 ## Installing LLVM 10 on Mac OS X
 On Darwin you can install LLVM 10 with [Homebrew](https://brew.sh/):
+
 ```bash
 brew install llvm@10
 ```
+
 If you already have an older version of LLVM installed, you can upgrade it to
 LLVM 10 like this:
+
 ```bash
 brew upgrade llvm
 ```
@@ -117,6 +128,7 @@ libraries and tools will be located in `/usr/local/opt/llvm/`.
 If your default linker is older then the one used to build LLVM 10, you may
 need to pass `-mlinker-version=0` to `clang-10` for it to work. Otherwise you
 may see errors like this:
+
 ```bash
 ld: unknown option: -platform_version
 clang-10: error: linker command failed with exit code 1 (use -v to see invocation)
@@ -129,6 +141,7 @@ that will only affect you if installing with `brew`.
 On Ubuntu Bionic, you can [install modern
 LLVM](https://blog.kowalczyk.info/article/k/how-to-install-latest-clang-6.0-on-ubuntu-16.04-xenial-wsl.html)
 from the official [repository](http://apt.llvm.org/):
+
 ```bash
 wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
 sudo apt-add-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main"
@@ -142,6 +155,7 @@ This will install all the required header files, libraries and tools in
 Building from sources can be slow and tricky to debug. It is not necessary, but
 might be your preferred way of obtaining LLVM 10. The following steps will work
 on Linux and Mac OS X:
+
 ```bash
 git clone https://github.com/llvm/llvm-project.git
 cd llvm-project
@@ -157,6 +171,7 @@ documentation](https://llvm.org/docs/CMake.html).
 Building & Testing
 ===================
 You can build **llvm-tutor** (and all the provided passes) as follows:
+
 ```bash
 cd <build/dir>
 cmake -DLT_LLVM_INSTALL_DIR=<installation/dir/of/llvm/10> <source/dir/llvm/tutor>
@@ -170,11 +185,13 @@ library paths.
 
 In order to run the tests, you need to install **llvm-lit** (aka **lit**). It's
 not bundled with LLVM 10 packages, but you can install it with **pip**:
+
 ```bash
 # Install lit - note that this installs lit globally
 pip install lit
 ```
 Running the tests is as simple as:
+
 ```bash
 $ lit <build_dir>/test
 ```
@@ -205,6 +222,7 @@ Overview of The Passes
 Once you've [built](#build-instructions) this project, you can experiment with
 every pass separately. All passes work with LLVM files. You can generate one
 like this:
+
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
 # Textual form
@@ -228,6 +246,7 @@ tested method first.
 We will use
 [input_for_cc.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_cc.c)
 to test **OpcodeCounter**:
+
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
 # Generate an LLVM file to analyze
@@ -237,6 +256,7 @@ $LLVM_DIR/bin/opt -load <build_dir>/lib/libOpcodeCounter.dylib -legacy-opcode-co
 ```
 For `main` **OpcodeCounter**, prints the following summary (note that when running the pass,
 a summary for other functions defined in `input_for_cc.bc` is also printed):
+
 ```
 =================================================
 LLVM-TUTOR: OpcodeCounter results for `main`
@@ -254,11 +274,7 @@ call                 4
 -------------------------------------------------
 ```
 
-#### Run OpcodeCounter Automatically
-**NOTE:** Currently this only works when building LLVM from sources. More
-information is available
-[here](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp#L119).
-
+### Run OpcodeCounter Automatically
 You can configure **llvm-tutor** so that **OpcodeCounter** is run automatically
 at any optimisation level (i.e. `-O{1|2|3|s}`). This is achieved through
 auto-registration with the existing pipelines, which is enabled with the
@@ -267,12 +283,14 @@ when [building](#building--testing) **llvm-tutor**.
 
 Once built, you can run **OpcodeCounter** by specifying an optimisation level.
 Note that you still have to specify the plugin file to be loaded:
+
 ```bash
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libOpcodeCounter.dylib -O1 input_for_cc.bc
 ```
 Here I used the Legacy Pass Manager (the plugin file was specified with
 `-load` rather than `-load-pass-plugin`), but the auto-registration also works with
 the New Pass Manager:
+
 ```bash
 $LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libOpcodeCounter.dylib --passes='default<O1>' input_for_cc.bc
 ```
@@ -280,8 +298,8 @@ $LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libOpcodeCounter.dylib --pas
 This is implemented in
 [OpcodeCounter.cpp](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp),
 on
-[line 88](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp#L88) for the New PM, and on
-[line 123](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp#L123) for the Legacy PM.
+[line 82](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp#L82) for the New PM, and on
+[line 111](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp#L111) for the Legacy PM.
 This [section](#about-pass-managers-in-llvm) contains more information about
 the pass managers in LLVM.
 
@@ -289,6 +307,7 @@ the pass managers in LLVM.
 This pass is a _HelloWorld_ example for _code instrumentation_. For every function
 defined in the input module, **InjectFuncCall** will add (_inject_) the following
 call to [`printf`](https://en.cppreference.com/w/cpp/io/c/fprintf):
+
 ```C
 printf("(llvm-tutor) Hello from: %s\n(llvm-tutor)   number of arguments: %d\n", FuncName, FuncNumArgs)
 ```
@@ -312,6 +331,7 @@ This generates `instrumented.bin`, which is the instrumented version of
 `input_for_hello.bc`. In order to verify that **InjectFuncCall** worked as
 expected, you can either check the output file (and verify that it contains
 extra calls to `printf`) or run it:
+
 ```
 $LLVM_DIR/bin/lli instrumented.bin
 (llvm-tutor) Hello from: main
@@ -359,6 +379,7 @@ matter how many times the loop iterates. Only direct function calls are counted.
 We will use
 [input_for_cc.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_cc.c)
 to test **StaticCallCounter**:
+
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
 # Generate an LLVM file to analyze
@@ -367,6 +388,7 @@ $LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_f
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libStaticCallCounter.dylib -legacy-static-cc -analyze input_for_cc.bc
 ```
 You will see the following output:
+
 ```
 =================================================
 LLVM-TUTOR: static analysis results
@@ -383,6 +405,7 @@ foo                  3
 [StaticMain.cpp](https://github.com/banach-space/llvm-tutor/blob/master/tools/StaticMain.cpp).
 It is a command line wrapper that allows you to run **StaticCallCounter** without
 the need for **opt**:
+
 ```bash
 <build_dir>/bin/static input_for_cc.bc
 ```
@@ -402,6 +425,7 @@ example first.
 We will use
 [input_for_cc.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_cc.c)
 to test **DynamicCallCounter**:
+
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
 # Generate an LLVM file to analyze
@@ -413,11 +437,13 @@ This generates `instrumented.bin`, which is the instrumented version of
 `input_for_cc.bc`. In order to verify that **DynamicCallCounter** worked as
 expected, you can either check the output file (and verify that it contains
 new call-counting instructions) or run it:
+
 ```bash
 # Run the instrumented binary
 $LLVM_DIR/bin/lli ./instrumented_bin
 ```
 You will see the following output:
+
 ```
 =================================================
 LLVM-TUTOR: dynamic analysis results
@@ -449,6 +475,7 @@ and are a great illustration of what and how LLVM passes can be used for.
 
 ### MBASub
 The **MBASub** pass implements this rather basic expression:
+
 ```
 a - b == (a + ~b) + 1
 ```
@@ -460,6 +487,7 @@ implementation are correct.
 We will use
 [input_for_mba_sub.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_mba_sub.c)
 to test **MBASub**:
+
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
 $LLVM_DIR/bin/clang -emit-llvm -S inputs/input_for_mba_sub.c -o input_for_sub.ll
@@ -469,6 +497,7 @@ $LLVM_DIR/bin/opt -load <build_dir>/lib/libMBASub.so -legacy-mba-sub input_for_s
 ### MBAAdd
 The **MBAAdd** pass implements a slightly more involved formula that is only
 valid for 8 bit integers:
+
 ```
 a + b == (((a ^ b) + 2 * (a & b)) * 39 + 23) * 151 + 111
 ```
@@ -480,6 +509,7 @@ the formula and the implementation are correct.
 We will use
 [input_for_add.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_mba.c)
 to test **MBAAdd**:
+
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
 $LLVM_DIR/bin/clang -O1 -emit-llvm -S inputs/input_for_mba.c -o input_for_mba.ll
@@ -513,12 +543,14 @@ in the input function.
 We will use
 [input_for_riv.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_riv.c)
 to test **RIV**:
+
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
 $LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_riv.c -o input_for_riv.ll
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libRIV.so -legacy-riv inputs/input_for_riv.ll
 ```
 You will see the following output:
+
 ```
 =================================================
 LLVM-TUTOR: RIV analysis results
@@ -576,6 +608,7 @@ nodes](https://en.wikipedia.org/wiki/Static_single_assignment_form)) into two
 new basic blocks (clones of the original basic block). The `if-then-else`
 construct is introduced as a non-trivial mechanism that decides which of the
 cloned basic blocks to branch to. This condition is equivalent to:
+
 ```cpp
 if (var == 0)
   goto clone 1
@@ -588,6 +621,7 @@ in which:
 * `clone 1` and `clone 2` are labels for the cloned basic blocks.
 
 The complete transformation looks like this:
+
 ```c
 BEFORE:                     AFTER:
 -------                     ------
@@ -615,12 +649,14 @@ This pass depends on the **RIV** pass, which also needs be loaded in order for
 **DuplicateBB** to work. Lets use
 [input_for_duplicate_bb.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_duplicate_bb.c)
 as our sample input. First, generate the LLVM file:
+
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
 $LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_duplicate_bb.c -o input_for_duplicate_bb.ll
 ```
 
 Function `foo` in `input_for_duplicate_bb.ll` should look like this (all metadata has been stripped):
+
 ```assembly
 define i32 @foo(i32) {
   ret i32 1
@@ -629,10 +665,12 @@ define i32 @foo(i32) {
 Note that there's only one basic block (the _entry_ block) and that `foo` takes
 one argument (this means that the result from **RIV** will be a non-empty set).
 We will now apply **DuplicateBB** to `foo`:
+
 ```bash
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libRIV.so -load <build_dir>/lib/libDuplicateBB.so -legacy-duplicate-bb input_for_duplicate_bb.ll
 ```
 After the instrumentation `foo` will look like this (all metadata has been stripped):
+
 ```assembly
 define i32 @foo(i32) {
 lt-if-then-else-0:
@@ -659,6 +697,7 @@ block that's required to merge `clone-1-0` and `clone-2-0`.
 **MergeBB** will merge qualifying basic blocks that are identical. To some
 extent, this pass reverts the transformations introduced by **DuplicateBB**.
 This is illustrated below:
+
 ```c
 BEFORE:                     AFTER DuplicateBB:                 AFTER MergeBB:
 -------                     ------------------                 --------------
@@ -685,6 +724,7 @@ blocks added by **DuplicateBB** (it will update them though).
 ### Run the pass
 Lets use the following IR implementation of `foo` as input. Note that basic
 blocks 3 and 5 are identical and can safely be merged:
+
 ```assembly
 define i32 @foo(i32) {
   %2 = icmp eq i32 %0, 19
@@ -704,6 +744,7 @@ define i32 @foo(i32) {
 }
 ```
 We will now apply **MergeBB** to `foo`:
+
 ```bash
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libMergeBB.so -legacy-merge-bb foo.ll
 ```
@@ -723,6 +764,7 @@ define i32 @foo(i32) {
 ```
 As you can see, basic blocks 3 and 5 from the input module have been merged
 into one basic block.
+
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
 $LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_duplicate_bb.c -o input_for_duplicate_bb.ll
@@ -731,6 +773,7 @@ $LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_duplicate_bb.c -o input_f
 ### Run MergeBB on the output from DuplicateBB
 It is really interesting to see the effect of **MergeBB** on the output from
 **DuplicateBB**. Lets start with the same input as we used for **DuplicateBB**:
+
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
 $LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_duplicate_bb.c -o input_for_duplicate_bb.ll
@@ -739,10 +782,12 @@ $LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_duplicate_bb.c -o input_f
 Now we will apply **DuplicateBB** _and_ **MergeBB** (in this order) to `foo`.
 Recall that **DuplicateBB** requires **RIV**, which means that in total we have
 to load three plugins:
+
 ```bash
 $LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libRIV.so -load-pass-plugin <build_dir>/lib/libMergeBB.so -load-pass-plugin <build-dir>/lib/libDuplicateBB.so -passes=duplicate-bb,merge-bb input_for_duplicate_bb.ll
 ```
 And here's the output:
+
 ```assembly
 define i32 @foo(i32) {
 lt-if-then-else-0:
@@ -769,6 +814,7 @@ Before running a debugger, you may want to analyze the output from
 and
 [STATISTIC](http://llvm.org/docs/ProgrammersManual.html#the-statistic-class-stats-option)
 macros. For example, for **MBAAdd**:
+
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
 $LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_mba.c -o input_for_mba.ll
@@ -776,6 +822,7 @@ $LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libMBAAdd.dylib -passes=mba-
 ```
 Note the `-debug-only=mba-add` and `-stats` flags in the command line - that's
 what enables the following output:
+
 ```bash
   %12 = add i8 %1, %0 ->   <badref> = add i8 111, %11
   %20 = add i8 %12, %2 ->   <badref> = add i8 111, %19
@@ -796,6 +843,7 @@ to `MBAAdd::run`. Hopefully that will be sufficient for you to start.
 ## Mac OS X
 The default debugger on OS X is [LLDB](http://lldb.llvm.org). You will
 normally use it like this:
+
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
 $LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_mba.c -o input_for_mba.ll
@@ -804,6 +852,7 @@ lldb -- $LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libMBAAdd.dylib -pas
 (lldb) process launch
 ```
 or, equivalently, by using LLDBs aliases:
+
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
 $LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_mba.c -o input_for_mba.ll
@@ -816,6 +865,7 @@ At this point, LLDB should break at the entry to `MBAAdd::run`.
 ## Ubuntu
 On most Linux systems, [GDB](https://www.gnu.org/software/gdb/) is the most
 popular debugger. A typical session will look like this:
+
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
 $LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_mba.c -o input_for_mba.ll
@@ -855,11 +905,13 @@ extend it so that it works with the other one as well.
 ## New vs Legacy PM When Running Opt
 **MBAAdd** implements interface for both pass managers. This is how you will
 use it with the legacy pass manager:
+
 ```bash
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libMBAAdd.so -legacy-mba-add input_for_mba.ll -o out.ll
 ```
 
 And this is how you run it with the new pass manager:
+
 ```bash
 $LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libMBAAdd.so -passes=mba-add input_for_mba.ll -o out.ll
 ```
