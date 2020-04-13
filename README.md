@@ -395,9 +395,10 @@ LLVM-TUTOR: static analysis results
 =================================================
 NAME                 #N DIRECT CALLS
 -------------------------------------------------
+foo                  3
 bar                  2
 fez                  1
-foo                  3
+-------------------------------------------------
 ```
 
 ### Run the pass through `static`

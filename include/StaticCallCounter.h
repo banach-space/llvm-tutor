@@ -10,13 +10,14 @@
 #ifndef LLVM_TUTOR_STATICCALLCOUNTER_H
 #define LLVM_TUTOR_STATICCALLCOUNTER_H
 
+#include "llvm/ADT/MapVector.h"
 #include "llvm/IR/CallSite.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/PassManager.h"
 #include "llvm/Pass.h"
 #include "llvm/Support/raw_ostream.h"
 
-using ResultStaticCC = llvm::DenseMap<const llvm::Function *, unsigned>;
+using ResultStaticCC = llvm::MapVector<const llvm::Function *, unsigned>;
 
 //------------------------------------------------------------------------------
 // New PM interface
@@ -38,9 +39,9 @@ struct LegacyStaticCallCounter : public llvm::ModulePass {
   static char ID;
   LegacyStaticCallCounter() : llvm::ModulePass(ID) {}
   bool runOnModule(llvm::Module &M) override;
-  // The print method must be implemented by Legacy analys passes in order to
+  // The print method must be implemented by Legacy analysis passes in order to
   // print a human readable version of the analysis results:
-  //  http://llvm.org/docs/WritingAnLLVMPass.html#the-print-method
+  //    http://llvm.org/docs/WritingAnLLVMPass.html#the-print-method
   void print(llvm::raw_ostream &OutS, llvm::Module const *M) const override;
 
   ResultStaticCC DirectCalls;

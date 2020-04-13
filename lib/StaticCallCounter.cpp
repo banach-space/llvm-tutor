@@ -26,7 +26,7 @@ using namespace llvm;
 // StaticCallCounter Implementation
 //-----------------------------------------------------------------------------
 StaticCallCounter::Result StaticCallCounter::runOnModule(Module &M) {
-  llvm::DenseMap<const llvm::Function *, unsigned> Res;
+  llvm::MapVector<const llvm::Function *, unsigned> Res;
 
   for (auto &Func : M) {
     for (auto &BB : Func) {
@@ -121,24 +121,11 @@ void printStaticCCResult(raw_ostream &OutS, const ResultStaticCC &DirectCalls) {
   OutS << "-------------------------------------------------"
        << "\n";
 
-  // Generate a vector of captured functions, sorted alphabetically by function
-  // names. The solution implemented here is a suboptimal - a separate
-  // container with functions is created for sorting.
-  // TODO Make this more elegant (i.e. avoid creating a separate container)
-  std::vector<const Function *> FuncNames;
-  FuncNames.reserve(DirectCalls.size());
   for (auto &CallCount : DirectCalls) {
-    FuncNames.push_back(CallCount.getFirst());
+    OutS << format("%-20s %-10lu\n", CallCount.first->getName().str().c_str(),
+                   CallCount.second);
   }
-  std::sort(FuncNames.begin(), FuncNames.end(),
-            [](const Function *x, const Function *y) {
-              return (x->getName().str() < y->getName().str());
-            });
 
-  // Print functions (alphabetically)
-  for (auto &Func : FuncNames) {
-    unsigned NumDirectCalls = (DirectCalls.find(Func))->getSecond();
-    OutS << format("%-20s %-10lu\n", Func->getName().str().c_str(),
-                   NumDirectCalls);
-  }
+  OutS << "-------------------------------------------------"
+       << "\n\n";
 }
