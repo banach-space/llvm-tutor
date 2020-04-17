@@ -1,20 +1,36 @@
-//========================================================================
+//==============================================================================
 // FILE:
 //    StaticCallCounter.cpp
 //
 // DESCRIPTION:
-//    Counts the number of direct function calls (i.e. as seen in the source
-//    code) in a file.
+//    Counts the number of static function calls in the input module. `Static`
+//    refers to the fact that the analysed functions calls are compile-time
+//    calls (as opposed to `dynamic`, i.e. run-time). Only direct function
+//    calls are considered. Calls via functions pointers are not taken into
+//    account.
+//
+//    This is a reference analysis pass:
+//      * it inherits from llvm::AnalysisInfoMixin (New PM API)
+//      * it implements a print method (Legacy PM API)
+//
+//    The `print` method (Legacy PM) is called when running opt with the
+//    `-analyze` flag. As the new PM has no equivalent of the `print method, it
+//    is currently not possible to print the results of this pass when:
+//      * running StaticCalCounter through opt and using the new PM.
+//    However, StaticCallCounter does implement the new PM interface.
+//    It is used in `static`, a tool implemented in tools/StaticMain.cpp that
+//    is a wrapper around StaticCallCounter and that can be used as a
+//    standalone tool. `static` always prints the results of the analysis.
 //
 // USAGE:
-//    1. Run through opt - legacy pass manager
+//    1. Legacy PM - run through opt:
 //      opt -load <BUILD/DIR>/lib/libStaticCallCounter.so --legacy-static-cc
 //      -analyze <input-llvm-file>
-//    2. You can also run it through 'static':
+//    2. New PM - run through 'static':
 //      <BUILD/DIR>/bin/static <input-llvm-file>
 //
 // License: MIT
-//========================================================================
+//==============================================================================
 #include "StaticCallCounter.h"
 
 #include "llvm/Passes/PassBuilder.h"
@@ -22,9 +38,9 @@
 
 using namespace llvm;
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // StaticCallCounter Implementation
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 StaticCallCounter::Result StaticCallCounter::runOnModule(Module &M) {
   llvm::MapVector<const llvm::Function *, unsigned> Res;
 
@@ -35,8 +51,6 @@ StaticCallCounter::Result StaticCallCounter::runOnModule(Module &M) {
         // the base class CallSiteBase), ImmutableCallSite constructor creates
         // a valid call-site or NULL for something which is NOT a call site.
         auto ICS = ImmutableCallSite(&Ins);
-
-        // Check whether the instruction is actually a call/invoke
         if (nullptr == ICS.getInstruction()) {
           continue;
         }
@@ -75,9 +89,9 @@ void LegacyStaticCallCounter::print(raw_ostream &OutS, Module const *) const {
   printStaticCCResult(OutS, DirectCalls);
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // New PM Registration
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 AnalysisKey StaticCallCounter::Key;
 
 llvm::PassPluginLibraryInfo getStaticCallCounterPluginInfo() {
@@ -95,17 +109,17 @@ llvmGetPassPluginInfo() {
   return getStaticCallCounterPluginInfo();
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Legacy PM Registration
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 char LegacyStaticCallCounter::ID = 0;
 
 // Register the pass - required for (among others) opt
 RegisterPass<LegacyStaticCallCounter>
-    X("legacy-static-cc", "For each function print the number of direct calls",
-      true, // Doesn't modify the CFG => true
-      true  // It's a pure analysis pass => true
-    );
+    X(/*PassArg=*/"legacy-static-cc",
+      /*Name=*/"LegacyStaticCallCounter",
+      /*CFGOnly=*/true,
+      /*is_analysis=*/true);
 
 //------------------------------------------------------------------------------
 // Helper functions

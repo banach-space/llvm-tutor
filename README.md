@@ -370,12 +370,33 @@ with **opt** and then execute the instrumented IR module in order to see the
 output.  For **HelloWorld** it was sufficient to run run the pass with **opt**.
 
 ## StaticCallCounter
-The **StaticCallCounter** pass counts the number of _compile-time_ (i.e. visible
-during the compilation) function calls in the input LLVM module. If a function
-is called within a loop, that will always be counted as one function call, no
-matter how many times the loop iterates. Only direct function calls are counted.
+The **StaticCallCounter** pass counts the number of _static_ function calls in
+the input LLVM module. _Static_ refers to the fact that these function calls
+are compile-time calls (i.e. visible during the compilation). This is in
+contrast to _dynamic_ function calls, i.e. function calls encountered at
+run-time (when the compiled module is run). The distinction becomes apparent
+when analysing functions calls within loops, e.g.:
+```c
+  for (i = 0; i < 10; i++)
+    foo();
+```
+Although at run-time `foo` will be executed 10 times, **StaticCallCounter**
+will report only 1 function call.
 
-### Run the pass
+This pass will only consider direct functions calls. Functions calls via
+function pointers are not taken into account.
+
+**StaticCallCounter** resembles **OpcodeCounter** - both passes analyse opcodes
+in the input module. However, only **StaticCallCounter** is a genuine analysis
+pass (in LLVM terms). Indeed, **StaticCallCounter** has the following
+additional properties:
+
+* it implements the [`print`
+  method](https://llvm.org/docs/WritingAnLLVMPass.html#the-print-method) (Legacy PM interface)
+* it inherits from
+  [`AnalysisInfoMixin`](https://github.com/llvm/llvm-project/blob/release/10.x/llvm/include/llvm/IR/PassManager.h#L390) (New PM interface)
+
+### Run the pass through **opt**
 We will use
 [input_for_cc.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_cc.c)
 to test **StaticCallCounter**:
@@ -387,7 +408,7 @@ $LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_f
 # Run the pass through opt
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libStaticCallCounter.dylib -legacy-static-cc -analyze input_for_cc.bc
 ```
-You will see the following output:
+You should see the following output:
 
 ```
 =================================================
@@ -401,17 +422,25 @@ fez                  1
 -------------------------------------------------
 ```
 
+Note the extra command line option above: `-analyze`. This option is only
+available when using the Legacy Pass Manager and is used to print the results
+of the analysis pass that has just been run. It is enabled by implementing the
+[`print` method](https://llvm.org/docs/WritingAnLLVMPass.html#the-print-method)
+mentioned earlier.
+
 ### Run the pass through `static`
+You can run **StaticCallCounter** through a standalone tool called `static`.
 `static` is an LLVM based tool implemented in
 [StaticMain.cpp](https://github.com/banach-space/llvm-tutor/blob/master/tools/StaticMain.cpp).
-It is a command line wrapper that allows you to run **StaticCallCounter** without
-the need for **opt**:
+It is a command line wrapper that allows you to run **StaticCallCounter**
+without the need for **opt**:
 
 ```bash
 <build_dir>/bin/static input_for_cc.bc
 ```
 It is an example of a relatively basic static analysis tool. Its implementation
-demonstrates how basic pass management in LLVM works.
+demonstrates how basic pass management in LLVM works (i.e. it handles that for
+itself instead of relying on **opt**).
 
 ## DynamicCallCounter
 The **DynamicCallCounter** pass counts the number of _run-time_ (i.e.
