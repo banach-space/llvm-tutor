@@ -40,7 +40,7 @@ message("LLVM STATUS:
 )
 
 # Set the LLVM header and library paths
-include_directories(${LLVM_INCLUDE_DIRS})
+include_directories(SYSTEM ${LLVM_INCLUDE_DIRS})
 link_directories(${LLVM_LIBRARY_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
 
