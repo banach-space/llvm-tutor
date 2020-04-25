@@ -153,7 +153,5 @@ char LegacyInjectFuncCall::ID = 0;
 
 // Register the pass - required for (among others) opt
 static RegisterPass<LegacyInjectFuncCall>
-    X("legacy-inject-func-call", "Inject ",
-      false, // does modify the CFG => false
-      false  // not a pure analysis pass => false
-    );
+    X(/*PassArg=*/"legacy-inject-func-call", /*Name=*/"LegacyInjectFuncCall",
+      /*CFGOnly=*/false, /*is_analysis=*/false);

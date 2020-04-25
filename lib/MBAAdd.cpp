@@ -187,8 +187,7 @@ llvmGetPassPluginInfo() {
 //-----------------------------------------------------------------------------
 char LegacyMBAAdd::ID = 0;
 
-static RegisterPass<LegacyMBAAdd> X("legacy-mba-add",
-                                    "Mixed Boolean Arithmetic Substitution",
-                                    true, // doesn't modify the CFG => true
-                                    false // not a pure analysis pass => false
-);
+static RegisterPass<LegacyMBAAdd> X(/*PassArg=*/"legacy-mba-add",
+                                    /*Name=*/"MBAAdd",
+                                    /*CFGOnly=*/true,
+                                    /*is_analysis=*/false);

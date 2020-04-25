@@ -260,7 +260,7 @@ char LegacyDynamicCallCounter::ID = 0;
 
 // Register the pass - required for (among others) opt
 static RegisterPass<LegacyDynamicCallCounter>
-    X("legacy-dynamic-cc", "Inject ",
-      false, // does modify the CFG => false
-      false  // not a pure analysis pass => false
-    );
+    X(/*PassArg=*/"legacy-dynamic-cc",
+      /*Name=*/"LegacyDynamicCallCounter",
+      /*CFGOnly=*/false,
+      /*is_analysis=*/false);
