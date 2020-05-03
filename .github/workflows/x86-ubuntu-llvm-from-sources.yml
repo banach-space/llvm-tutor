@@ -2,7 +2,7 @@ name: x86-Ubuntu-llvm-from-sources
 
 on:
   schedule:
-    - cron:  '0 0 * * 6'
+    - cron:  '0 0 * * 1,3,5'
 
 jobs:
   build:
