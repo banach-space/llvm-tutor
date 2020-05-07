@@ -216,6 +216,8 @@ Overview of The Passes
    * [**DuplicateBB**](#duplicatebb) - duplicates basic
      blocks, requires **RIV** analysis results
    * [**MergeBB**](#mergebb) - merges duplicated basic blocks
+   * [**FunctionArgumentUsage**](#functionargumentusagepass) - reports
+     type mismatches around function calls
 
 Once you've [built](#build-instructions) this project, you can experiment with
 every pass separately. All passes work with LLVM files. You can generate one
@@ -834,6 +836,78 @@ Only one of the clones, `lt-clone-2-0`, has been  preserved, and
 `lt-if-then-else-0` has been updated accordingly. Regardless of the value of of
 the `if` condition (more precisely, variable `%1`), the control flow jumps to
 `lt-clone-2-0`.
+
+## FunctionArgumentUsagePass
+The **FunctionArgumentUsage** pass is an example of analysis pass. Its goal
+is to report about any type mismatches around function calls: if the type
+of a formal parameter is not exactly the same as the type of a physical
+parameter - the actual value the caller pass to the callee, e.g.
+```c
+int demo(int a, int *b) {
+    return a * 2 + *b;
+}
+int main() {
+    // ip is defines somewhere there
+    int **ipp = &ip;
+    demo(100, ipp); // ptr instead of ptr to ptr
+    return 0;
+}
+```
+This C code will be compiled into the following IR:
+```llvm
+  %1 = load i32**, i32*** %ipp, align 8
+  %2 = bitcast i32** %1 to i32*
+  %call2 = call i32 @demo(i32 100, i32* %2)
+```
+The pass is looking for `bitcast` in parameter definitions as well as directly
+around the parameter use in the function call and collects mismatches into
+a vector member of the pass class:
+```llvm
+%1 = call i32 @demo(i32 100, i32* bitcast (i8** %0 to i32*))
+```
+
+### Run the pass through **opt**
+The pass is an analysis pass and cannot be directly run through the **opt** using the
+new pass manager but can be run using the legacy wrapper.
+
+We will use [input_for_fnargusage.c](inputs/input_for_fnargusage.c)
+to test **FunctionArgumentUsagePass**:
+
+```bash
+export LLVM_DIR=<installation/dir/of/llvm/10>
+# Generate an LLVM file to analyze
+$LLVM_DIR/bin/clang -O0 -g -S -emit-llvm -c <source_dir>/inputs/input_for_fnargusage.c -o input_for_fnargusage.bc
+# Run the pass through opt
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libFunctionArgumentUsage.dylib -legacy-fnargusage -analyze input_for_fnargusage.bc
+```
+You should see the following output:
+```
+Printing analysis 'Function Argument Usage Pass' for function 'demo':
+Function 'main' call on line '16': argument type mismatch. Argument #1 Expected 'i32*'
+  but argument is of type 'i32**'
+Function 'callee' call on line '6': argument type mismatch. Argument #1 Expected 'i32*'
+  but argument is of type 'i8*'
+Printing analysis 'Function Argument Usage Pass' for function 'callee':
+Function 'main' call on line '12': argument type mismatch. Argument #0 Expected 'i8'
+  but argument is of type 'i32'
+Printing analysis 'Function Argument Usage Pass' for function 'main':
+
+```
+Note the extra command line option above: `-analyze`. This option is only
+available when using the Legacy Pass Manager and is used to print the results
+of the analysis pass that has just been run. It is enabled by implementing the
+[`print` method](https://llvm.org/docs/WritingAnLLVMPass.html#the-print-method).
+
+To run the pass using the new pass manager, a special "Printer" pass
+`FunctionArgumentUsagePrinterPass` has been implemented in a different compilation
+unit (since the whole code of the pass is used only within the compilation unit,
+the pass definition can be put into the anonymous namespace). The pass is not
+derived from the `AnalysisInfoMixin` class and can be run through the **opt** tool:
+```bash
+# Run the pass through opt
+$LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libFunctionArgumentUsage.dylib -passes="fnargusage-user" input_for_fnargusage.bc
+```
+You should see exactly the same output as the legacy pass provides.
 
 Debugging
 ==========

@@ -10,6 +10,7 @@ set(LLVM_TUTOR_PLUGINS
     DuplicateBB
     OpcodeCounter
     MergeBB
+    FunctionArgumentUsage
     )
 
 set(StaticCallCounter_SOURCES
@@ -32,6 +33,9 @@ set(OpcodeCounter_SOURCES
   OpcodeCounter.cpp)
 set(MergeBB_SOURCES
   MergeBB.cpp)
+set(FunctionArgumentUsage_SOURCES
+  FunctionArgumentUsagePass.cpp
+  FunctionArgumentUsagePrinterPass.cpp)
 
 # CONFIGURE THE PLUGIN LIBRARIES
 # ==============================
