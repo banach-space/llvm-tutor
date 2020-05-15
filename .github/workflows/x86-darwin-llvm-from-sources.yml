@@ -2,7 +2,7 @@ name: x86-Darwin-llvm-from-sources
 
 on:
   schedule:
-    - cron:  '0 0 * * 0,2,4,6'
+    - cron:  '0 0 * * *'
 
 jobs:
   build:
