@@ -1,0 +1,58 @@
+name: x86-Windows-llvm-from-sources
+
+on: 
+  schedule:
+    - cron:  '0 0 * * *'
+
+jobs:
+  build:
+    runs-on: windows-2019
+    steps:
+      - uses: actions/checkout@v1
+      - uses: ilammy/msvc-dev-cmd@v1
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.0.0
+
+      - name: Download Ninja
+        shell: cmake -P {0}
+        run: |
+          # The following steps are implemented using CMake commands
+          set(ninja_version "1.9.0")
+          set(ninja_suffix "windows.zip")
+          set(ninja_url "https://github.com/ninja-build/ninja/releases/download/v${ninja_version}/ninja-${ninja_suffix}")
+          file(DOWNLOAD "${ninja_url}" ./ninja.zip SHOW_PROGRESS)
+          execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./ninja.zip)
+          if (NOT "${{ runner.os }}" STREQUAL "Windows")
+            execute_process(
+            COMMAND chmod +x ninja
+            )
+          endif()
+      - name: Build LLVM
+        run: |
+          # Adding the location of Ninja to $PATH
+          $env:Path += "$;GITHUB_WORKSPACE"
+          git clone --depth 1 --single-branch --branch release/10.x https://github.com/llvm/llvm-project
+          cd llvm-project
+          mkdir build
+          cd build
+          # cmake -G "Visual Studio 16 2019" -Thost=x64 `
+          cmake -G Ninja `
+            -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_EXPORT_SYMBOLS_FOR_PLUGINS=On `
+            -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_OPTIMIZED_TABLEGEN=ON `
+            -DCMAKE_BUILD_TYPE=MinSizeRel `
+            ..\llvm
+          # Note that only the required tools are built
+          ninja clang opt lli not FileCheck
+      - name: Install lit
+        run: |
+          pip install lit
+      - name: Build HelloWorld
+        run: |
+          # Adding the location of Ninja to $PATH
+          $env:Path += "$;GITHUB_WORKSPACE\llvm-project\build\bin\"
+          cd HelloWorld
+          copy-item -path CMakeLists.txt_for_windows -destination CMakeLists.txt
+          mkdir build && cd build
+          cmake -G Ninja -DLT_LLVM_INSTALL_DIR="${env:GITHUB_WORKSPACE}/llvm-project/build" ../
+          ninja HelloWorld
+          D:\a\llvm-tutor\llvm-tutor\llvm-project\build\bin\opt.exe -load HelloWorld.dll --legacy-hello-world -disable-output ..\..\test\hello.ll
