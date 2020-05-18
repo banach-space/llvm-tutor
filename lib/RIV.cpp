@@ -25,6 +25,11 @@
 //      RIV_M = {RIV_N, v_N}
 //    -------------------------------------------------------------------------
 //
+// REFERENCES:
+//    Based on examples from: 
+//    "Building, Testing and Debugging a Simple out-of-tree LLVM Pass", Serge
+//    Guelton and Adrien Guinet, LLVM Dev Meeting 2015
+//
 // License: MIT
 //=============================================================================
 #include "RIV.h"

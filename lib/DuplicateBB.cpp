@@ -38,31 +38,46 @@
 //    --------------------------------------------------------------------------
 //    F - BEFORE     (equivalence)          F - AFTER
 //    --------------------------------------------------------------------------
-//    [ entry ]                              [ entry ]
-//        |                                      |
-//        v            _________                 v
-//        |           |                  [ if-then-else-1 ]
-//        |           |                         / \
-//        |           |                       /     \
-//        |           |          [ lt-clone-1-1 ] [ lt-clone-2-1 ]
-//     [ BB1 ]       <                        \     /
-//        |           |                         \ /
-//        |           |                          v
-//        |           |                    [ lt-tail-1 ]
-//        |           |_________                 |
-//        v            _________                 v
-//        |           |                 [ lt-if-then-else-2 ]
-//        |           |                         / \
-//        |           |                       /     \
-//        |           |          [ lt-clone-1-2 ] [ lt-clone-2-2 ]
-//     [ BB2 ]       <                        \     /
-//        |           |                         \ /
-//        |           |                          v
-//        |           |                   [ lt-tail-2 ]
-//        |           |_________                 |
-//        v                                      v
-//      (...)                                  (...)
+//    [ entry ]                              [ entry ]                         |
+//        |                                      |                             |
+//        v            _________                 v                             e
+//        |           |                  [ if-then-else-1 ]                    x
+//        |           |                         / \                            e
+//        |           |                       /     \                          c
+//        |           |          [ lt-clone-1-1 ] [ lt-clone-2-1 ]             u
+//     [ BB1 ]       <                        \     /                          t
+//        |           |                         \ /                            i
+//        |           |                          v                             o
+//        |           |                    [ lt-tail-1 ]                       n
+//        |           |_________                 |                             |
+//        v            _________                 v                             d
+//        |           |                 [ lt-if-then-else-2 ]                  i
+//        |           |                         / \                            r
+//        |           |                       /     \                          e
+//        |           |          [ lt-clone-1-2 ] [ lt-clone-2-2 ]             c
+//     [ BB2 ]       <                        \     /                          t
+//        |           |                         \ /                            i
+//        |           |                          v                             o
+//        |           |                   [ lt-tail-2 ]                        n
+//        |           |_________                 |                             |
+//        v                                      v                             |
+//      (...)                                  (...)                           V
 //    --------------------------------------------------------------------------
+//
+//  USAGE:
+//    1. Legacy Pass Manager:
+//      $ opt -load <BUILD_DIR>/lib/libRIV.so `\`
+//        -load <BUILD_DIR>/lib/libDuplicateBB%shlibext -legacy-duplicate-bb `\`
+//        -S <bitcode-file>
+//    2. New Pass Manager:
+//      $ opt -load-pass-plugin <BUILD_DIR>/lib//libRIV.so `\`
+//      -load-pass-plugin <BUILD_DIR>/lib//libDuplicateBB.so `\`
+//      -passes=duplicate-bb -S <bitcode-file>
+//
+// REFERENCES:
+//    Based on examples from: 
+//    "Building, Testing and Debugging a Simple out-of-tree LLVM Pass", Serge
+//    Guelton and Adrien Guinet, LLVM Dev Meeting 2015
 //
 // License: MIT
 //==============================================================================

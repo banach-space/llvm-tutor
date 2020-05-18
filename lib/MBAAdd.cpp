@@ -10,12 +10,15 @@
 //
 // USAGE:
 //    1. Legacy pass manager:
-//      $ opt -load <BUILD_DIR>/lib/libMBAAdd.so --legacy-mba-add [-mba-ratio=<ratio>] <bitcode-file>
+//      $ opt -load <BUILD_DIR>/lib/libMBAAdd.so `\`
+//        --legacy-mba-add [-mba-ratio=<ratio>] <bitcode-file>
 //      with the optional ratio in the range [0, 1.0].
 //    2. New pass maanger:
-//      $ opt -load-pass-plugin <BUILD_DIR>/lib/libMBAAdd.so -passes=-"mba-add" <bitcode-file>
+//      $ opt -load-pass-plugin <BUILD_DIR>/lib/libMBAAdd.so `\`
+//        -passes=-"mba-add" <bitcode-file>
 //      The command line option is not available for the new PM
 //
+//  
 // [1] "Defeating MBA-based Obfuscation" Ninon Eyrolles, Louis Goubin, Marion
 //     Videau
 //

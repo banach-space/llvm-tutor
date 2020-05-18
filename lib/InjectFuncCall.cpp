@@ -22,9 +22,11 @@
 //
 // USAGE:
 //    1. Legacy pass manager:
-//      $ opt -load <BUILD_DIR>/lib/libInjectFuncCall.so --legacy-inject-func-call <bitcode-file>
+//      $ opt -load <BUILD_DIR>/lib/libInjectFuncCall.so `\`
+//        --legacy-inject-func-call <bitcode-file>
 //    2. New pass maanger:
-//      $ opt -load-pass-plugin <BUILD_DIR>/lib/libInjectFunctCall.so -passes=-"inject-func-call" <bitcode-file>
+//      $ opt -load-pass-plugin <BUILD_DIR>/lib/libInjectFunctCall.so `\`
+//        -passes=-"inject-func-call" <bitcode-file>
 //
 // License: MIT
 //========================================================================

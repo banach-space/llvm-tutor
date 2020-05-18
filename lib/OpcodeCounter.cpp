@@ -16,13 +16,13 @@
 //
 // USAGE:
 //    1. Legacy PM
-//      opt -load libOpcodeCounter.dylib -legacy-opcode-counter\
+//      opt -load libOpcodeCounter.dylib -legacy-opcode-counter `\`
 //        -disable-output <input-llvm-file>
 //    2. Automatically through an optimisation pipeline - legacy PM
-//      opt -load libOpcodeCounter.dylib -O{0|1|2|3|s} -disable-output \
+//      opt -load libOpcodeCounter.dylib -O{0|1|2|3|s} -disable-output `\`
 //        <input-llvm-file>
 //    3. Automatically through an optimisation pipeline - new PM
-//      opt -load-pass-plugin libOpcodeCounter.dylib --passes='default<O1>'\
+//      opt -load-pass-plugin libOpcodeCounter.dylib --passes='default<O1>' `\`
 //        -disable-output <input-llvm-file>
 //
 // License: MIT

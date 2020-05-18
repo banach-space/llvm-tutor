@@ -3,11 +3,11 @@
 //    DynamicCallCounter.cpp
 //
 // DESCRIPTION:
-//	  Counts dynamic function calls in a module. `Dynamic` in this context means
-//	  runtime function calls (as opposed to static, i.e. compile time). Note
-//	  that runtime calls can only be analysed while the underlying module is
-//	  executing. In order to count them one has to instrument the input
-//	  module.
+//    Counts dynamic function calls in a module. `Dynamic` in this context means
+//    runtime function calls (as opposed to static, i.e. compile time). Note
+//    that runtime calls can only be analysed while the underlying module is
+//    executing. In order to count them one has to instrument the input
+//    module.
 //
 //    This pass adds/injects code that will count function calls at
 //    runtime and prints the results when the module exits. More specifically:
@@ -32,17 +32,17 @@
 //      @CounterFor_foo = common global i32 0, align 4
 //    ```
 //
-//	  This pass will only count calls to functions _defined_ in the input
-//	  module. Functions that are only _declared_ (and defined elsewhere) are not
-//	  counted.
+//    This pass will only count calls to functions _defined_ in the input
+//    module. Functions that are only _declared_ (and defined elsewhere) are not
+//    counted.
 //
 // USAGE:
 //    1. Legacy pass manager:
-//      $ opt -load <BUILD_DIR>/lib/libDynamicCallCounter.so \
+//      $ opt -load <BUILD_DIR>/lib/libDynamicCallCounter.so `\`
 //        --legacy-dynamic-cc <bitcode-file> -o instrumented.bin
 //      $ lli instrumented.bin
 //    2. New pass manager:
-//      $ opt -load-pass-plugin <BUILD_DIR>/lib/libDynamicCallCounter.so \
+//      $ opt -load-pass-plugin <BUILD_DIR>/lib/libDynamicCallCounter.so `\`
 //        -passes=-"dynamic-cc" <bitcode-file> -o instrumentend.bin
 //      $ lli instrumented.bin
 //
@@ -69,7 +69,7 @@ Constant *CreateGlobalCounter(Module &M, StringRef GlobalVarName) {
   // This will change the declaration into definition (and initialise to 0)
   GlobalVariable *NewGV = M.getNamedGlobal(GlobalVarName);
   NewGV->setLinkage(GlobalValue::CommonLinkage);
-  NewGV->setAlignment(4);
+  NewGV->setAlignment(MaybeAlign(4));
   NewGV->setInitializer(llvm::ConstantInt::get(CTX, APInt(32, 0)));
 
   return NewGlobalVar;

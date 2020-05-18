@@ -13,7 +13,8 @@
 //    1. Legacy pass manager:
 //      $ opt -load <BUILD_DIR>/lib/libMBASub.so --legacy-mba-sub <bitcode-file>
 //    2. New pass maanger:
-//      $ opt -load-pass-plugin <BUILD_DIR>/lib/libMBASub.so -passes=-"mba-sub" <bitcode-file>
+//      $ opt -load-pass-plugin <BUILD_DIR>/lib/libMBASub.so `\`
+//        -passes=-"mba-sub" <bitcode-file>
 //
 //  [1] "Hacker's Delight" by Henry S. Warren, Jr.
 //

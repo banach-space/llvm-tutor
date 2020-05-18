@@ -8,12 +8,12 @@
 //  ----------------------------------------------------------------------------
 //  CFG BEFORE:                         CFG AFTER:
 //  ----------------------------------------------------------------------------
-//  [BB0] [other BBs]                   [BB0] [other BBs]
-//     \     |                             \     |
-//    [BB1][BB2] [other BBs]                ---[BB2] [other BBs]
-//       \   |    /                              |    /
-//      [  BBsucc  ]                         [  BBsucc  ]
-//       /   |   \                            /   |   \
+//  [BB0] [other BBs]                   [BB0] [other BBs]                      |
+//     \     |                             \     |                             |
+//    [BB1][BB2] [other BBs]                ---[BB2] [other BBs]               |
+//       \   |    /                              |    /                        |
+//      [  BBsucc  ]                         [  BBsucc  ]                      |
+//       /   |   \                            /   |   \                        V
 //  ----------------------------------------------------------------------------
 //  Only qualifying basic blocks are merged. The edge(s) from (potentially
 //  multiple) BB0 to BB1, must be one of the following instructions:
@@ -32,6 +32,12 @@
 //  this in mind when running the passes in a chain.
 //
 // USAGE:
+//  1. Legacy Pass Manager:
+//    $ opt -load <BUILD_DIR>/lib/libMergeBB.so `\`
+//      -legacy-merge-bb -S <bitcode-file>
+//  2. New Pass Manager
+//    $ opt -load-pass-plugin <BUILD_DIR>/lib/libMergeBB.so `\`
+//      -passes=merge-bb -S <bitcode-file>
 //
 // License: MIT
 //=============================================================================
