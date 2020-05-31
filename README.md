@@ -41,6 +41,7 @@ similar format.
 * [Overview of the Passes](#overview-of-the-passes)
 * [Debugging](#debugging)
 * [About Pass Managers in LLVM](#about-pass-managers-in-llvm)
+* [Analysis vs Transformation Pass](#analysis-vs-transformation-pass)
 * [Credits & References](#credits)
 * [License](#license)
 
@@ -202,25 +203,28 @@ Voilà! You should see all tests passing.
 
 Overview of The Passes
 ======================
-   * [**HelloWorld**](#helloworld) - prints the name and the number of
-     arguments for each function encounterd in the input module
-   * [**OpcodeCounter**](#opcodecounter) - prints the summary of the LLVM IR
-     opcodes encountered in the input function
-   * [**InjectFuncCall**](#injectfunccall) - instruments
-     the input module by inserting calls to `printf`
-   * [**StaticCallCounter**](#staticcallcounter) - counts
-     direct function calls at compile-time
-   * [**DynamicCallCounter**](#dynamiccallcounter) - counts
-     direct function calls at run-time
-   * [**MBASub**](#mbasub) - code transformation for integer `sub`
-     instructions
-   * [**MBAAdd**](#mbaadd) - code transformation for 8-bit integer `add`
-     instructions
-   * [**RIV**](#riv) - finds reachable integer values
-     for each basic block
-   * [**DuplicateBB**](#duplicatebb) - duplicates basic
-     blocks, requires **RIV** analysis results
-   * [**MergeBB**](#mergebb) - merges duplicated basic blocks
+The available passes are categorised as either Analysis, Transformation or CFG.
+The difference between Analysis and Transformation passes is rather
+self-explanatory ([here](#analysis-vs-transformation-pass) is a more technical
+breakdown). A CFG pass is simply a Transformation pass that modifies the Control
+Flow Graph. This is frequently a bit more complex and requires some extra bookkeeping,
+hence a dedicated category.
+
+In the following table the passes are grouped thematically and ordered by the
+level of complexity.
+
+| Name      | Description     | Category |
+|-----------|-----------------|------|
+|[**HelloWorld**](#helloworld) | prints the functions encountered in the input module | Analysis |
+|[**OpcodeCounter**](#opcodecounter) | prints the LLVM IR opcodes encountered in the input module | Analysis |
+|[**InjectFuncCall**](#injectfunccall) | instruments the input module by inserting calls to `printf` | Transformation |
+|[**StaticCallCounter**](#staticcallcounter) | counts direct function calls at compile-time (static analysis) | Analysis |
+|[**DynamicCallCounter**](#dynamiccallcounter) | counts direct function calls at run-time (dynamic analysis) | Transformation |
+|[**MBASub**](#mbasub) | code transformation for integer `sub` instructions | Transformation |
+|[**MBAAdd**](#mbaadd) | code transformation for 8-bit integer `add` instructions | Transformation |
+|[**RIV**](#riv) | finds reachable integer values for each basic block | Analysis |
+|[**DuplicateBB**](#duplicatebb) | duplicates basic blocks, requires **RIV** analysis results | CFG |
+|[**MergeBB**](#mergebb) | merges duplicated basic blocks | CFG |
 
 Once you've [built](#build-instructions) this project, you can experiment with
 every pass separately. All passes work with LLVM files. You can generate one
@@ -690,7 +694,7 @@ $LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_duplicate_bb.c -o input_f
 
 Function `foo` in `input_for_duplicate_bb.ll` should look like this (all metadata has been stripped):
 
-```assembly
+```llvm
 define i32 @foo(i32) {
   ret i32 1
 }
@@ -704,7 +708,7 @@ $LLVM_DIR/bin/opt -load <build_dir>/lib/libRIV.so -load <build_dir>/lib/libDupli
 ```
 After the instrumentation `foo` will look like this (all metadata has been stripped):
 
-```assembly
+```llvm
 define i32 @foo(i32) {
 lt-if-then-else-0:
   %2 = icmp eq i32 %0, 0
@@ -758,7 +762,7 @@ blocks added by **DuplicateBB** (it will update them though).
 Lets use the following IR implementation of `foo` as input. Note that basic
 blocks 3 and 5 are identical and can safely be merged:
 
-```assembly
+```llvm
 define i32 @foo(i32) {
   %2 = icmp eq i32 %0, 19
   br i1 %2, label %3, label %5
@@ -782,7 +786,7 @@ We will now apply **MergeBB** to `foo`:
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libMergeBB.so -legacy-merge-bb foo.ll
 ```
 After the instrumentation `foo` will look like this (all metadata has been stripped):
-```assembly
+```llvm
 define i32 @foo(i32) {
   %2 = icmp eq i32 %0, 19
   br i1 %2, label %3, label %3
@@ -821,7 +825,7 @@ $LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libRIV.so -load-pass-plugin 
 ```
 And here's the output:
 
-```assembly
+```llvm
 define i32 @foo(i32) {
 lt-if-then-else-0:
   %1 = icmp eq i32 %0, 0
@@ -956,6 +960,50 @@ There are two differences:
 These differences stem from the fact that in the case of Legacy Pass Manager you
 register a new command line option for **opt**, whereas  New Pass Manager
 simply requires you to define a pass pipeline (with `-passes=`).
+
+Analysis vs Transformation Pass
+===============================
+The implementation of a pass depends on whether it is an Analysis or a
+Transformation pass. The difference in the API that you will use is often
+subtle and also depends on the pass manager that you will use.
+
+For example, for the New Pass Manager: 
+
+* a transformation pass will normally inherit from [PassInfoMixin](https://github.com/llvm/llvm-project/blob/release/10.x/llvm/include/llvm/IR/PassManager.h#L373),
+* an analysis pass will inherit from [AnalysisInfoMixin](https://github.com/llvm/llvm-project/blob/release/10.x/llvm/include/llvm/IR/PassManager.h#L390).
+
+This is one of the key characteristics of the New Pass Managers - it makes the
+split into Analysis and Transformation passes very explicit. In the case of the
+Legacy Pass Manager, an Analysis pass is required to implement the [print
+method](https://github.com/llvm/llvm-project/blob/release/10.x/llvm/tools/opt/PassPrinters.cpp#L50).
+But otherwise, the API splits passes based on the unit of IR they operate on,
+e.g.
+[ModulePass](https://github.com/llvm/llvm-project/blob/release/10.x/llvm/include/llvm/Pass.h#L222)
+vs
+[FunctionPass](https://github.com/llvm/llvm-project/blob/release/10.x/llvm/include/llvm/Pass.h#L282).
+Overall, an Analysis pass requires more bookkeeping and hence a bit more code (
+for example an instance of
+[AnalysisKey](https://github.com/llvm/llvm-project/blob/release/10.x/llvm/include/llvm/IR/PassManager.h#L406)
+so that it can be identified by the New Pass Manager).
+
+To make this a bit more confusing - nothing stops you from implementing an
+analysis pass using the API for transformation passes. Indeed, they are very
+similar and for small examples (like the ones presented here) practically
+equivalent. Take for example [**HelloWorld**](#helloworld). It does not
+transform the input module, so in practice it is an Analysis pass. However, in
+order to keep the implementation as simple as possible, I used the API for
+Transformation passes.
+
+Within **llvm-tutor** the following passes can be used as reference examples:
+
+* [**StaticCallCounter**](#staticcallcounter) - analysis pass
+* [**MBASub**](#mbasub) - transformation pass
+
+Other examples also adhere to LLVM's convention, but sometimes simplicity is
+favoured over being strict (e.g. [**OpcodeCounter**](#opcodecounter) and
+[**HelloWorld**](#helloworld)). Whenever that is the case, [the comments in the
+code](https://github.com/banach-space/llvm-tutor/blob/update_readme/lib/OpcodeCounter.cpp#L6-L10)
+are there to clarify it.
 
 Credits
 ========
