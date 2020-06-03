@@ -510,6 +510,10 @@ may also know them from [Hacker's
 Delight](https://www.amazon.co.uk/Hackers-Delight-Henry-S-Warren/dp/0201914654))
 and are a great illustration of what and how LLVM passes can be used for.
 
+Similar transformation are possible at the source-code level. The relevant
+Clang plugins are available in
+[**clang-tutor**](https://github.com/banach-space/clang-tutor#obfuscator).
+
 ### MBASub
 The **MBASub** pass implements this rather basic expression:
 
