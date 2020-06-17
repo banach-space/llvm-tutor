@@ -76,7 +76,7 @@ Finally, run **HelloWorld** with [**opt**](http://llvm.org/docs/CommandGuide/opt
 
 ```bash
 # Run the pass
-$LLVM_DIR/bin/opt -load-pass-plugin libHelloWorld.dylib -passes=hello-world -disable-output input_for_hello.ll
+$LLVM_DIR/bin/opt -load-pass-plugin ./libHelloWorld.dylib -passes=hello-world -disable-output input_for_hello.ll
 # Expected output
 (llvm-tutor) Hello from: foo
 (llvm-tutor)   number of arguments: 1
