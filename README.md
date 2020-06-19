@@ -588,7 +588,7 @@ to test **RIV**:
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
 $LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_riv.c -o input_for_riv.ll
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libRIV.so -legacy-riv inputs/input_for_riv.ll
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libRIV.so -legacy-riv -analyze inputs/input_for_riv.ll
 ```
 You will see the following output:
 
@@ -633,6 +633,9 @@ BB %if.else
              i32 %b
              i32 %c
 ```
+
+Note the extra command line option above: `-analyze`. It's required to inform
+**opt** to print the results of the analysis to `stdout`.
 
 ## DuplicateBB
 This pass will duplicate all basic blocks in a module, with the exception of
@@ -956,6 +959,7 @@ And this is how you run it with the new pass manager:
 ```bash
 $LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libMBAAdd.so -passes=mba-add input_for_mba.ll -o out.ll
 ```
+
 There are two differences:
 * the way you load your plugin: `-load` vs `-load-pass-plugin`
 * the way you specify which pass/plugin to run: `-legacy-mba-add` vs
@@ -969,7 +973,7 @@ Analysis vs Transformation Pass
 ===============================
 The implementation of a pass depends on whether it is an Analysis or a
 Transformation pass. The difference in the API that you will use is often
-subtle and also depends on the pass manager that you will use.
+subtle and further differs between the pass managers.
 
 For example, for the New Pass Manager: 
 
@@ -977,37 +981,39 @@ For example, for the New Pass Manager:
 * an analysis pass will inherit from [AnalysisInfoMixin](https://github.com/llvm/llvm-project/blob/release/10.x/llvm/include/llvm/IR/PassManager.h#L390).
 
 This is one of the key characteristics of the New Pass Managers - it makes the
-split into Analysis and Transformation passes very explicit. In the case of the
-Legacy Pass Manager, an Analysis pass is required to implement the [print
+split into Analysis and Transformation passes very explicit. An Analysis pass
+requires a bit more bookkeeping and hence a bit more code.  For example, you
+need to add an instance of
+[AnalysisKey](https://github.com/llvm/llvm-project/blob/release/10.x/llvm/include/llvm/IR/PassManager.h#L406)
+so that it can be identified by the New Pass Manager.
+
+In the case of the Legacy Pass Manager, an Analysis pass is required to
+implement the [print
 method](https://github.com/llvm/llvm-project/blob/release/10.x/llvm/tools/opt/PassPrinters.cpp#L50).
 But otherwise, the API splits passes based on the unit of IR they operate on,
 e.g.
 [ModulePass](https://github.com/llvm/llvm-project/blob/release/10.x/llvm/include/llvm/Pass.h#L222)
 vs
 [FunctionPass](https://github.com/llvm/llvm-project/blob/release/10.x/llvm/include/llvm/Pass.h#L282).
-Overall, an Analysis pass requires more bookkeeping and hence a bit more code (
-for example an instance of
-[AnalysisKey](https://github.com/llvm/llvm-project/blob/release/10.x/llvm/include/llvm/IR/PassManager.h#L406)
-so that it can be identified by the New Pass Manager).
+This is one of the main differences between the pass managers in LLVM. 
 
-To make this a bit more confusing - nothing stops you from implementing an
-analysis pass using the API for transformation passes. Indeed, they are very
-similar and for small examples (like the ones presented here) practically
-equivalent. Take for example [**HelloWorld**](#helloworld). It does not
-transform the input module, so in practice it is an Analysis pass. However, in
-order to keep the implementation as simple as possible, I used the API for
-Transformation passes.
+Note that for small standalone examples the difference becomes less relevant.
+[**HelloWorld**](#helloworld) is a good example. It does not transform the
+input module, so in practice it is an Analysis pass. However, in order to keep
+the implementation as simple as possible, I used the API for Transformation
+passes.
 
-Within **llvm-tutor** the following passes can be used as reference examples:
+Within **llvm-tutor** the following passes can be used as reference Analysis
+and Transformation examples:
 
 * [**StaticCallCounter**](#staticcallcounter) - analysis pass
 * [**MBASub**](#mbasub) - transformation pass
 
 Other examples also adhere to LLVM's convention, but sometimes simplicity is
-favoured over being strict (e.g. [**OpcodeCounter**](#opcodecounter) and
-[**HelloWorld**](#helloworld)). Whenever that is the case, [the comments in the
-code](https://github.com/banach-space/llvm-tutor/blob/update_readme/lib/OpcodeCounter.cpp#L6-L10)
-are there to clarify it.
+favoured over strictness (e.g. [**OpcodeCounter**](#opcodecounter) and
+[**HelloWorld**](#helloworld)). Whenever that is the case, the [comments in the
+code](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp#L6-L10)
+clarify that.
 
 Credits
 ========
