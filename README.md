@@ -166,7 +166,7 @@ cd llvm-project
 git checkout release/10.x
 mkdir build
 cd build
-cmake -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=X86 <llvm-project/root/dir>/llvm/
+cmake -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=X86 -DLLVM_ENABLE_PROJECTS=clang <llvm-project/root/dir>/llvm/
 cmake --build .
 ```
 For more details read the [official

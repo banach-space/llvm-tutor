@@ -1,0 +1,50 @@
+# How to run:
+# 1. Download the Dockerfile
+# $ wget https://raw.githubusercontent.com/banach-space/llvm-tutor/master/Dockerfile
+# 2. Build the Docker image
+# $ docker build -t=llvm-tutor:llvm-10 .
+# 3. Run the Docker container
+# $ docker run --rm -it --hostname=llvm-tutor llvm-tutor:llvm-10 /bin/bash
+
+FROM debian:buster
+
+# Installing dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    cmake \
+    ninja-build \
+    build-essential \
+    python-minimal python-pip\
+    && rm -rf /var/lib/apt/lists/*
+
+# Installing lit
+# Note that lit's tests depend on 'not' and 'FileCheck', LLVM utilities.
+# https://github.com/llvm/llvm-project/tree/master/llvm/utils/lit
+# So, we need to add -DLLVM_INSTALL_UTILS=ON cmake flag when trying to build LLVM.
+# https://llvm.org/docs/CMake.html
+RUN pip install lit
+
+# Building LLVM+Clang (release/10.x) from source
+ENV LLVM_DIR /opt/llvm
+RUN git clone --branch release/10.x --depth 1 https://github.com/llvm/llvm-project \
+    && mkdir -p $LLVM_DIR \
+    && mkdir -p llvm-project/build \
+    && cd llvm-project/build \
+    && cmake -G Ninja \
+        -DLLVM_ENABLE_PROJECTS=clang \
+        -DLLVM_TARGETS_TO_BUILD=X86 \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=$LLVM_DIR \
+        -DLLVM_INSTALL_UTILS=ON \
+        ../llvm \
+    && cmake --build . --target install \
+    && rm -r /llvm-project
+
+# Building llvm-tutor
+ENV TUTOR_DIR /llvm-tutor
+RUN git clone https://github.com/banach-space/llvm-tutor $TUTOR_DIR \
+    && mkdir -p $TUTOR_DIR/build \
+    && cd $TUTOR_DIR/build \
+    && cmake -DLT_LLVM_INSTALL_DIR=$LLVM_DIR ../ \
+    && make -j $(nproc --all) \
+    && lit test/
