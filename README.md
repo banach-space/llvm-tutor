@@ -35,19 +35,21 @@ my other tutorial,
 similar format.
 
 ### Table of Contents
-* [HelloWorld](#helloworld)
-* [Development Environment](#development-environment)
-* [Building & Testing](#building--testing)
-* [Overview of the Passes](#overview-of-the-passes)
-* [Debugging](#debugging)
-* [About Pass Managers in LLVM](#about-pass-managers-in-llvm)
-* [Analysis vs Transformation Pass](#analysis-vs-transformation-pass)
-* [Credits & References](#credits)
-* [License](#license)
+* [HelloWorld: Your First Pass](#helloworld-your-first-pass)
+* Part 1: **llvm-tutor** in more detail
+  * [Development Environment](#development-environment)
+  * [Building & Testing](#building--testing)
+  * [Overview of the Passes](#overview-of-the-passes)
+  * [Debugging](#debugging)
+* Part 2: Passes In LLVM
+  * [About Pass Managers in LLVM](#about-pass-managers-in-llvm)
+  * [Analysis vs Transformation Pass](#analysis-vs-transformation-pass)
+  * [Optimisation Passes Inside LLVM](#optimisation-passes-inside-llvm)
+* [References](#references)
 
 
-HelloWorld
-==========
+HelloWorld: Your First Pass
+===========================
 The **HelloWorld** pass from
 [HelloWorld.cpp](https://github.com/banach-space/llvm-tutor/blob/master/HelloWorld/HelloWorld.cpp)
 is a self-contained *reference example*. The corresponding
@@ -1015,42 +1017,51 @@ favoured over strictness (e.g. [**OpcodeCounter**](#opcodecounter) and
 code](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp#L6-L10)
 clarify that.
 
-Credits
-========
-This is first and foremost a community effort. This project wouldn't be
-possible without the amazing LLVM [online
-documentation](http://llvm.org/docs/), the plethora of great comments in the
-source code, and the llvm-dev mailing list. Thank you!
+Transformation Passes Inside LLVM
+=================================
+Apart from writing your own transformations an analyses, you may want to
+familiarize yourself with [the passes available within
+LLVM](https://llvm.org/docs/Passes.html). It is a great resource for learning
+how LLVM works and what makes it so powerful and successful. It is also a great
+resource for discovering how compilers work in general. Indeed, many of the
+passes implement general concepts known from the theory of compiler development.
 
-It goes without saying that there's plenty of great presentations on YouTube,
-blog posts and GitHub projects that cover similar subjects. I've learnt a great
-deal from them - thank you all for sharing! There's one presentation/tutorial
-that has been particularly important in my journey as an aspiring LLVM
-developer and that helped to _democratise_ out-of-source pass development:
-* "Building, Testing and Debugging a Simple out-of-tree LLVM Pass" Serge
-  Guelton, Adrien Guinet
-  ([slides](https://llvm.org/devmtg/2015-10/slides/GueltonGuinet-BuildingTestingDebuggingASimpleOutOfTreePass.pdf),
-  [video](https://www.youtube.com/watch?v=BnlG-owSVTk&index=8&list=PL_R5A0lGi1AA4Lv2bBFSwhgDaHvvpVU21))
+The list of the available passes in LLVM can be a bit daunting. Below is a list
+of the selected few that are a good starting point. Each entry contains a link
+to the implementation in LLVM, a short description and a link to test files
+available within **llvm-tutor**. These test files contain a collection of
+annotated test cases for the corresponding pass. The goal of these tests is to
+demonstrate the functionality of the tested pass through relatively simple
+examples.
 
-Adrien and Serge came up with some great, illustrative and self-contained
-examples that are great for learning and tutoring LLVM pass development. You'll
-notice that there are similar transformation and analysis passes available in
-this project. The implementations available here reflect what **I** (aka
-banach-space) found most challenging while studying them.
+| Name      | Description     | Test files in lllvm-tutor |
+|-----------|-----------------|---------------------------|
+|[**dce**](https://github.com/llvm/llvm-project/blob/release/10.x/llvm/lib/Transforms/Scalar/DCE.cpp) | Dead Code Elimination | [dce.ll](https://github.com/banach-space/llvm-tutor/blob/master/test/llvm/dce.ll) |
+|[**memcpyopt**](https://github.com/llvm/llvm-project/blob/release/10.x/llvm/lib/Transforms/Scalar/MemCpyOptimizer.cpp) | Optimise calls to `memcpy` (e.g. replace them with `memset`) | [memcpyopt.ll](https://github.com/banach-space/llvm-tutor/blob/master/test/llvm/memcpyopt.ll) |
+|[**reassociate**](https://github.com/llvm/llvm-project/blob/release/10.x/llvm/lib/Transforms/Scalar/Reassociate.cpp) | Reassociate (e.g. 4 + (x + 5) -> x + (4 + 5)). This enables further optimisations, e.g. LICM. | [reassociate.ll](https://github.com/banach-space/llvm-tutor/blob/master/test/llvm/reassociate.ll) |
+|[**always-inline**](https://github.com/llvm/llvm-project/blob/release/10.x/llvm/lib/Transforms/IPO/AlwaysInliner.cpp) | Always inlines functions decorated with [`alwaysinline`](https://llvm.org/docs/LangRef.html#function-attributes) | [always-inline.ll](https://github.com/banach-space/llvm-tutor/blob/master/test/llvm/always-inline.ll) |
+|[**loop-deletion**](https://github.com/llvm/llvm-project/blob/release/10.x/llvm/lib/Transforms/Scalar/LoopDeletion.cpp) | Delete unused loops | [loop-deletion.ll](https://github.com/banach-space/llvm-tutor/blob/master/test/llvm/loop-deletion.ll) |
+|[**licm**](https://github.com/llvm/llvm-project/blob/release/10.x/llvm/lib/Transforms/Scalar/LICM.cpp) | [Loop-Invariant Code Motion](https://en.wikipedia.org/wiki/Loop-invariant_code_motion) (a.k.a. LICM) | [licm.ll](https://github.com/banach-space/llvm-tutor/blob/master/test/llvm/licm.ll) |
+|[**slp**](https://github.com/llvm/llvm-project/blob/release/10.x/llvm/lib/Transforms/Vectorize/SLPVectorizer.cpp) | [Superword-level parallelism vectorisation](https://llvm.org/docs/Vectorizers.html#the-slp-vectorizer) | [slp\_x86.ll](https://github.com/banach-space/llvm-tutor/blob/master/test/llvm/slp_x86.ll), [slp\_aarch64.ll](https://github.com/banach-space/llvm-tutor/blob/master/test/llvm/slp_aarch64.ll)  |
 
-I also want to thank Min-Yih Hsu for his [blog
-series](https://medium.com/@mshockwave/writing-llvm-pass-in-2018-preface-6b90fa67ae82)
-_"Writing LLVM Pass in 2018"_. It was invaluable in understanding how the new
-pass manager works and how to use it. Last, but not least I am very grateful to
-[Nick Sunmer](https://www.cs.sfu.ca/~wsumner/index.html) (e.g.
-[llvm-demo](https://github.com/nsumner/llvm-demo)) and [Mike
-Shah](http://www.mshah.io) (see Mike's Fosdem 2018
-[talk](http://www.mshah.io/fosdem18.html)) for sharing their knowledge online.
-I have learnt a great deal from it, thank you! I always look-up to those of us
-brave and bright enough to work in academia - thank you for driving the
-education and research forward!
+This list focuses on [LLVM's transform
+passes](https://llvm.org/docs/Passes.html#transform-passes) that are relatively
+easy to demonstrate through small, standalone examples. You can ran an
+individual test like this:
 
-## References
+```bash
+lit <source/dir/llvm/tutor>/test/llvm/always-inline.ll
+```
+
+To run an individual pass, extract one [RUN line](https://github.com/banach-space/llvm-tutor/blob/master/test/llvm/always-inline.ll#L2)
+from the test file and run it:
+
+```bash
+$LLVM_DIR/bin/opt -inline-threshold=0 -always-inline -S <source/dir/llvm/tutor>/test/llvm/always-inline.ll
+```
+
+References
+===========
 Below is a list of LLVM resources available outside the official online
 documentation that I have found very helpful. Where possible, the items are sorted by
 date.
@@ -1084,6 +1095,42 @@ Piovezan, EuroLLVM, ([slides](https://llvm.org/devmtg/2019-04/slides/Tutorial-Br
   * _"Introduction to LLVM"_, M. Shah, Fosdem 2018, [link](http://www.mshah.io/fosdem18.html)
   *  [llvm-demo](https://github.com/nsumner/llvm-demo), by N Sumner
   * _"Building an LLVM-based tool. Lessons learned"_, A. Denisov, [blog](https://lowlevelbits.org/building-an-llvm-based-tool.-lessons-learned/), [video](https://www.youtube.com/watch?reload=9&v=Yvj4G9B6pcU)
+
+Credits
+========
+This is first and foremost a community effort. This project wouldn't be
+possible without the amazing LLVM [online
+documentation](http://llvm.org/docs/), the plethora of great comments in the
+source code, and the llvm-dev mailing list. Thank you!
+
+It goes without saying that there's plenty of great presentations on YouTube,
+blog posts and GitHub projects that cover similar subjects. I've learnt a great
+deal from them - thank you all for sharing! There's one presentation/tutorial
+that has been particularly important in my journey as an aspiring LLVM
+developer and that helped to _democratise_ out-of-source pass development:
+
+* "Building, Testing and Debugging a Simple out-of-tree LLVM Pass" Serge
+  Guelton, Adrien Guinet
+  ([slides](https://llvm.org/devmtg/2015-10/slides/GueltonGuinet-BuildingTestingDebuggingASimpleOutOfTreePass.pdf),
+  [video](https://www.youtube.com/watch?v=BnlG-owSVTk&index=8&list=PL_R5A0lGi1AA4Lv2bBFSwhgDaHvvpVU21))
+
+Adrien and Serge came up with some great, illustrative and self-contained
+examples that are great for learning and tutoring LLVM pass development. You'll
+notice that there are similar transformation and analysis passes available in
+this project. The implementations available here reflect what **I** (aka
+banach-space) found most challenging while studying them.
+
+I also want to thank Min-Yih Hsu for his [blog
+series](https://medium.com/@mshockwave/writing-llvm-pass-in-2018-preface-6b90fa67ae82)
+_"Writing LLVM Pass in 2018"_. It was invaluable in understanding how the new
+pass manager works and how to use it. Last, but not least I am very grateful to
+[Nick Sunmer](https://www.cs.sfu.ca/~wsumner/index.html) (e.g.
+[llvm-demo](https://github.com/nsumner/llvm-demo)) and [Mike
+Shah](http://www.mshah.io) (see Mike's Fosdem 2018
+[talk](http://www.mshah.io/fosdem18.html)) for sharing their knowledge online.
+I have learnt a great deal from it, thank you! I always look-up to those of us
+brave and bright enough to work in academia - thank you for driving the
+education and research forward!
 
 License
 ========
