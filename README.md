@@ -10,8 +10,8 @@ Example LLVM passes - based on **LLVM 10**
 **llvm-tutor** is a collection of self-contained reference LLVM passes. It's a
 tutorial that targets novice and aspiring LLVM developers. Key features:
 
-* **Complete** - includes `CMake` build scripts, LIT tests and CI set-up
-* **Out of source** - builds against a binary LLVM installation (no need to build LLVM from sources)
+* **Out-of-tree** - builds against a binary LLVM installation (no need to build LLVM from sources)
+* **Complete** - includes `CMake` build scripts, LIT tests, CI set-up and documentation
 * **Modern** - based on the latest version of LLVM (and updated with every release)
 
 ### Overview
