@@ -1017,7 +1017,7 @@ favoured over strictness (e.g. [**OpcodeCounter**](#opcodecounter) and
 code](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp#L6-L10)
 clarify that.
 
-Transformation Passes Inside LLVM
+Optimisation Passes Inside LLVM
 =================================
 Apart from writing your own transformations an analyses, you may want to
 familiarize yourself with [the passes available within
