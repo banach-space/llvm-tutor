@@ -78,7 +78,7 @@ Finally, run **HelloWorld** with [**opt**](http://llvm.org/docs/CommandGuide/opt
 
 ```bash
 # Run the pass
-$LLVM_DIR/bin/opt -load-pass-plugin ./libHelloWorld.dylib -passes=hello-world -disable-output input_for_hello.ll
+$LLVM_DIR/bin/opt -load-pass-plugin ./libHelloWorld.so -passes=hello-world -disable-output input_for_hello.ll
 # Expected output
 (llvm-tutor) Hello from: foo
 (llvm-tutor)   number of arguments: 1
@@ -261,7 +261,7 @@ export LLVM_DIR=<installation/dir/of/llvm/10>
 # Generate an LLVM file to analyze
 $LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
 # Run the pass through opt
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libOpcodeCounter.dylib -legacy-opcode-counter input_for_cc.bc
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libOpcodeCounter.so -legacy-opcode-counter input_for_cc.bc
 ```
 For `main` **OpcodeCounter**, prints the following summary (note that when running the pass,
 a summary for other functions defined in `input_for_cc.bc` is also printed):
@@ -294,14 +294,14 @@ Once built, you can run **OpcodeCounter** by specifying an optimisation level.
 Note that you still have to specify the plugin file to be loaded:
 
 ```bash
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libOpcodeCounter.dylib -O1 input_for_cc.bc
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libOpcodeCounter.so -O1 input_for_cc.bc
 ```
 Here I used the Legacy Pass Manager (the plugin file was specified with
 `-load` rather than `-load-pass-plugin`), but the auto-registration also works with
 the New Pass Manager:
 
 ```bash
-$LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libOpcodeCounter.dylib --passes='default<O1>' input_for_cc.bc
+$LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libOpcodeCounter.so --passes='default<O1>' input_for_cc.bc
 ```
 
 This is implemented in
@@ -334,7 +334,7 @@ export LLVM_DIR=<installation/dir/of/llvm/10>
 # Generate an LLVM file to analyze
 $LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/inputs/input_for_hello.c -o input_for_hello.bc
 # Run the pass through opt
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libInjectFuncCall.dylib -legacy-inject-func-call input_for_hello.bc -o instrumented.bin
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libInjectFuncCall.so -legacy-inject-func-call input_for_hello.bc -o instrumented.bin
 ```
 This generates `instrumented.bin`, which is the instrumented version of
 `input_for_hello.bc`. In order to verify that **InjectFuncCall** worked as
@@ -415,7 +415,7 @@ export LLVM_DIR=<installation/dir/of/llvm/10>
 # Generate an LLVM file to analyze
 $LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
 # Run the pass through opt
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libStaticCallCounter.dylib -legacy-static-cc -analyze input_for_cc.bc
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libStaticCallCounter.so -legacy-static-cc -analyze input_for_cc.bc
 ```
 You should see the following output:
 
@@ -470,7 +470,7 @@ export LLVM_DIR=<installation/dir/of/llvm/10>
 # Generate an LLVM file to analyze
 $LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
 # Instrument the input file
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libDynamicCallCounter.dylib -legacy-dynamic-cc input_for_cc.bc -o instrumented_bin
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libDynamicCallCounter.so -legacy-dynamic-cc input_for_cc.bc -o instrumented_bin
 ```
 This generates `instrumented.bin`, which is the instrumented version of
 `input_for_cc.bc`. In order to verify that **DynamicCallCounter** worked as
@@ -533,8 +533,8 @@ to test **MBASub**:
 
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
-$LLVM_DIR/bin/clang -emit-llvm -S inputs/input_for_mba_sub.c -o input_for_sub.ll
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libMBASub.so -legacy-mba-sub input_for_sub.ll -o out.ll
+$LLVM_DIR/bin/clang -emit-llvm -S <source_dir>inputs/input_for_mba_sub.c -o input_for_sub.ll
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libMBASub.so -legacy-mba-sub -S input_for_sub.ll -o out.ll
 ```
 
 ### MBAAdd
@@ -555,14 +555,14 @@ to test **MBAAdd**:
 
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
-$LLVM_DIR/bin/clang -O1 -emit-llvm -S inputs/input_for_mba.c -o input_for_mba.ll
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libMBAAdd.so -legacy-mba-add input_for_mba.ll -o out.ll
+$LLVM_DIR/bin/clang -O1 -emit-llvm -S <source_dir>inputs/input_for_mba.c -o input_for_mba.ll
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libMBAAdd.so -legacy-mba-add -S input_for_mba.ll -o out.ll
 ```
 You can also specify the level of _obfuscation_ on a scale of `0.0` to `1.0`, with
 `0` corresponding to no obfuscation and `1` meaning that all `add` instructions
 are to be replaced with `(((a ^ b) + 2 * (a & b)) * 39 + 23) * 151 + 111`, e.g.:
 ```bash
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libMBAAdd.so -legacy-mba-add -mba-ratio=0.3 inputs/input_for_mba.c -o out.ll
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libMBAAdd.so -legacy-mba-add -mba-ratio=0.3 <source_dir>inputs/input_for_mba.c -o out.ll
 ```
 
 ## RIV
@@ -589,8 +589,8 @@ to test **RIV**:
 
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
-$LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_riv.c -o input_for_riv.ll
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libRIV.so -legacy-riv -analyze inputs/input_for_riv.ll
+$LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>inputs/input_for_riv.c -o input_for_riv.ll
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libRIV.so -legacy-riv -analyze input_for_riv.ll
 ```
 You will see the following output:
 
@@ -698,7 +698,7 @@ as our sample input. First, generate the LLVM file:
 
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
-$LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_duplicate_bb.c -o input_for_duplicate_bb.ll
+$LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>inputs/input_for_duplicate_bb.c -o input_for_duplicate_bb.ll
 ```
 
 Function `foo` in `input_for_duplicate_bb.ll` should look like this (all metadata has been stripped):
@@ -713,7 +713,7 @@ one argument (this means that the result from **RIV** will be a non-empty set).
 We will now apply **DuplicateBB** to `foo`:
 
 ```bash
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libRIV.so -load <build_dir>/lib/libDuplicateBB.so -legacy-duplicate-bb input_for_duplicate_bb.ll
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libRIV.so -load <build_dir>/lib/libDuplicateBB.so -legacy-duplicate-bb -S input_for_duplicate_bb.ll -o duplicate.ll
 ```
 After the instrumentation `foo` will look like this (all metadata has been stripped):
 
@@ -792,7 +792,7 @@ define i32 @foo(i32) {
 We will now apply **MergeBB** to `foo`:
 
 ```bash
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libMergeBB.so -legacy-merge-bb foo.ll
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libMergeBB.so -legacy-merge-bb -S foo.ll -o merge.ll
 ```
 After the instrumentation `foo` will look like this (all metadata has been stripped):
 ```llvm
@@ -811,10 +811,6 @@ define i32 @foo(i32) {
 As you can see, basic blocks 3 and 5 from the input module have been merged
 into one basic block.
 
-```bash
-export LLVM_DIR=<installation/dir/of/llvm/10>
-$LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_duplicate_bb.c -o input_for_duplicate_bb.ll
-```
 
 ### Run MergeBB on the output from DuplicateBB
 It is really interesting to see the effect of **MergeBB** on the output from
@@ -822,7 +818,7 @@ It is really interesting to see the effect of **MergeBB** on the output from
 
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
-$LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_duplicate_bb.c -o input_for_duplicate_bb.ll
+$LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>inputs/input_for_duplicate_bb.c -o input_for_duplicate_bb.ll
 ```
 
 Now we will apply **DuplicateBB** _and_ **MergeBB** (in this order) to `foo`.
@@ -830,7 +826,7 @@ Recall that **DuplicateBB** requires **RIV**, which means that in total we have
 to load three plugins:
 
 ```bash
-$LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libRIV.so -load-pass-plugin <build_dir>/lib/libMergeBB.so -load-pass-plugin <build-dir>/lib/libDuplicateBB.so -passes=duplicate-bb,merge-bb input_for_duplicate_bb.ll
+$LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libRIV.so -load-pass-plugin <build_dir>/lib/libMergeBB.so -load-pass-plugin <build-dir>/lib/libDuplicateBB.so -passes=duplicate-bb,merge-bb -S input_for_duplicate_bb.ll -o merge_after_duplicate.ll
 ```
 And here's the output:
 
@@ -863,8 +859,8 @@ macros. For example, for **MBAAdd**:
 
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
-$LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_mba.c -o input_for_mba.ll
-$LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libMBAAdd.dylib -passes=mba-add input_for_mba.ll -debug-only=mba-add -stats -o out.ll
+$LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>inputs/input_for_mba.c -o input_for_mba.ll
+$LLVM_DIR/bin/opt -S -load-pass-plugin <build_dir>/lib/libMBAAdd.so -passes=mba-add input_for_mba.ll -debug-only=mba-add -stats -o out.ll
 ```
 Note the `-debug-only=mba-add` and `-stats` flags in the command line - that's
 what enables the following output:
@@ -892,8 +888,8 @@ normally use it like this:
 
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
-$LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_mba.c -o input_for_mba.ll
-lldb -- $LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libMBAAdd.dylib -passes=mba-add input_for_mba.ll -o out.ll
+$LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>inputs/input_for_mba.c -o input_for_mba.ll
+lldb -- $LLVM_DIR/bin/opt -S -load-pass-plugin <build_dir>/lib/libMBAAdd.dylib -passes=mba-add input_for_mba.ll -o out.ll
 (lldb) breakpoint set --name MBAAdd::run
 (lldb) process launch
 ```
@@ -901,8 +897,8 @@ or, equivalently, by using LLDBs aliases:
 
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
-$LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_mba.c -o input_for_mba.ll
-lldb -- $LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libMBAAdd.dylib -passes=mba-add input_for_mba.ll -o out.ll
+$LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>inputs/input_for_mba.c -o input_for_mba.ll
+lldb -- $LLVM_DIR/bin/opt -S -load-pass-plugin <build_dir>/lib/libMBAAdd.dylib -passes=mba-add input_for_mba.ll -o out.ll
 (lldb) b MBAAdd::run
 (lldb) r
 ```
@@ -914,8 +910,8 @@ popular debugger. A typical session will look like this:
 
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
-$LLVM_DIR/bin/clang -emit-llvm -S -O1 inputs/input_for_mba.c -o input_for_mba.ll
-gdb --args $LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libMBAAdd.so -passes=mba-add input_for_mba.ll -o out.ll
+$LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>inputs/input_for_mba.c -o input_for_mba.ll
+gdb --args $LLVM_DIR/bin/opt -S -load-pass-plugin <build_dir>/lib/libMBAAdd.so -passes=mba-add input_for_mba.ll -o out.ll
 (gdb) b MBAAdd.cpp:MBAAdd::run
 (gdb) r
 ```
@@ -953,13 +949,13 @@ extend it so that it works with the other one as well.
 use it with the legacy pass manager:
 
 ```bash
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libMBAAdd.so -legacy-mba-add input_for_mba.ll -o out.ll
+$LLVM_DIR/bin/opt -S -load <build_dir>/lib/libMBAAdd.so -legacy-mba-add input_for_mba.ll -o out.ll
 ```
 
 And this is how you run it with the new pass manager:
 
 ```bash
-$LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libMBAAdd.so -passes=mba-add input_for_mba.ll -o out.ll
+$LLVM_DIR/bin/opt -S -load-pass-plugin <build_dir>/lib/libMBAAdd.so -passes=mba-add input_for_mba.ll -o out.ll
 ```
 
 There are two differences:
