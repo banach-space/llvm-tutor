@@ -533,7 +533,7 @@ to test **MBASub**:
 
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
-$LLVM_DIR/bin/clang -emit-llvm -S <source_dir>inputs/input_for_mba_sub.c -o input_for_sub.ll
+$LLVM_DIR/bin/clang -emit-llvm -S <source_dir>/inputs/input_for_mba_sub.c -o input_for_sub.ll
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libMBASub.so -legacy-mba-sub -S input_for_sub.ll -o out.ll
 ```
 
@@ -555,14 +555,14 @@ to test **MBAAdd**:
 
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
-$LLVM_DIR/bin/clang -O1 -emit-llvm -S <source_dir>inputs/input_for_mba.c -o input_for_mba.ll
+$LLVM_DIR/bin/clang -O1 -emit-llvm -S <source_dir>/inputs/input_for_mba.c -o input_for_mba.ll
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libMBAAdd.so -legacy-mba-add -S input_for_mba.ll -o out.ll
 ```
 You can also specify the level of _obfuscation_ on a scale of `0.0` to `1.0`, with
 `0` corresponding to no obfuscation and `1` meaning that all `add` instructions
 are to be replaced with `(((a ^ b) + 2 * (a & b)) * 39 + 23) * 151 + 111`, e.g.:
 ```bash
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libMBAAdd.so -legacy-mba-add -mba-ratio=0.3 <source_dir>inputs/input_for_mba.c -o out.ll
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libMBAAdd.so -legacy-mba-add -mba-ratio=0.3 <source_dir>/inputs/input_for_mba.c -o out.ll
 ```
 
 ## RIV
@@ -589,7 +589,7 @@ to test **RIV**:
 
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
-$LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>inputs/input_for_riv.c -o input_for_riv.ll
+$LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>/inputs/input_for_riv.c -o input_for_riv.ll
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libRIV.so -legacy-riv -analyze input_for_riv.ll
 ```
 You will see the following output:
@@ -698,7 +698,7 @@ as our sample input. First, generate the LLVM file:
 
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
-$LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>inputs/input_for_duplicate_bb.c -o input_for_duplicate_bb.ll
+$LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>/inputs/input_for_duplicate_bb.c -o input_for_duplicate_bb.ll
 ```
 
 Function `foo` in `input_for_duplicate_bb.ll` should look like this (all metadata has been stripped):
@@ -818,7 +818,7 @@ It is really interesting to see the effect of **MergeBB** on the output from
 
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
-$LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>inputs/input_for_duplicate_bb.c -o input_for_duplicate_bb.ll
+$LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>/inputs/input_for_duplicate_bb.c -o input_for_duplicate_bb.ll
 ```
 
 Now we will apply **DuplicateBB** _and_ **MergeBB** (in this order) to `foo`.
@@ -859,7 +859,7 @@ macros. For example, for **MBAAdd**:
 
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
-$LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>inputs/input_for_mba.c -o input_for_mba.ll
+$LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>/inputs/input_for_mba.c -o input_for_mba.ll
 $LLVM_DIR/bin/opt -S -load-pass-plugin <build_dir>/lib/libMBAAdd.so -passes=mba-add input_for_mba.ll -debug-only=mba-add -stats -o out.ll
 ```
 Note the `-debug-only=mba-add` and `-stats` flags in the command line - that's
@@ -888,7 +888,7 @@ normally use it like this:
 
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
-$LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>inputs/input_for_mba.c -o input_for_mba.ll
+$LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>/inputs/input_for_mba.c -o input_for_mba.ll
 lldb -- $LLVM_DIR/bin/opt -S -load-pass-plugin <build_dir>/lib/libMBAAdd.dylib -passes=mba-add input_for_mba.ll -o out.ll
 (lldb) breakpoint set --name MBAAdd::run
 (lldb) process launch
@@ -897,7 +897,7 @@ or, equivalently, by using LLDBs aliases:
 
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
-$LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>inputs/input_for_mba.c -o input_for_mba.ll
+$LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>/inputs/input_for_mba.c -o input_for_mba.ll
 lldb -- $LLVM_DIR/bin/opt -S -load-pass-plugin <build_dir>/lib/libMBAAdd.dylib -passes=mba-add input_for_mba.ll -o out.ll
 (lldb) b MBAAdd::run
 (lldb) r
@@ -910,7 +910,7 @@ popular debugger. A typical session will look like this:
 
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
-$LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>inputs/input_for_mba.c -o input_for_mba.ll
+$LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>/inputs/input_for_mba.c -o input_for_mba.ll
 gdb --args $LLVM_DIR/bin/opt -S -load-pass-plugin <build_dir>/lib/libMBAAdd.so -passes=mba-add input_for_mba.ll -o out.ll
 (gdb) b MBAAdd.cpp:MBAAdd::run
 (gdb) r
