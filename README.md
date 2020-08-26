@@ -880,7 +880,9 @@ what enables the following output:
 3 mba-add - The # of substituted instructions
 ```
 As you can see, you get a nice summary from **MBAAdd**. In many cases this will
-be sufficient to understand what might be going wrong.
+be sufficient to understand what might be going wrong. Note that for these
+macros to work you need a debug build of LLVM (i.e. **opt**) and **llvm-tutor**
+(i.e. use `-DCMAKE_BUILD_TYPE=Debug` instead of `-DCMAKE_BUILD_TYPE=Release`).
 
 For tricker issues just use a debugger. Below I demonstrate how to debug
 [**MBAAdd**](#mbaadd). More specifically, how to set up a breakpoint on entry
