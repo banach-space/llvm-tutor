@@ -260,8 +260,8 @@ PreservedAnalyses DuplicateBB::run(llvm::Function &F,
   }
 
   DuplicateBBCountStats = DuplicateBBCount;
-  return (Targets.empty() ? llvm::PreservedAnalyses::none()
-                          : llvm::PreservedAnalyses::all());
+  return (Targets.empty() ? llvm::PreservedAnalyses::all()
+                          : llvm::PreservedAnalyses::none());
 }
 
 bool LegacyDuplicateBB::runOnFunction(llvm::Function &F) {
