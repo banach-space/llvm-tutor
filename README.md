@@ -74,11 +74,13 @@ Before you can test it, you need to prepare an input file:
 $LLVM_DIR/bin/clang -S -emit-llvm <source/dir/llvm/tutor/>inputs/input_for_hello.c -o input_for_hello.ll
 ```
 
-Finally, run **HelloWorld** with [**opt**](http://llvm.org/docs/CommandGuide/opt.html):
+Finally, run **HelloWorld** with
+[**opt**](http://llvm.org/docs/CommandGuide/opt.html) (use `libHelloWorld.so`
+on Linux and `libHelloWorld.dylib` on Mac OS):
 
 ```bash
 # Run the pass
-$LLVM_DIR/bin/opt -load-pass-plugin ./libHelloWorld.so -passes=hello-world -disable-output input_for_hello.ll
+$LLVM_DIR/bin/opt -load-pass-plugin ./libHelloWorld.{so|dylib} -passes=hello-world -disable-output input_for_hello.ll
 # Expected output
 (llvm-tutor) Hello from: foo
 (llvm-tutor)   number of arguments: 1
@@ -104,7 +106,7 @@ order to build **llvm-tutor** you will need:
 
 In order to run the passes, you will need:
   * **clang-10** (to generate input LLVM files)
-  * **opt** (to run the passes)
+  * [**opt**](http://llvm.org/docs/CommandGuide/opt.html) (to run the passes)
 
 There are additional requirements for tests (these will be satisfied by
 installing LLVM 10):
@@ -176,7 +178,8 @@ documentation](https://llvm.org/docs/CMake.html).
 
 Building & Testing
 ===================
-You can build **llvm-tutor** (and all the provided passes) as follows:
+## Building
+You can build **llvm-tutor** (and all the provided pass plugins) as follows:
 
 ```bash
 cd <build/dir>
@@ -189,8 +192,10 @@ installation or build directory of LLVM 10. It is used to locate the
 corresponding `LLVMConfig.cmake` script that is used to set the include and
 library paths.
 
-In order to run the tests, you need to install **llvm-lit** (aka **lit**). It's
-not bundled with LLVM 10 packages, but you can install it with **pip**:
+## Testing
+In order to run **llvm-tutor** tests, you need to install **llvm-lit** (aka
+**lit**). It's not bundled with LLVM 10 packages, but you can install it with
+**pip**:
 
 ```bash
 # Install lit - note that this installs lit globally
@@ -202,6 +207,21 @@ Running the tests is as simple as:
 $ lit <build_dir>/test
 ```
 Voilà! You should see all tests passing.
+
+## Plugins (Linux vs Mac OS)
+In **llvm-tutor** every LLVM pass is implemented in a separate shared object
+([here](http://www.yolinux.com/TUTORIALS/LibraryArchives-StaticAndDynamic.html)
+you can learn more about shared objects). These shared objects are essentially
+dynamically loadable plugins for **opt**. All plugins are built in the
+`<build/dir/lib>` directory. Note that the extension of dynamically loaded
+shared objects differs between Linux and Mac OS. For example, for the
+**HelloWorld** pass you will get:
+
+* `libHelloWorld.so` on Linux
+* `libHelloWorld.dylib` on MacOS.
+
+For the sake of consistency, in this README.md file all examples use the `*.so`
+extension. When working on Mac OS, use `*.dylib` instead.
 
 Overview of The Passes
 ======================
@@ -229,8 +249,10 @@ level of complexity.
 |[**MergeBB**](#mergebb) | merges duplicated basic blocks | CFG |
 
 Once you've [built](#build-instructions) this project, you can experiment with
-every pass separately. All passes work with LLVM files. You can generate one
-like this:
+every pass separately. All passes, except for [**HelloWorld**](#helloworld),
+are described in more details below.
+
+LLVM passes work with LLVM IR files. You can generate one like this:
 
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/10>
@@ -239,9 +261,14 @@ $LLVM_DIR/bin/clang  -emit-llvm input.c -S -o out.ll
 # Binary/bit-code form
 $LLVM_DIR/bin/clang  -emit-llvm input.c -o out.bc
 ```
-It doesn't matter whether you choose the binary (without `-S`) or textual
-form (with `-S`), but obviously the latter is more human-friendly. All passes,
-except for [**HelloWorld**](#helloworld), are described below.
+It doesn't matter whether you choose the binary, `*.bc` (default), or textual
+(`.ll`, requires the `-S` flag) form, but obviously the latter is more
+human-readable. Similar logic applies to **opt** (by default it generates
+`*.bc` files, use `-S` to generate an `*.ll` file instead).
+
+As noted [earlier](#building--testing), all examples in this file use the
+`*.so` extension for pass plugins. When working on Mac OS, use `*.dylib`
+instead.
 
 ## OpcodeCounter
 **OpcodeCounter** prints a summary of the
