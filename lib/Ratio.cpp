@@ -16,8 +16,8 @@ namespace cl {
 // Check if the user input is a real in [0., 1.]
 // Returns false on success.
 bool parser<Ratio>::parse(Option &Opt, StringRef ArgName,
-                          const std::string &Arg, Ratio &Val) {
-  char const *ArgCStr = Arg.c_str();
+                          const StringRef &Arg, Ratio &Val) {
+  char const *ArgCStr = Arg.str().c_str();
   char *EndPtr = nullptr;
   double TheRatio = std::strtod(
       ArgCStr, &EndPtr); // cannot use std::stod: no exception support in LLVM

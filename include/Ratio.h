@@ -37,7 +37,7 @@ public:
   parser(Option &Opt) : basic_parser<Ratio>(Opt) {}
   virtual ~parser() = default;
 
-  bool parse(Option &O, StringRef ArgName, const std::string &Arg, Ratio &Val);
+  bool parse(Option &O, StringRef ArgName, const StringRef &Arg, Ratio &Val);
 
   void printOptionDiff(const Option &O, Ratio const &V, OptionValue<Ratio> D,
                        size_t GlobalWidth) const;
