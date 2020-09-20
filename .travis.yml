@@ -6,13 +6,13 @@ addons:
   apt:
     update: true
     sources:
-      - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main'
+      - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-11 main'
         key_url: 'http://apt.llvm.org/llvm-snapshot.gpg.key'
     packages:
-      - llvm-10
-      - llvm-10-dev
-      - llvm-10-tools
-      - clang-10
+      - llvm-11
+      - llvm-11-dev
+      - llvm-11-tools
+      - clang-11
 
 env:
   - CONFIGURATION=Debug
@@ -28,15 +28,24 @@ install:
   - pip install --user lit
 
 script:
+  # The latest version of CMake available in Travis is 3.12.4. That's
+  # insufficient for LLVM and llvm-tutor. Download more recent version and use
+  # that instead.
+  - CMAKE_DIR="/home/travis/build/banach-space/cmake/"
+  - mkdir $CMAKE_DIR && cd $CMAKE_DIR
+  - wget https://github.com/Kitware/CMake/releases/download/v3.18.4/cmake-3.18.4-Linux-x86_64.sh
+  - checksum=3d6e838e98cbeeeedb83860dc4ef9cc5d559b78bad5fd48b014b8d863d575356
+  - echo "$checksum cmake-3.18.4-Linux-x86_64.sh" | sha256sum -c -
+  - bash cmake-3.18.4-Linux-x86_64.sh --skip-license
   # Build HelloWorld as a standalone project
-  - cd HelloWorld
+  - cd $HOME/build/banach-space/llvm-tutor/HelloWorld
   - mkdir build && cd build
-  - cmake -DLT_LLVM_INSTALL_DIR=/usr/lib/llvm-10/ -DCMAKE_BUILD_TYPE=$CONFIGURATION ../
+  - $CMAKE_DIR/bin/cmake -DLT_LLVM_INSTALL_DIR=/usr/lib/llvm-11/ -DCMAKE_BUILD_TYPE=$CONFIGURATION ../
   - make -j4
   # Build the top project and run tests
   - cd ../../
   - mkdir build
   - cd build
-  - cmake -DLT_LLVM_INSTALL_DIR=/usr/lib/llvm-10/ -DCMAKE_BUILD_TYPE=$CONFIGURATION ../
+  - $CMAKE_DIR/bin/cmake -DLT_LLVM_INSTALL_DIR=/usr/lib/llvm-11/ -DCMAKE_BUILD_TYPE=$CONFIGURATION ../
   - make -j4
   - lit test/

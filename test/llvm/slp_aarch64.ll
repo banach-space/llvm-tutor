@@ -1,4 +1,4 @@
-; RUN: opt -basicaa -slp-vectorizer -die -S -mtriple=aarch64-unknown-linuxgnu %s
+; RUN: opt --basic-aa -slp-vectorizer -die -S -mtriple=aarch64-unknown-linuxgnu %s
 
 ; The input function can be expressed in C as:
 ; int hadd(int *a) {

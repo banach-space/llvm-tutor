@@ -10,7 +10,7 @@ jobs:
       - name: Install Dependencies
         run: |
           brew update
-          brew install llvm@10
+          brew install llvm@11
           brew upgrade llvm
           pip install lit
           ls /usr/local/opt/

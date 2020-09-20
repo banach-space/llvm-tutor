@@ -31,7 +31,7 @@ jobs:
         run: |
           # Adding the location of Ninja to $PATH
           $env:Path += "$;GITHUB_WORKSPACE"
-          git clone --depth 1 --single-branch --branch release/10.x https://github.com/llvm/llvm-project
+          git clone --depth 1 --single-branch --branch release/11.x https://github.com/llvm/llvm-project
           cd llvm-project
           mkdir build
           cd build

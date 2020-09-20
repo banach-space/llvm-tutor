@@ -11,7 +11,7 @@
 #define LLVM_TUTOR_STATICCALLCOUNTER_H
 
 #include "llvm/ADT/MapVector.h"
-#include "llvm/IR/CallSite.h"
+#include "llvm/IR/AbstractCallSite.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/PassManager.h"
 #include "llvm/Pass.h"

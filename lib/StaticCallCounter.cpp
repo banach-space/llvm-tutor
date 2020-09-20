@@ -14,8 +14,8 @@
 //      * it implements a print method (Legacy PM API)
 //
 //    The `print` method (Legacy PM) is called when running opt with the
-//    `-analyze` flag. As the new PM has no equivalent of the `print method, it
-//    is currently not possible to print the results of this pass when:
+//    `-analyze` flag. As the new PM has no equivalent of the `print` method,
+//    it is currently not possible to print the results of this pass when:
 //      * running StaticCalCounter through opt and using the new PM.
 //    However, StaticCallCounter does implement the new PM interface.
 //    It is used in `static`, a tool implemented in tools/StaticMain.cpp that
@@ -47,22 +47,21 @@ StaticCallCounter::Result StaticCallCounter::runOnModule(Module &M) {
   for (auto &Func : M) {
     for (auto &BB : Func) {
       for (auto &Ins : BB) {
-        // As per the comments in CallSite.h (more specifically, comments for
-        // the base class CallSiteBase), ImmutableCallSite constructor creates
-        // a valid call-site or NULL for something which is NOT a call site.
-        auto ICS = ImmutableCallSite(&Ins);
-        if (nullptr == ICS.getInstruction()) {
+
+        // If this is a call instruction then CB will be not null.
+        auto *CB = dyn_cast<CallBase>(&Ins);
+        if (nullptr == CB) {
           continue;
         }
 
-        // Check whether the called function is directly invoked
-        auto DirectInvoc =
-            dyn_cast<Function>(ICS.getCalledValue()->stripPointerCasts());
+        // If CB is a direct function call then DirectInvoc will be not null.
+        auto DirectInvoc = CB->getCalledFunction();
         if (nullptr == DirectInvoc) {
           continue;
         }
 
-        // Update the count for the particular call
+        // We have a direct function call - update the count for the function
+        // being called.
         auto CallCount = Res.find(DirectInvoc);
         if (Res.end() == CallCount) {
           CallCount = Res.insert(std::make_pair(DirectInvoc, 0)).first;
