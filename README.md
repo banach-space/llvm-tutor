@@ -98,7 +98,7 @@ flag is used to prevent **opt** from printing the output bitcode file.
 Development Environment
 =======================
 ## Platform Support And Requirements
-This project has been tested on **Linux 18.04** and **Mac OS X 10.14.4**. In
+This project has been tested on **Ubuntu 18.04** and **Mac OS X 10.14.4**. In
 order to build **llvm-tutor** you will need:
   * LLVM 10
   * C++ compiler that supports C++14
