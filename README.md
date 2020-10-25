@@ -29,10 +29,8 @@ will guide you through the implementation. All examples are complemented with
 [LIT](https://llvm.org/docs/TestingGuide.html) tests and reference [input
 files](https://github.com/banach-space/llvm-tutor/blob/master/inputs).
 
-If you are interested in discovering how to write Clang plugins then visit
-my other tutorial,
-[**clang-tutor**](https://github.com/banach-space/clang-tutor/), that fallows
-similar format.
+Visit [**clang-tutor**](https://github.com/banach-space/clang-tutor/) if you
+are internested in similar tutorial for Clang.
 
 ### Table of Contents
 * [HelloWorld: Your First Pass](#helloworld-your-first-pass)
