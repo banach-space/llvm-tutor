@@ -9,10 +9,17 @@ jobs:
       - uses: actions/checkout@v1
       - name: Install Dependencies
         run: |
+          # A workaround borrowed from here:
+          #   https://github.com/actions/virtual-environments/issues/1811
+          brew uninstall openssl
+          brew uninstall python@2.7.17
+          brew untap local/openssl
+          brew untap local/python2
+          # End of workaround
           brew update
+          brew upgrade
           brew install llvm@11
-          brew upgrade llvm
-          pip install lit
+          pip3 install lit
           ls /usr/local/opt/
       - name: Build HelloWorld
         run: |
