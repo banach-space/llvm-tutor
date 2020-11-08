@@ -225,13 +225,13 @@ level of complexity.
 
 | Name      | Description     | Category |
 |-----------|-----------------|------|
-|[**HelloWorld**](#helloworld) | prints the functions encountered in the input module | Analysis |
-|[**OpcodeCounter**](#opcodecounter) | prints the LLVM IR opcodes encountered in the input module | Analysis |
+|[**HelloWorld**](#helloworld) | visits all functions and prints their names | Analysis |
+|[**OpcodeCounter**](#opcodecounter) | prints a summary of LLVM IR opcodes in the input module | Analysis |
 |[**InjectFuncCall**](#injectfunccall) | instruments the input module by inserting calls to `printf` | Transformation |
 |[**StaticCallCounter**](#staticcallcounter) | counts direct function calls at compile-time (static analysis) | Analysis |
 |[**DynamicCallCounter**](#dynamiccallcounter) | counts direct function calls at run-time (dynamic analysis) | Transformation |
-|[**MBASub**](#mbasub) | code transformation for integer `sub` instructions | Transformation |
-|[**MBAAdd**](#mbaadd) | code transformation for 8-bit integer `add` instructions | Transformation |
+|[**MBASub**](#mbasub) | obfuscate integer `sub` instructions | Transformation |
+|[**MBAAdd**](#mbaadd) | obfuscate 8-bit integer `add` instructions | Transformation |
 |[**RIV**](#riv) | finds reachable integer values for each basic block | Analysis |
 |[**DuplicateBB**](#duplicatebb) | duplicates basic blocks, requires **RIV** analysis results | CFG |
 |[**MergeBB**](#mergebb) | merges duplicated basic blocks | CFG |
@@ -263,7 +263,7 @@ instead.
 [LLVM IR opcodes](https://github.com/llvm/llvm-project/blob/release/11.x/llvm/lib/IR/Instruction.cpp#L319)
 encountered in every function in the input module. This pass is slightly more
 complicated than **HelloWorld** and it can be [run
-automatically](#run-opcodecounter-automatically). Let's use our tried and
+automatically](#auto-registration-with-optimisation-pipelines). Let's use our tried and
 tested method first.
 
 ### Run the pass
@@ -298,22 +298,18 @@ call                 4
 -------------------------------------------------
 ```
 
-### Run OpcodeCounter Automatically
-You can configure **llvm-tutor** so that **OpcodeCounter** is run automatically
-at any optimisation level (i.e. `-O{1|2|3|s}`). This is achieved through
-auto-registration with the existing pipelines, which is enabled with the
-`LT_OPT_PIPELINE_REG` CMake variable. Simply add `-DLT_OPT_PIPELINE_REG=On`
-when [building](#building--testing) **llvm-tutor**.
-
-Once built, you can run **OpcodeCounter** by specifying an optimisation level.
-Note that you still have to specify the plugin file to be loaded:
+### Auto-registration with optimisation pipelines
+You can run **OpcodeCounter** by simply specifying an optimisation level (e.g.
+`-O{1|2|3|s}`). This is achieved through auto-registration with the existing
+optimisation pass pipelines. Note that you still have to specify the plugin
+file to be loaded:
 
 ```bash
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libOpcodeCounter.so -O1 input_for_cc.bc
 ```
-Here I used the Legacy Pass Manager (the plugin file was specified with
-`-load` rather than `-load-pass-plugin`), but the auto-registration also works with
-the New Pass Manager:
+In this example I used the Legacy Pass Manager (the plugin file was specified
+with `-load` rather than `-load-pass-plugin`). The auto-registration also works
+with the New Pass Manager:
 
 ```bash
 $LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libOpcodeCounter.so --passes='default<O1>' input_for_cc.bc
@@ -322,8 +318,8 @@ $LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libOpcodeCounter.so --passes
 This is implemented in
 [OpcodeCounter.cpp](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp),
 on
-[line 82](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp#L82) for the New PM, and on
-[line 111](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp#L111) for the Legacy PM.
+[line 82](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp#L82-L102) for the New PM, and on
+[line 122](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp#L122-L127) for the Legacy PM.
 This [section](#about-pass-managers-in-llvm) contains more information about
 the pass managers in LLVM.
 

@@ -11,8 +11,9 @@
 //
 //    This example demonstrates how to insert your pass at one of the
 //    predefined extension points, e.g. before any other transformations are
-//    run (`EP_EarlyAsPossible`). This is achieved by creating an instance of
-//    llvm::RegisterStandardPasses as demonstrated below.
+//    run (i.e. via `EP_EarlyAsPossible` for the Legacy PM) or whenever the
+//    vectoriser is run (i.e. via `registerVectorizerStartEPCallback` for the
+//    new PM).
 //
 // USAGE:
 //    1. Legacy PM
@@ -75,17 +76,29 @@ bool LegacyOpcodeCounter::runOnFunction(llvm::Function &Func) {
 //-----------------------------------------------------------------------------
 // New PM Registration
 //-----------------------------------------------------------------------------
-// Register OpcodeCounter as a step of an existing pipeline. The insertion
-// point is specified by the 'registerVectorizerStartEPCallback' callback.
-// More specifically, OpcodeCounter will be run automatically whenever the
-// vectoriser is used (i.e. when using '-O{1|2|3|s}'.
 llvm::PassPluginLibraryInfo getOpcodeCounterPluginInfo() {
   return {LLVM_PLUGIN_API_VERSION, "OpcodeCounter", LLVM_VERSION_STRING,
           [](PassBuilder &PB) {
+            // Register OpcodeCounter as a step of an existing pipeline. The
+            // insertion point is specified by using the
+            // 'registerVectorizerStartEPCallback' callback. To be more
+            // precise, using this callback means that OpcodeCounter will be
+            // called whenever the vectoriser is used (i.e. when using
+            // '-O{1|2|3|s}'.
             PB.registerVectorizerStartEPCallback(
                 [](llvm::FunctionPassManager &PM,
                    llvm::PassBuilder::OptimizationLevel Level) {
                   PM.addPass(OpcodeCounter());
+                });
+            // Register OpcodeCounter when passing `-passes=opcode-counter`
+            PB.registerPipelineParsingCallback(
+                [](StringRef Name, FunctionPassManager &FPM,
+                   ArrayRef<PassBuilder::PipelineElement>) {
+                  if (Name == "opcode-counter") {
+                    FPM.addPass(OpcodeCounter());
+                    return true;
+                  }
+                  return false;
                 });
           }};
 }
