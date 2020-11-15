@@ -77,6 +77,8 @@ static constexpr char PluginName[] = "FindFCmpEq";
 // FindFCmpEq implementation
 //------------------------------------------------------------------------------
 
+llvm::AnalysisKey FindFCmpEq::Key;
+
 FindFCmpEq::Result FindFCmpEq::run(Function &Func,
                                    FunctionAnalysisManager &FAM) {
   return run(Func);
@@ -149,10 +151,11 @@ PassPluginLibraryInfo getFindFCmpEqPluginInfo() {
             // Printing passes format their pipeline element argument to the
             // pattern `print<pass-name>`. This is the pattern we're checking
             // for here.
-            std::string PrinterPassElement = formatv("print<{0}>", PassArg);
             PB.registerPipelineParsingCallback(
                 [&](StringRef Name, FunctionPassManager &FPM,
                     ArrayRef<PassBuilder::PipelineElement>) {
+                  std::string PrinterPassElement =
+                      formatv("print<{0}>", PassArg);
                   if (Name.equals(PrinterPassElement)) {
                     FPM.addPass(FindFCmpEqPrinter(llvm::outs()));
                     return true;

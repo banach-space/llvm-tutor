@@ -235,6 +235,8 @@ level of complexity.
 |[**RIV**](#riv) | finds reachable integer values for each basic block | Analysis |
 |[**DuplicateBB**](#duplicatebb) | duplicates basic blocks, requires **RIV** analysis results | CFG |
 |[**MergeBB**](#mergebb) | merges duplicated basic blocks | CFG |
+|[**FindFCmpEq**](#findfcmpeq) | finds floating-point equality comparisons | Analysis |
+|[**ConvertFCmpEq**](#convertfcmpeq) | converts direct floating-point equality comparisons to difference comparisons | Transformation |
 
 Once you've [built](#build-instructions) this project, you can experiment with
 every pass separately. All passes, except for [**HelloWorld**](#helloworld),
@@ -864,6 +866,18 @@ Only one of the clones, `lt-clone-2-0`, has been  preserved, and
 the `if` condition (more precisely, variable `%1`), the control flow jumps to
 `lt-clone-2-0`.
 
+## FindFCmpEq
+TODO
+
+### Run the pass
+TODO
+
+## ConvertFCmpEq
+TODO
+
+### Run the pass
+TODO
+
 Debugging
 ==========
 Before running a debugger, you may want to analyze the output from
@@ -1047,8 +1061,8 @@ annotated test cases for the corresponding pass. The goal of these tests is to
 demonstrate the functionality of the tested pass through relatively simple
 examples.
 
-| Name      | Description     | Test files in lllvm-tutor |
-|-----------|-----------------|---------------------------|
+| Name      | Description     | Test files in llvm-tutor |
+|-----------|-----------------|--------------------------|
 |[**dce**](https://github.com/llvm/llvm-project/blob/release/11.x/llvm/lib/Transforms/Scalar/DCE.cpp) | Dead Code Elimination | [dce.ll](https://github.com/banach-space/llvm-tutor/blob/master/test/llvm/dce.ll) |
 |[**memcpyopt**](https://github.com/llvm/llvm-project/blob/release/11.x/llvm/lib/Transforms/Scalar/MemCpyOptimizer.cpp) | Optimise calls to `memcpy` (e.g. replace them with `memset`) | [memcpyopt.ll](https://github.com/banach-space/llvm-tutor/blob/master/test/llvm/memcpyopt.ll) |
 |[**reassociate**](https://github.com/llvm/llvm-project/blob/release/11.x/llvm/lib/Transforms/Scalar/Reassociate.cpp) | Reassociate (e.g. 4 + (x + 5) -> x + (4 + 5)). This enables further optimisations, e.g. LICM. | [reassociate.ll](https://github.com/banach-space/llvm-tutor/blob/master/test/llvm/reassociate.ll) |

@@ -197,7 +197,7 @@ PassPluginLibraryInfo getConvertFCmpEqPluginInfo() {
           }};
 }
 
-extern "C" LLVM_ATTRIBUTE_WEAK::llvm::PassPluginLibraryInfo
+extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
 llvmGetPassPluginInfo() {
   return getConvertFCmpEqPluginInfo();
 }
