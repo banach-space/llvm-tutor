@@ -1,7 +1,6 @@
 name: x86-Windows-llvm-from-sources
 
 on: 
-  push:
   schedule:
     - cron:  '0 0 * * *'
 
