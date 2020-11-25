@@ -259,26 +259,41 @@ As noted [earlier](#building--testing), all examples in this file use the
 instead.
 
 ## OpcodeCounter
-**OpcodeCounter** prints a summary of the
-[LLVM IR opcodes](https://github.com/llvm/llvm-project/blob/release/11.x/llvm/lib/IR/Instruction.cpp#L319)
-encountered in every function in the input module. This pass is slightly more
-complicated than **HelloWorld** and it can be [run
-automatically](#auto-registration-with-optimisation-pipelines). Let's use our tried and
-tested method first.
+**OpcodeCounter** is an Analysis pass that prints a summary of the [LLVM IR
+opcodes](https://github.com/llvm/llvm-project/blob/release/11.x/llvm/lib/IR/Instruction.cpp#L319)
+encountered in every function in the input module. This pass can be [run
+automatically](#auto-registration-with-optimisation-pipelines) with one of the
+pre-defined optimisation pipelines. However, let's use our tried and tested method
+first.
 
 ### Run the pass
 We will use
 [input_for_cc.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_cc.c)
-to test **OpcodeCounter**:
+to test **OpcodeCounter**. Since **OpcodeCounter** is an Analysis pass, we want
+**opt** to print its results. There are two ways of achieving this. First, you
+need to choose which pass manager you want to use (see
+[here](#about-pass-managers-in-llvm) for more details). Next:
+
+* Legacy Pass Manager: use the `-analyze` command line option. This option is
+  used to instruct **opt** to print the results of the analysis pass that has
+  just been run.
+* New Pass Manager: Simply use the [printing
+  pass](#printing-passes-for-the-new-pass-manager) that corresponds to
+  **OpcodeCounter**. This pass is called `print<opcode-counter>`. No extra
+  arguments are needed, but it's a good idea to add `-disable-output` (it is
+  not required when using `-analyze`).
 
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/11>
 # Generate an LLVM file to analyze
 $LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
-# Run the pass through opt
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libOpcodeCounter.so -legacy-opcode-counter input_for_cc.bc
+# Run the pass through opt - Legacy PM
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libOpcodeCounter.so -legacy-opcode-counter -analyze input_for_cc.bc
+# Run the pass through opt - New PM
+$LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libOpcodeCounter.so --passes="print<opcode-counter>" -disable-output input_for_cc.bc
 ```
-For `main` **OpcodeCounter**, prints the following summary (note that when running the pass,
+
+For `main`, **OpcodeCounter** prints the following summary (note that when running the pass,
 a summary for other functions defined in `input_for_cc.bc` is also printed):
 
 ```
@@ -406,16 +421,6 @@ will report only 1 function call.
 This pass will only consider direct functions calls. Functions calls via
 function pointers are not taken into account.
 
-**StaticCallCounter** resembles **OpcodeCounter** - both passes analyse opcodes
-in the input module. However, only **StaticCallCounter** is a genuine analysis
-pass (in LLVM terms). Indeed, **StaticCallCounter** has the following
-additional properties:
-
-* it implements the [`print`
-  method](https://llvm.org/docs/WritingAnLLVMPass.html#the-print-method) (Legacy PM interface)
-* it inherits from
-  [`AnalysisInfoMixin`](https://github.com/llvm/llvm-project/blob/release/10.x/llvm/include/llvm/IR/PassManager.h#L390) (New PM interface)
-
 ### Run the pass through **opt**
 We will use
 [input_for_cc.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_cc.c)
@@ -442,11 +447,9 @@ fez                  1
 -------------------------------------------------
 ```
 
-Note the extra command line option above: `-analyze`. This option is only
-available when using the Legacy Pass Manager and is used to print the results
-of the analysis pass that has just been run. It is enabled by implementing the
-[`print` method](https://llvm.org/docs/WritingAnLLVMPass.html#the-print-method)
-mentioned earlier.
+Note the extra command line option above: `-analyze`. It's required to inform
+**opt** to print the results of the analysis to `stdout`. We discussed this
+option in more detail [here](#opcodecounter).
 
 ### Run the pass through `static`
 You can run **StaticCallCounter** through a standalone tool called `static`.
@@ -648,7 +651,8 @@ BB %if.else
 ```
 
 Note the extra command line option above: `-analyze`. It's required to inform
-**opt** to print the results of the analysis to `stdout`.
+**opt** to print the results of the analysis to `stdout`. We discussed this
+option in more detail [here](#opcodecounter).
 
 ## DuplicateBB
 This pass will duplicate all basic blocks in a module, with the exception of
@@ -1008,23 +1012,40 @@ vs
 [FunctionPass](https://github.com/llvm/llvm-project/blob/release/11.x/llvm/include/llvm/Pass.h#L284).
 This is one of the main differences between the pass managers in LLVM. 
 
-Note that for small standalone examples the difference becomes less relevant.
-[**HelloWorld**](#helloworld) is a good example. It does not transform the
-input module, so in practice it is an Analysis pass. However, in order to keep
-the implementation as simple as possible, I used the API for Transformation
-passes.
+Note that for small standalone examples, the difference between Analysis and
+Transformation passes becomes less relevant. [**HelloWorld**](#helloworld) is
+a good example. It does not transform the input module, so in practice it is an
+Analysis pass. However, in order to keep the implementation as simple as
+possible, I used the API for Transformation passes.
 
 Within **llvm-tutor** the following passes can be used as reference Analysis
 and Transformation examples:
 
-* [**StaticCallCounter**](#staticcallcounter) - analysis pass
+* [**OpcodeCounter**](#opcodecounter) - analysis pass
 * [**MBASub**](#mbasub) - transformation pass
 
-Other examples also adhere to LLVM's convention, but sometimes simplicity is
-favoured over strictness (e.g. [**OpcodeCounter**](#opcodecounter) and
-[**HelloWorld**](#helloworld)). Whenever that is the case, the [comments in the
-code](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp#L6-L10)
-clarify that.
+Other examples also adhere to LLVM's convention, but contain other
+complexities. Only in the case of [**HelloWorld**](#helloworld) simplicity was
+favoured over strictness.
+
+### Printing passes for the new pass manager
+You might have noticed that some passes implement the
+[`print`](https://llvm.org/docs/WritingAnLLVMPass.html#the-print-method) member
+method. This method is used by the Legacy Pass Manager to print the results of
+the corresponding Analysis pass.  You can run it by passing the `-analyze`
+command line option when using **opt**. Interestingly, nothing of this sort is
+available in the New Pass Manager.  Instead, you just implement a _printing
+pass_.
+
+A printing pass for an Analysis pass is basically a
+Transformation pass that:
+
+* requests the results of the analysis from the original pass
+* prints these results.
+
+In other words, it's just a wrapper pass. There's a convention to register such
+passes under the `print<analysis-pass-name>` command line option.
+
 
 Optimisation Passes Inside LLVM
 =================================

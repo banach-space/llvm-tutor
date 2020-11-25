@@ -3,7 +3,10 @@
 //    OpcodeCounter.h
 //
 // DESCRIPTION:
-//    Declares the OpcodeCounter Pass
+//    Declares the OpcodeCounter Passes:
+//      * new pass manager interface
+//      * legacy pass manager interface
+//      * printer pass for the new pass manager
 //
 // License: MIT
 //==============================================================================
@@ -16,16 +19,35 @@
 #include "llvm/Pass.h"
 #include "llvm/Support/raw_ostream.h"
 
-using ResultOpcodeCounter = llvm::StringMap<unsigned>;
-
 //------------------------------------------------------------------------------
 // New PM interface
 //------------------------------------------------------------------------------
-struct OpcodeCounter : public llvm::PassInfoMixin<OpcodeCounter> {
+using ResultOpcodeCounter = llvm::StringMap<unsigned>;
+
+struct OpcodeCounter : public llvm::AnalysisInfoMixin<OpcodeCounter> {
   using Result = ResultOpcodeCounter;
-  llvm::PreservedAnalyses run(llvm::Function &F,
+  Result run(llvm::Function &F,
                               llvm::FunctionAnalysisManager &);
+
   OpcodeCounter::Result generateOpcodeMap(llvm::Function &F);
+
+private:
+  // A special type used by analysis passes to provide an address that
+  // identifies that particular analysis pass type.
+  static llvm::AnalysisKey Key;
+  friend struct llvm::AnalysisInfoMixin<OpcodeCounter>;
+};
+
+//------------------------------------------------------------------------------
+// New PM interface for the printer pass
+//------------------------------------------------------------------------------
+class OpcodeCounterPrinter : public llvm::PassInfoMixin<OpcodeCounter> {
+public:
+  explicit OpcodeCounterPrinter(llvm::raw_ostream &OutS) : OS(OutS) {}
+  llvm::PreservedAnalyses run(llvm::Function &Func,
+                              llvm::FunctionAnalysisManager &FAM);
+private:
+  llvm::raw_ostream &OS;
 };
 
 //------------------------------------------------------------------------------
@@ -35,14 +57,12 @@ struct LegacyOpcodeCounter : public llvm::FunctionPass {
   static char ID;
   LegacyOpcodeCounter() : llvm::FunctionPass(ID) {}
   bool runOnFunction(llvm::Function &F) override;
+  // The print method must be implemented by Legacy analysis passes in order to
+  // print a human readable version of the analysis results:
+  //    http://llvm.org/docs/WritingAnLLVMPass.html#the-print-method
+  void print(llvm::raw_ostream &OutS, llvm::Module const *M) const override;
 
+  ResultOpcodeCounter ROC;
   OpcodeCounter Impl;
 };
-
-//------------------------------------------------------------------------------
-// Helper functions
-//------------------------------------------------------------------------------
-// Pretty-prints the result of this analysis
-void printOpcodeCounterResult(const ResultOpcodeCounter &OC,
-                              llvm::StringRef FuncName);
 #endif

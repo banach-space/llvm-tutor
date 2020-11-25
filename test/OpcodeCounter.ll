@@ -1,9 +1,9 @@
 ; Legacy PM - OpcodeCounter explicitly requested
-; RUN:  opt -load %shlibdir/libOpcodeCounter%shlibext --legacy-opcode-counter %S/Inputs/CallCounterInput.ll -disable-output 2>&1\
+; RUN:  opt -load %shlibdir/libOpcodeCounter%shlibext -analyze --legacy-opcode-counter %S/Inputs/CallCounterInput.ll 2>&1\
 ; RUN:   | FileCheck %s
 
 ; New PM - OpcodeCounter explicitly requested
-; RUN:  opt -load-pass-plugin %shlibdir/libOpcodeCounter%shlibext -passes=opcode-counter %S/Inputs/CallCounterInput.ll -disable-output 2>&1\
+; RUN:  opt -load-pass-plugin %shlibdir/libOpcodeCounter%shlibext -passes="print<opcode-counter>" %S/Inputs/CallCounterInput.ll -disable-output 2>&1\
 ; RUN:   | FileCheck %s
 
 ;------------------------------------------------------------------------------
