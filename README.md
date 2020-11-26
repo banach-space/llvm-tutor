@@ -603,7 +603,9 @@ to test **RIV**:
 
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/11>
+# Generate an LLVM file to analyze
 $LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>/inputs/input_for_riv.c -o input_for_riv.ll
+# Run the pass through opt - Legacy PM
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libRIV.so -legacy-riv -analyze input_for_riv.ll
 ```
 You will see the following output:

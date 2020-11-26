@@ -1,4 +1,5 @@
 ; RUN: opt -load %shlibdir/libRIV%shlibext -legacy-riv -analyze %s  | FileCheck %s
+; RUN:  opt -load-pass-plugin %shlibdir/libRIV%shlibext -passes="print<riv>" -disable-output %s 2>&1 | FileCheck %s
 
 ; Verifies that RIV correctly captures global variables.
 

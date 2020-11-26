@@ -131,7 +131,7 @@ llvmGetPassPluginInfo() {
 //------------------------------------------------------------------------------
 char LegacyStaticCallCounter::ID = 0;
 
-// Register the pass - required for (among others) opt
+// #1 REGISTRATION FOR "opt -analyze -legacy-static-cc"
 RegisterPass<LegacyStaticCallCounter>
     X(/*PassArg=*/"legacy-static-cc",
       /*Name=*/"LegacyStaticCallCounter",

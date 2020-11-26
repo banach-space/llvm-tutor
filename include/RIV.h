@@ -3,7 +3,10 @@
 //    RIV.h
 //
 // DESCRIPTION:
-//    Declares the RIV pass
+//    Declares the RIV passes:
+//      * new pass manager interface
+//      * legacy pass manager interface
+//      * printer pass for the new pass manager
 //
 // License: MIT
 //========================================================================
@@ -28,9 +31,24 @@ struct RIV : public llvm::AnalysisInfoMixin<RIV> {
   Result buildRIV(llvm::Function &F,
                   llvm::DomTreeNodeBase<llvm::BasicBlock> *CFGRoot);
 
+private:
   // A special type used by analysis passes to provide an address that
   // identifies that particular analysis pass type.
   static llvm::AnalysisKey Key;
+  friend struct llvm::AnalysisInfoMixin<RIV>;
+};
+
+//------------------------------------------------------------------------------
+// New PM interface for the printer pass
+//------------------------------------------------------------------------------
+class RIVPrinter : public llvm::PassInfoMixin<RIVPrinter> {
+public:
+  explicit RIVPrinter(llvm::raw_ostream &OutS) : OS(OutS) {}
+  llvm::PreservedAnalyses run(llvm::Function &F,
+                              llvm::FunctionAnalysisManager &FAM);
+
+private:
+  llvm::raw_ostream &OS;
 };
 
 //------------------------------------------------------------------------------
@@ -53,9 +71,4 @@ struct LegacyRIV : public llvm::FunctionPass {
   RIV Impl;
 };
 
-//------------------------------------------------------------------------------
-// Helper functions
-//------------------------------------------------------------------------------
-// Pretty-prints the result of this analysis
-void printRIVResult(llvm::raw_ostream &OutS, const RIV::Result &RIVMap);
-#endif
+#endif // LLVM_TUTOR_RIV_H

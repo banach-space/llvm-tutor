@@ -48,6 +48,9 @@ using NodeTy = DomTreeNodeBase<llvm::BasicBlock> *;
 // A map that a basic block BB holds a set of pointers to values defined in BB.
 using DefValMapTy = RIV::Result;
 
+// Pretty-prints the result of this analysis
+static void printRIVResult(llvm::raw_ostream &OutS, const RIV::Result &RIVMap);
+
 //-----------------------------------------------------------------------------
 // RIV Implementation
 //-----------------------------------------------------------------------------
@@ -117,6 +120,16 @@ RIV::Result RIV::run(llvm::Function &F, llvm::FunctionAnalysisManager &FAM) {
   return Res;
 }
 
+PreservedAnalyses
+RIVPrinter::run(Function &Func,
+                              FunctionAnalysisManager &FAM) {
+
+  auto RIVMap = FAM.getResult<RIV>(Func);
+
+  printRIVResult(OS, RIVMap);
+  return PreservedAnalyses::all();
+}
+
 bool LegacyRIV::runOnFunction(llvm::Function &F) {
   // Clear the results from previous runs.
   RIVMap.clear();
@@ -134,6 +147,14 @@ void LegacyRIV::print(raw_ostream &out, Module const *) const {
   printRIVResult(out, RIVMap);
 }
 
+// This method defines how this pass interacts with other passes
+void LegacyRIV::getAnalysisUsage(AnalysisUsage &AU) const {
+  // Request the results from Dominator Tree Pass
+  AU.addRequired<DominatorTreeWrapperPass>();
+  // We do not modify the input module
+  AU.setPreservesAll();
+}
+
 //-----------------------------------------------------------------------------
 // New PM Registration
 //-----------------------------------------------------------------------------
@@ -142,6 +163,17 @@ AnalysisKey RIV::Key;
 llvm::PassPluginLibraryInfo getRIVPluginInfo() {
   return {LLVM_PLUGIN_API_VERSION, "riv", LLVM_VERSION_STRING,
           [](PassBuilder &PB) {
+            // #1 REGISTRATION FOR "opt -passes=print<riv>"
+            PB.registerPipelineParsingCallback(
+                [&](StringRef Name, FunctionPassManager &FPM,
+                    ArrayRef<PassBuilder::PipelineElement>) {
+                  if (Name == "print<riv>") {
+                    FPM.addPass(RIVPrinter(llvm::errs()));
+                    return true;
+                  }
+                  return false;
+                });
+            // #2 REGISTRATION FOR "FAM.getResult<RIV>(Function)"
             PB.registerAnalysisRegistrationCallback(
                 [](FunctionAnalysisManager &FAM) {
                   FAM.registerPass([&] { return RIV(); });
@@ -157,15 +189,9 @@ llvmGetPassPluginInfo() {
 //-----------------------------------------------------------------------------
 // Legacy PM Registration
 //-----------------------------------------------------------------------------
-// This method defines how this pass interacts with other passes
-void LegacyRIV::getAnalysisUsage(AnalysisUsage &AU) const {
-  // Request the results from Dominator Tree Pass
-  AU.addRequired<DominatorTreeWrapperPass>();
-  // We do not modify the input module
-  AU.setPreservesAll();
-}
-
 char LegacyRIV::ID = 0;
+
+// #1 REGISTRATION FOR "opt -analyze -legacy-riv"
 static RegisterPass<LegacyRIV> X(/*PassArg=*/"legacy-riv",
                                  /*Name=*/"Compute Reachable Integer values",
                                  /*CFGOnly=*/true,
@@ -174,7 +200,7 @@ static RegisterPass<LegacyRIV> X(/*PassArg=*/"legacy-riv",
 //------------------------------------------------------------------------------
 // Helper functions
 //------------------------------------------------------------------------------
-void printRIVResult(raw_ostream &OutS, const RIV::Result &RIVMap) {
+static void printRIVResult(raw_ostream &OutS, const RIV::Result &RIVMap) {
   OutS << "=================================================\n";
   OutS << "LLVM-TUTOR: RIV analysis results\n";
   OutS << "=================================================\n";
