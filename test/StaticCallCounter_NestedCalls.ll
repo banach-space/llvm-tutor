@@ -1,4 +1,5 @@
 ; RUN:  opt -load %shlibdir/libStaticCallCounter%shlibext --legacy-static-cc -analyze %s | FileCheck %s
+; RUN:  opt -load-pass-plugin %shlibdir/libStaticCallCounter%shlibext -passes="print<static-cc>" -disable-output %s 2>&1 | FileCheck %s
 
 ; Makes sure that nested function calls are analysed correctly. Note that only
 ; compile-time calls are reported. At run-time foo is called 3 times, bar 2

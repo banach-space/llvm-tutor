@@ -9,25 +9,18 @@
 //    calls are considered. Calls via functions pointers are not taken into
 //    account.
 //
-//    This is a reference analysis pass:
-//      * it inherits from llvm::AnalysisInfoMixin (New PM API)
-//      * it implements a print method (Legacy PM API)
-//
-//    The `print` method (Legacy PM) is called when running opt with the
-//    `-analyze` flag. As the new PM has no equivalent of the `print` method,
-//    it is currently not possible to print the results of this pass when:
-//      * running StaticCalCounter through opt and using the new PM.
-//    However, StaticCallCounter does implement the new PM interface.
-//    It is used in `static`, a tool implemented in tools/StaticMain.cpp that
-//    is a wrapper around StaticCallCounter and that can be used as a
-//    standalone tool. `static` always prints the results of the analysis.
+//    This pass is used in `static`, a tool implemented in tools/StaticMain.cpp
+//    that is a wrapper around StaticCallCounter. `static` allows you to run
+//    StaticCallCounter without `opt`.
 //
 // USAGE:
-//    1. Legacy PM - run through opt:
-//      opt -load <BUILD/DIR>/lib/libStaticCallCounter.so --legacy-static-cc
-//      -analyze <input-llvm-file>
-//    2. New PM - run through 'static':
-//      <BUILD/DIR>/bin/static <input-llvm-file>
+//    1. Legacy PM
+//      opt -load libStaticCallCounter.dylib -legacy-static-cc `\`
+//        -analyze <input-llvm-file>
+//    2. New PM
+//      opt -load-pass-plugin libStaticCallCounter.dylib `\`
+//        -passes="print<static-cc>" `\`
+//        -disable-output <input-llvm-file>
 //
 // License: MIT
 //==============================================================================
@@ -37,6 +30,10 @@
 #include "llvm/Passes/PassPlugin.h"
 
 using namespace llvm;
+
+// Pretty-prints the result of this analysis
+static void printStaticCCResult(llvm::raw_ostream &OutS,
+                         const ResultStaticCC &DirectCalls);
 
 //------------------------------------------------------------------------------
 // StaticCallCounter Implementation
@@ -74,6 +71,16 @@ StaticCallCounter::Result StaticCallCounter::runOnModule(Module &M) {
   return Res;
 }
 
+PreservedAnalyses
+StaticCallCounterPrinter::run(Module &M,
+                              ModuleAnalysisManager &MAM) {
+
+  auto DirectCalls = MAM.getResult<StaticCallCounter>(M);
+
+  printStaticCCResult(OS, DirectCalls);
+  return PreservedAnalyses::all();
+}
+
 StaticCallCounter::Result
 StaticCallCounter::run(llvm::Module &M, llvm::ModuleAnalysisManager &) {
   return runOnModule(M);
@@ -96,6 +103,17 @@ AnalysisKey StaticCallCounter::Key;
 llvm::PassPluginLibraryInfo getStaticCallCounterPluginInfo() {
   return {LLVM_PLUGIN_API_VERSION, "static-cc", LLVM_VERSION_STRING,
           [](PassBuilder &PB) {
+            // #1 REGISTRATION FOR "opt -passes=print<static-cc>"
+            PB.registerPipelineParsingCallback(
+                [&](StringRef Name, ModulePassManager &MPM,
+                    ArrayRef<PassBuilder::PipelineElement>) {
+                  if (Name == "print<static-cc>") {
+                    MPM.addPass(StaticCallCounterPrinter(llvm::errs()));
+                    return true;
+                  }
+                  return false;
+                });
+            // #2 REGISTRATION FOR "MAM.getResult<StaticCallCounter>(Module)"
             PB.registerAnalysisRegistrationCallback(
                 [](ModuleAnalysisManager &MAM) {
                   MAM.registerPass([&] { return StaticCallCounter(); });
@@ -123,7 +141,8 @@ RegisterPass<LegacyStaticCallCounter>
 //------------------------------------------------------------------------------
 // Helper functions
 //------------------------------------------------------------------------------
-void printStaticCCResult(raw_ostream &OutS, const ResultStaticCC &DirectCalls) {
+static void printStaticCCResult(raw_ostream &OutS,
+                                const ResultStaticCC &DirectCalls) {
   OutS << "================================================="
        << "\n";
   OutS << "LLVM-TUTOR: static analysis results\n";

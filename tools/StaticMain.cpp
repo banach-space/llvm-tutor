@@ -37,27 +37,13 @@ static cl::opt<std::string> InputModule{cl::Positional,
                                         cl::cat{CallCounterCategory}};
 
 //===----------------------------------------------------------------------===//
-// StaticCountWrapper pass
-//
-// Runs StaticCallCounter and prints the result
+// static - implementation
 //===----------------------------------------------------------------------===//
-struct StaticCCWrapper : public PassInfoMixin<StaticCCWrapper> {
-  void print(llvm::raw_ostream &OutS) const;
-  ResultStaticCC DirectCalls;
-  llvm::PreservedAnalyses run(llvm::Module &M,
-                              llvm::ModuleAnalysisManager &MAM) {
-
-    DirectCalls = MAM.getResult<StaticCallCounter>(M);
-    printStaticCCResult(errs(), DirectCalls);
-    return llvm::PreservedAnalyses::all();
-  }
-};
-
 static void countStaticCalls(Module &M) {
-  // Create a module pass manager and add StaticCCWrapper to it.
+  // Create a module pass manager and add StaticCallCounterPrinter to it.
   ModulePassManager MPM;
-  StaticCCWrapper StaticWrapper;
-  MPM.addPass(StaticWrapper);
+  StaticCallCounterPrinter SCCP(llvm::errs());
+  MPM.addPass(SCCP);
 
   // Create an analysis manager and register StaticCallCounter with it.
   ModuleAnalysisManager MAM;

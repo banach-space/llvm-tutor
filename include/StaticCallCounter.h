@@ -3,7 +3,10 @@
 //    StaticCallCounter.h
 //
 // DESCRIPTION:
-//    Declares the StaticCallCounter Pass
+//    Declares the StaticCallCounter Passes
+//      * new pass manager interface
+//      * legacy pass manager interface
+//      * printer pass for the new pass manager
 //
 // License: MIT
 //========================================================================
@@ -17,19 +20,35 @@
 #include "llvm/Pass.h"
 #include "llvm/Support/raw_ostream.h"
 
-using ResultStaticCC = llvm::MapVector<const llvm::Function *, unsigned>;
-
 //------------------------------------------------------------------------------
 // New PM interface
 //------------------------------------------------------------------------------
+using ResultStaticCC = llvm::MapVector<const llvm::Function *, unsigned>;
+
 struct StaticCallCounter : public llvm::AnalysisInfoMixin<StaticCallCounter> {
   using Result = ResultStaticCC;
   Result run(llvm::Module &M, llvm::ModuleAnalysisManager &);
   Result runOnModule(llvm::Module &M);
 
+private:
   // A special type used by analysis passes to provide an address that
   // identifies that particular analysis pass type.
   static llvm::AnalysisKey Key;
+  friend struct llvm::AnalysisInfoMixin<StaticCallCounter>;
+};
+
+//------------------------------------------------------------------------------
+// New PM interface for the printer pass
+//------------------------------------------------------------------------------
+class StaticCallCounterPrinter
+    : public llvm::PassInfoMixin<StaticCallCounterPrinter> {
+public:
+  explicit StaticCallCounterPrinter(llvm::raw_ostream &OutS) : OS(OutS) {}
+  llvm::PreservedAnalyses run(llvm::Module &M,
+                              llvm::ModuleAnalysisManager &MAM);
+
+private:
+  llvm::raw_ostream &OS;
 };
 
 //------------------------------------------------------------------------------
@@ -48,11 +67,4 @@ struct LegacyStaticCallCounter : public llvm::ModulePass {
   StaticCallCounter Impl;
 };
 
-//------------------------------------------------------------------------------
-// Helper functions
-//------------------------------------------------------------------------------
-// Pretty-prints the result of this analysis
-void printStaticCCResult(llvm::raw_ostream &OutS,
-                         const ResultStaticCC &DirectCalls);
-
-#endif
+#endif // LLVM_TUTOR_STATICCALLCOUNTER_H
