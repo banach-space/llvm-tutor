@@ -26,7 +26,7 @@
 ; EXPECTED OUTPUT
 ;------------------------------------------------------------------------------
 ; LEGACY_PM: Executing Pass 'Legacy OpcodeCounter Pass' on Function 'foo'...
-; NEW_PM: Running pass: OpcodeCounter on foo
+; NEW_PM: Running pass: OpcodeCounterPrinter on foo
 
 define void @foo() {
   ret void

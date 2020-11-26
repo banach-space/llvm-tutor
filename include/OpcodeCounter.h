@@ -41,11 +41,12 @@ private:
 //------------------------------------------------------------------------------
 // New PM interface for the printer pass
 //------------------------------------------------------------------------------
-class OpcodeCounterPrinter : public llvm::PassInfoMixin<OpcodeCounter> {
+class OpcodeCounterPrinter : public llvm::PassInfoMixin<OpcodeCounterPrinter> {
 public:
   explicit OpcodeCounterPrinter(llvm::raw_ostream &OutS) : OS(OutS) {}
   llvm::PreservedAnalyses run(llvm::Function &Func,
                               llvm::FunctionAnalysisManager &FAM);
+
 private:
   llvm::raw_ostream &OS;
 };

@@ -8,10 +8,10 @@
 ; request to run OpcodeCounter (through --legacy-opcode-counter or
 ; -passes=opcode-counter).
 
-; CHECK-O1: Running pass: OpcodeCounter on main
-; CHECK-O2: Running pass: OpcodeCounter on main
-; CHECK-O3: Running pass: OpcodeCounter on main
-; CHECK-Os: Running pass: OpcodeCounter on main
+; CHECK-O1: Running pass: OpcodeCounterPrinter on main
+; CHECK-O2: Running pass: OpcodeCounterPrinter on main
+; CHECK-O3: Running pass: OpcodeCounterPrinter on main
+; CHECK-Os: Running pass: OpcodeCounterPrinter on main
 
 define i32 @main(i32, i8** nocapture readnone) {
   ret i32 1
