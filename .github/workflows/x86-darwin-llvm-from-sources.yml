@@ -45,11 +45,11 @@ jobs:
         run: |
           cd HelloWorld
           mkdir build && cd build
-          cmake -DLT_LLVM_INSTALL_DIR="$GITHUB_WORKSPACE/llvm-project/build" -DLT_OPT_PIPELINE_REG=On ../
+          cmake -DLT_LLVM_INSTALL_DIR="$GITHUB_WORKSPACE/llvm-project/build" ../
           make -j2
       - name: Build llvm-tutor + run tests
         run: |
           mkdir build && cd build
-          cmake -DLT_LLVM_INSTALL_DIR="$GITHUB_WORKSPACE/llvm-project/build" -DLT_OPT_PIPELINE_REG=On ../
+          cmake -DLT_LLVM_INSTALL_DIR="$GITHUB_WORKSPACE/llvm-project/build" ../
           make -j2
           lit test/
