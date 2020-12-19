@@ -41,7 +41,7 @@ jobs:
           ninja clang opt lli not FileCheck
       - name: Install lit
         run: |
-          sudo pip install lit
+          sudo pip3 install lit
       - name: Build HelloWorld
         run: |
           cd HelloWorld

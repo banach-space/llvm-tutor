@@ -45,7 +45,7 @@ jobs:
           ninja clang opt lli not FileCheck
       - name: Install lit
         run: |
-          pip install lit
+          pip3 install lit
       - name: Build HelloWorld
         run: |
           # Adding the location of Ninja to $PATH
