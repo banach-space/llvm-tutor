@@ -57,6 +57,7 @@ using namespace llvm;
 #define DEBUG_TYPE "MergeBB"
 
 STATISTIC(NumDedupBBs, "Number of basic blocks merged");
+STATISTIC(OverallNumOfUpdatedBranchTargets, "Number of updated branch targets");
 
 //-----------------------------------------------------------------------------
 // MergeBB Implementation
@@ -118,28 +119,29 @@ static unsigned getNumNonDbgInstrInBB(BasicBlock *BB) {
   return Count;
 }
 
-void MergeBB::replaceBB(BasicBlock *BBToErase, BasicBlock *BBToRetain) {
+unsigned MergeBB::updateBranchTargets(BasicBlock *BBToErase, BasicBlock *BBToRetain) {
   SmallVector<BasicBlock *, 8> BBToUpdate(predecessors(BBToErase));
 
   LLVM_DEBUG(dbgs() << "DEDUP BB: merging duplicated blocks ("
                     << BBToErase->getName() << " into " << BBToRetain->getName()
                     << ")\n");
 
+  unsigned UpdatedTargetsCount = 0;
   for (BasicBlock *BB0 : BBToUpdate) {
     // The terminator is either a branch (conditional or unconditional) or a
     // switch statement. One of its targets should be BBToErase. Replace
     // that target with BBToRetain.
     Instruction *Term = BB0->getTerminator();
-    bool Updated = false;
     for (unsigned OpIdx = 0, NumOpnds = Term->getNumOperands();
          OpIdx != NumOpnds; ++OpIdx) {
       if (Term->getOperand(OpIdx) == BBToErase) {
         Term->setOperand(OpIdx, BBToRetain);
-        Updated = true;
+        UpdatedTargetsCount++;
       }
     }
-    assert(Updated && "Inconsistent CFG and branch instruction");
   }
+
+  return UpdatedTargetsCount;
 }
 
 bool MergeBB::mergeDuplicatedBlock(BasicBlock *BB1,
@@ -164,8 +166,8 @@ bool MergeBB::mergeDuplicatedBlock(BasicBlock *BB1,
 
   BasicBlock::iterator II = BBSucc->begin();
   const PHINode *PN = dyn_cast<PHINode>(II);
-  Value *InValBB1;
-  Instruction *InInstBB1;
+  Value *InValBB1 = nullptr;
+  Instruction *InInstBB1 = nullptr;
   BBSucc->getFirstNonPHI();
   if (nullptr != PN) {
     // Do not optimize if multiple PHI instructions exist in the successor (to
@@ -234,7 +236,9 @@ bool MergeBB::mergeDuplicatedBlock(BasicBlock *BB1,
       continue;
 
     // It is safe to de-duplicate - do so.
-    replaceBB(BB1, BB2);
+    unsigned UpdatedTargets = updateBranchTargets(BB1, BB2);
+    assert(UpdatedTargets && "No branch target was updated");
+    OverallNumOfUpdatedBranchTargets += UpdatedTargets;
     DeleteList.insert(BB1);
     NumDedupBBs++;
 

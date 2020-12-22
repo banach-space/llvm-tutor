@@ -17,12 +17,12 @@ namespace cl {
 // Returns false on success.
 bool parser<Ratio>::parse(Option &Opt, StringRef ArgName,
                           const StringRef &Arg, Ratio &Val) {
-  char const *ArgCStr = Arg.str().c_str();
+  auto ArgStr = Arg.str();
   char *EndPtr = nullptr;
   double TheRatio = std::strtod(
-      ArgCStr, &EndPtr); // cannot use std::stod: no exception support in LLVM
+      ArgStr.c_str(), &EndPtr); // cannot use std::stod: no exception support in LLVM
 
-  if (EndPtr == ArgCStr) {
+  if (EndPtr == ArgStr.c_str()) {
     return Opt.error(ArgName + " value `" + Arg +
                      "' is not a floating point value");
   } else if (0. > TheRatio or 1. < TheRatio) {

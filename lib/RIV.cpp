@@ -217,7 +217,7 @@ static void printRIVResult(raw_ostream &OutS, const RIV::Result &RIVMap) {
     raw_string_ostream BBIdStream(DummyStr);
     KV.first->printAsOperand(BBIdStream, false);
     OutS << format("BB %-12s %-30s\n", BBIdStream.str().c_str(), EmptyStr);
-    for (auto const &IntegerValue : KV.second) {
+    for (auto const *IntegerValue : KV.second) {
       std::string DummyStr;
       raw_string_ostream InstrStr(DummyStr);
       IntegerValue->print(InstrStr);

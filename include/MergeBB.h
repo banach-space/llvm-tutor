@@ -36,7 +36,8 @@ struct MergeBB : public llvm::PassInfoMixin<MergeBB> {
   bool canMergeInstructions(llvm::ArrayRef<llvm::Instruction *> Insts);
 
   // Replace the destination of incoming edges of BBToErase by BBToRetain
-  void replaceBB(llvm::BasicBlock *BBToErase, llvm::BasicBlock *BBToRetain);
+  unsigned updateBranchTargets(llvm::BasicBlock *BBToErase,
+                               llvm::BasicBlock *BBToRetain);
 
   // If BB is duplicated, then merges BB with its duplicate and adds BB to
   // DeleteList. DeleteList contains the list of blocks to be deleted.
