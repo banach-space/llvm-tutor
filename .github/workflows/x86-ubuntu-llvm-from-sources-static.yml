@@ -51,4 +51,4 @@ jobs:
           sudo pip3 install lit
       - name: Run one test
         run: |
-          $GITHUB_WORKSPACE/llvm-project/build/bin/opt -passes=mba-sub $GITHUB_WORKSPACE/llvm-tutor/test/MBA_sub.ll
+          $GITHUB_WORKSPACE/llvm-project/build/bin/opt -passes=mba-sub $GITHUB_WORKSPACE/test/MBA_sub.ll
