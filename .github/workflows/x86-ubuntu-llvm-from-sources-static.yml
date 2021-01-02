@@ -1,6 +1,6 @@
 name: x86-Ubuntu-llvm-from-sources-static
 
-on: [push]
+on: workflow_dispatch
 
 # For now, this is added to test a feature branch. However, a workflow file needs to
 # be available in the main repository branch for this:
