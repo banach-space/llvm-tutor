@@ -1,0 +1,54 @@
+name: x86-Ubuntu-llvm-from-sources-static
+
+on: [push]
+
+# For now, this is added to test a feature branch. However, a workflow file needs to
+# be available in the main repository branch for this:
+# https://github.community/t/workflow-dispatch-workflow-not-showing-in-actions-tab/130088/16
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v1
+      - name: Download Ninja
+        shell: cmake -P {0}
+        run: |
+          # The following steps are implemented using CMake commands
+          set(ninja_version "1.9.0")
+          set(ninja_suffix "linux.zip")
+          set(ninja_url "https://github.com/ninja-build/ninja/releases/download/v${ninja_version}/ninja-${ninja_suffix}")
+          file(DOWNLOAD "${ninja_url}" ./ninja.zip SHOW_PROGRESS)
+          execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./ninja.zip)
+
+          if (NOT "${{ runner.os }}" STREQUAL "Windows")
+            execute_process(
+            COMMAND chmod +x ninja
+            )
+          endif()
+      - name: Clone llvm-project
+        run: |
+          git clone --depth 1 --single-branch --branch release/11.x https://github.com/llvm/llvm-project
+      - name: Register MBAAdd statically
+        run: |
+          bash static_registration.sh --llvm_project_src_dir "$GITHUB_WORKSPACE/llvm-project" --llvm_tutor_src_dir "$GITHUB_WORKSPACE//llvm-tutor/"
+      - name: Build LLVM
+        run: |
+          cd llvm-project
+          # Adding the location of Ninja to $PATH
+          export PATH=$GITHUB_WORKSPACE:$PATH
+          mkdir build && cd build
+          ln -s /usr/bin/x86_64-linux-gnu-ld.gold ld
+          cmake -G Ninja -D CMAKE_MAKE_PROGRAM=$GITHUB_WORKSPACE/ninja \
+            -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS="clang" \
+            -DLLVM_TARGETS_TO_BUILD="host" -DLLVM_OPTIMIZED_TABLEGEN=ON \
+            -DLLVM_MBASUB_LINK_INTO_TOOLS=On \
+            ../llvm
+          # Note that only the required tools are built
+          ninja opt lli not FileCheck
+      - name: Install lit
+        run: |
+          sudo pip3 install lit
+      - name: Run one test
+        run: |
+          $GITHUB_WORKSPACE/llvm-project/build/bin/opt -passes=mba-sub $GITHUB_WORKSPACE/llvm-tutor/test/MBA_sub.ll
