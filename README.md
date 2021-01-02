@@ -42,6 +42,7 @@ are internested in similar tutorial for Clang.
 * Part 2: Passes In LLVM
   * [About Pass Managers in LLVM](#about-pass-managers-in-llvm)
   * [Analysis vs Transformation Pass](#analysis-vs-transformation-pass)
+  * [Dynamic vs Static Plugins](#dynamic-vs-static-plugins)
   * [Optimisation Passes Inside LLVM](#optimisation-passes-inside-llvm)
 * [References](#references)
 
@@ -196,14 +197,15 @@ $ lit <build_dir>/test
 ```
 Voilà! You should see all tests passing.
 
-## Plugins (Linux vs Mac OS)
+## LLVM Plugins as shared objecs
 In **llvm-tutor** every LLVM pass is implemented in a separate shared object
-([here](http://www.yolinux.com/TUTORIALS/LibraryArchives-StaticAndDynamic.html)
-you can learn more about shared objects). These shared objects are essentially
-dynamically loadable plugins for **opt**. All plugins are built in the
-`<build/dir/lib>` directory. Note that the extension of dynamically loaded
-shared objects differs between Linux and Mac OS. For example, for the
-**HelloWorld** pass you will get:
+(you can learn more about shared objects
+[here](http://www.yolinux.com/TUTORIALS/LibraryArchives-StaticAndDynamic.html)).
+These shared objects are essentially dynamically loadable plugins for **opt**.
+All plugins are built in the `<build/dir/lib>` directory.
+
+Note that the extension of dynamically loaded shared objects differs between
+Linux and Mac OS. For example, for the **HelloWorld** pass you will get:
 
 * `libHelloWorld.so` on Linux
 * `libHelloWorld.dylib` on MacOS.
@@ -1048,6 +1050,60 @@ Transformation pass that:
 In other words, it's just a wrapper pass. There's a convention to register such
 passes under the `print<analysis-pass-name>` command line option.
 
+Dynamic vs Static Plugins
+=========================
+By default, all examples in **llvm-tutor** are built as
+[dynamic plugins](#llvm-plugins-as-shared-objecs). However, LLVM provides
+infrastructure for both _dynamic_ and _static_ plugins (
+[documentation](https://llvm.org/docs/WritingAnLLVMPass.html#building-pass-plugins)).
+Static plugins are simply libraries linked into your executable (e.g. **opt**)
+statically. This way, unlike dynamic plugins, they don't require to be loaded at
+runtime with either `-load` or `-load-pass-plugin` options.
+
+Static plugins are normally developed in-tree, i.e. within `llvm-project/llvm`,
+and all examples in **llvm-tutor** can be adapted to work this way. You can use
+[static_registation.sh](https://github.com/banach-space/llvm-tutor/blob/master/utils/static_registration.sh)
+to see it can be done for [**MBASub**](#mbasub). This script will:
+
+* copy the required source and test files into `llvm-project/llvm`
+* adapt in-tree CMake scripts so that the in-tree version of **MBASub** is actually built
+* remove `-load` and `-load-pass-plugin` from the in-tree tests for **MBASub**
+
+Note that this script will modify `llvm-project/llvm`, but leave **llvm-tutor**
+intact. After running the script you will have to re-build **opt**. Two
+additional CMake flags have to be set: `LLVM_BUILD_EXAMPLES` and
+`LLVM_MBASUB_LINK_INTO_TOOLS`:
+
+```bash
+# LLVM_TUTOR_DIR: directory in which you cloned llvm-tutor
+cd $LLVM_TUTOR_DIR
+# LLVM_PROJECT_DIR: directory in which you cloned llvm-project
+bash utils/static_registration.sh --llvm_project_dir $LLVM_PROJECT_DIR
+# LLVM_BUILD_DIR: directory in which you previously built opt
+cd $LLVM_BUILD_DIR
+cmake -DLLVM_BUILD_EXAMPLES=On -DLLVM_MBASUB_LINK_INTO_TOOLS=On .
+cmake --build . --target opt
+```
+
+Once **opt** is re-built, **MBASub** will be statically linked
+into **opt**. Now you can run it like this:
+
+```bash
+$LLVM_BUILD_DIR/bin/opt --passes=mba-sub -S $LLVM_TUTOR_DIR/test/MBA_sub.ll
+```
+
+Note that this time we didn't have to use `-load-pass-plugin` (or `-load`) to
+load **MBASub**. If you want to dive deeper into the required steps for static
+registration, you can scan `static_registation.sh` or run:
+
+```bash
+cd $LLVM_PROJECT_DIR
+git diff
+git status
+```
+
+This will print all the changes within `llvm-project/llvm` introduced by the
+script.
 
 Optimisation Passes Inside LLVM
 =================================

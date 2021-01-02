@@ -1,10 +1,9 @@
 name: x86-Ubuntu-llvm-from-sources-static
 
-on: workflow_dispatch
-
-# For now, this is added to test a feature branch. However, a workflow file needs to
-# be available in the main repository branch for this:
-# https://github.community/t/workflow-dispatch-workflow-not-showing-in-actions-tab/130088/16
+on:
+  schedule:
+    - cron:  '0 0 * * *'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -28,15 +27,17 @@ jobs:
           endif()
       - name: Clone llvm-project
         run: |
-          git clone --depth 1 --single-branch --branch release/11.x https://github.com/llvm/llvm-project
+          git clone --depth 10 --single-branch --branch release/11.x https://github.com/llvm/llvm-project
+          cd llvm-project
+          git checkout tags/llvmorg-11.0.1
       - name: Register MBAAdd statically
         run: |
           bash utils/static_registration.sh --llvm_project_dir "$GITHUB_WORKSPACE/llvm-project"
       - name: Build LLVM
         run: |
-          cd llvm-project
           # Adding the location of Ninja to $PATH
           export PATH=$GITHUB_WORKSPACE:$PATH
+          cd llvm-project
           mkdir build && cd build
           ln -s /usr/bin/x86_64-linux-gnu-ld.gold ld
           cmake -G Ninja -D CMAKE_MAKE_PROGRAM=$GITHUB_WORKSPACE/ninja \
@@ -45,7 +46,7 @@ jobs:
             -DLLVM_MBASUB_LINK_INTO_TOOLS=On \
             ../llvm
           # Note that only the required tools are built
-          ninja opt lli not FileCheck
+          ninja
       - name: Install lit
         run: |
           sudo pip3 install lit
@@ -54,4 +55,4 @@ jobs:
           $GITHUB_WORKSPACE/llvm-project/build/bin/opt -passes=mba-sub $GITHUB_WORKSPACE/test/MBA_sub.ll
       - name: Run MBASub tests
         run: |
-          $GITHUB_WORKSPACE/llvm-project/build/bin/llvm-lit $GITHUB_WORKSPACE/llvm/test/Examples/MBASub/
+          $GITHUB_WORKSPACE/llvm-project/build/bin/llvm-lit $GITHUB_WORKSPACE/llvm-project/llvm/test/Examples/MBASub/
