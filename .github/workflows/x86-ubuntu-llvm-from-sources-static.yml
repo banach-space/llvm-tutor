@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-18.04
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Download Ninja
         shell: cmake -P {0}
         run: |
@@ -31,7 +31,7 @@ jobs:
           git clone --depth 1 --single-branch --branch release/11.x https://github.com/llvm/llvm-project
       - name: Register MBAAdd statically
         run: |
-          bash static_registration.sh --llvm_project_src_dir "$GITHUB_WORKSPACE/llvm-project" --llvm_tutor_src_dir "$GITHUB_WORKSPACE//llvm-tutor/"
+          bash static_registration.sh --llvm_project_src_dir "$GITHUB_WORKSPACE/llvm-project" --llvm_tutor_src_dir "$GITHUB_WORKSPACE/"
       - name: Build LLVM
         run: |
           cd llvm-project
