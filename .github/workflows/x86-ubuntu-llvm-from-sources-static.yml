@@ -31,7 +31,7 @@ jobs:
           git clone --depth 1 --single-branch --branch release/11.x https://github.com/llvm/llvm-project
       - name: Register MBAAdd statically
         run: |
-          bash static_registration.sh --llvm_project_src_dir "$GITHUB_WORKSPACE/llvm-project" --llvm_tutor_src_dir "$GITHUB_WORKSPACE/"
+          bash utils/static_registration.sh --llvm_project_dir "$GITHUB_WORKSPACE/llvm-project"
       - name: Build LLVM
         run: |
           cd llvm-project
@@ -49,6 +49,9 @@ jobs:
       - name: Install lit
         run: |
           sudo pip3 install lit
-      - name: Run one test
+      - name: Run MBASub - sanity check
         run: |
           $GITHUB_WORKSPACE/llvm-project/build/bin/opt -passes=mba-sub $GITHUB_WORKSPACE/test/MBA_sub.ll
+      - name: Run MBASub tests
+        run: |
+          $GITHUB_WORKSPACE/llvm-project/build/bin/llvm-lit $GITHUB_WORKSPACE/llvm/test/Examples/MBASub/
