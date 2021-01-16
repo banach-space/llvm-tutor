@@ -155,7 +155,7 @@ on Linux and Mac OS X:
 ```bash
 git clone https://github.com/llvm/llvm-project.git
 cd llvm-project
-git checkout release/11.x
+git checkout tags/llvmorg-11.0.1
 mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=host -DLLVM_ENABLE_PROJECTS=clang <llvm-project/root/dir>/llvm/
