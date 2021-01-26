@@ -4,7 +4,11 @@ add_executable(static
 )
 
 target_link_libraries(static
-  LLVMPasses)
+  LLVMCore
+  LLVMPasses
+  LLVMIRReader
+  LLVMSupport
+  )
 
 target_include_directories(
   static
