@@ -237,6 +237,8 @@ level of complexity.
 |[**RIV**](#riv) | finds reachable integer values for each basic block | Analysis |
 |[**DuplicateBB**](#duplicatebb) | duplicates basic blocks, requires **RIV** analysis results | CFG |
 |[**MergeBB**](#mergebb) | merges duplicated basic blocks | CFG |
+|[**FindFCmpEq**](#findfcmpeq) | finds floating-point equality comparisons | Analysis |
+|[**ConvertFCmpEq**](#convertfcmpeq) | converts direct floating-point equality comparisons to difference comparisons | Transformation |
 
 Once you've [built](#build-instructions) this project, you can experiment with
 every pass separately. All passes, except for [**HelloWorld**](#helloworld),
@@ -868,6 +870,85 @@ Only one of the clones, `lt-clone-2-0`, has been  preserved, and
 the `if` condition (more precisely, variable `%1`), the control flow jumps to
 `lt-clone-2-0`.
 
+## FindFCmpEq
+The **FindFCmpEq** pass finds all floating-point comparison operations that 
+directly check for equality between two values. This is important because these
+sorts of comparisons can sometimes be indicators of logical issues due to 
+[rounding errors](https://en.wikipedia.org/wiki/Machine_epsilon) inherent in 
+floating-point arithmetic.
+
+**FindFCmpEq** is implemented as two passes: an analysis pass (`FindFCmpEq`) and a 
+printing pass (`FindFCmpEqPrinter`). The legacy implementation (`FindFCmpEqWrapper`) 
+makes use of both of these passes.
+
+### Run the pass
+We will use [input_for_fcmp_eq.ll](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_fcmp_eq.c)
+to test **FindFCmpEq**:
+
+```bash
+export LLVM_DIR=<installation/dir/of/llvm/11>
+$LLVM_DIR/bin/clang -emit-llvm -S -c <source_dir>/inputs/input_for_fcmp_eq.c -o input_for_fcmp_eq.ll
+$LLVM_DIR/bin/opt --load-pass-plugin <build_dir>/lib/libFindFCmpEq.so --passes="print<find-fcmp-eq>" input_for_fcmp_eq.ll
+```
+
+For the legacy implementation, the `opt` command would be changed to the following:
+
+```bash
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libFindFCmpEq.so -find-fcmp-eq -analyze input_for_fcmp_eq.ll
+```
+
+In either case, you should see the following output which lists the direct floating-point equality comparison instructions found:
+
+```llvm
+Floating-point equality comparisons in "sqrt_impl":
+  %cmp = fcmp oeq double %0, %1
+Floating-point equality comparisons in "compare_fp_values":
+  %cmp = fcmp oeq double %0, %1
+```
+
+## ConvertFCmpEq
+The **ConvertFCmpEq** pass is a transformation that uses the analysis results of [**FindFCmpEq**](#FindFCmpEq) to convert direct floating-point equality comparison instructions into logically equivalent ones that use a pre-calculated rounding threshold.
+
+### Run the pass
+As with [**FindFCmpEq**](#FindFCmpEq), we will use [input_for_fcmp_eq.ll](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_fcmp_eq.c) to test **ConvertFCmpEq**:
+
+```bash
+export LLVM_DIR=<installation/dir/of/llvm/11>
+$LLVM_DIR/bin/clang -emit-llvm -S -Xclang -disable-O0-optnone \
+  -c <source_dir>/inputs/input_for_fcmp_eq.c -o input_for_fcmp_eq.ll
+$LLVM_DIR/bin/opt --load-pass-plugin <build_dir>/lib/libFindFCmpEq.so \
+  --load-pass-plugin <build_dir>/lib/libConvertFCmpEq.so \
+  --passes=convert-fcmp-eq -S input_for_fcmp_eq.ll -o fcmp_eq_after_conversion.ll
+```
+
+For the legacy implementation, the `opt` command would be changed to the following:
+
+```bash
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libFindFCmpEq.so \
+  <build_dir>/lib/libConvertFCmpEq.so -convert-fcmp-eq \
+  -S input_for_fcmp_eq.ll -o fcmp_eq_after_conversion.ll
+```
+
+Notice that both `libFindFCmpEq.so` _and_ `libConvertFCmpEq.so` must be loaded -- and the load order matters. Since **ConvertFCmpEq** requires [**FindFCmpEq**](#FindFCmpEq), its library must be loaded before **ConvertFCmpEq**. If both passes were built as part of the same library, this would not be required.
+
+After transformation, both `fcmp oeq` instructions will have been converted to difference based `fcmp olt` instructions using the IEEE 754 double-precision machine epsilon constant as the round-off threshold:
+
+```llvm
+  %cmp = fcmp oeq double %0, %1
+```
+
+... has now become
+
+```llvm
+  %3 = fsub double %0, %1
+  %4 = bitcast double %3 to i64
+  %5 = and i64 %4, 9223372036854775807
+  %6 = bitcast i64 %5 to double
+  %cmp = fcmp olt double %6, 0x3CB0000000000000
+```
+
+The values are subtracted from each other and the absolute value of their difference is calculated. If this absolute difference is less than the value of the machine epsilon, the original two floating-point values are considered to be equal.
+
 Debugging
 ==========
 Before running a debugger, you may want to analyze the output from
@@ -1122,8 +1203,8 @@ annotated test cases for the corresponding pass. The goal of these tests is to
 demonstrate the functionality of the tested pass through relatively simple
 examples.
 
-| Name      | Description     | Test files in lllvm-tutor |
-|-----------|-----------------|---------------------------|
+| Name      | Description     | Test files in llvm-tutor |
+|-----------|-----------------|--------------------------|
 |[**dce**](https://github.com/llvm/llvm-project/blob/release/11.x/llvm/lib/Transforms/Scalar/DCE.cpp) | Dead Code Elimination | [dce.ll](https://github.com/banach-space/llvm-tutor/blob/master/test/llvm/dce.ll) |
 |[**memcpyopt**](https://github.com/llvm/llvm-project/blob/release/11.x/llvm/lib/Transforms/Scalar/MemCpyOptimizer.cpp) | Optimise calls to `memcpy` (e.g. replace them with `memset`) | [memcpyopt.ll](https://github.com/banach-space/llvm-tutor/blob/master/test/llvm/memcpyopt.ll) |
 |[**reassociate**](https://github.com/llvm/llvm-project/blob/release/11.x/llvm/lib/Transforms/Scalar/Reassociate.cpp) | Reassociate (e.g. 4 + (x + 5) -> x + (4 + 5)). This enables further optimisations, e.g. LICM. | [reassociate.ll](https://github.com/banach-space/llvm-tutor/blob/master/test/llvm/reassociate.ll) |
