@@ -31,7 +31,7 @@ double sqrt(double x)
   return sqrt_impl(x, 0, x / 2.0 + 1.0);
 }
 
-int compare_fp_values()
+int main()
 {
   double a = 0.2;
   double b = 1.0 / sqrt(5.0) / sqrt(5.0);

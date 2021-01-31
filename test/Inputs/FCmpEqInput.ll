@@ -40,7 +40,7 @@ entry:
   ret double %root
 }
 
-define i1 @compare_fp_values() {
+define i32 @main() {
 entry:
   %a = load double, double* @value.test, align 8
   ; %b = 1.0 / sqrt(5.0) / sqrt(5.0)
@@ -50,5 +50,6 @@ entry:
   %b = fdiv double %1, %2
 
   %cmp = fcmp oeq double %a, %b
-  ret i1 %cmp
+  %result = zext i1 %cmp to i32
+  ret i32 %result
 }

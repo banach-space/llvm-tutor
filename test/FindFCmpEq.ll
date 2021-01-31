@@ -5,5 +5,5 @@
 
 ; CHECK: Floating-point equality comparisons in "sqrt_impl":
 ; CHECK-NEXT:   %3 = fcmp oeq double %0, %2
-; CHECK-NEXT: Floating-point equality comparisons in "compare_fp_values":
+; CHECK-NEXT: Floating-point equality comparisons in "main":
 ; CHECK-NEXT:   %cmp = fcmp oeq double %a, %b

@@ -7,11 +7,11 @@
 //    to convert all equality-based floating point comparison instructions in a
 //    function to indirect, difference-based comparisons.
 //
-//    This example demonstrates how to couple an analysis pass with a 
+//    This example demonstrates how to couple an analysis pass with a
 //    transformation pass, the use of statistics (the STATISTIC macro), and LLVM
-//    debugging operations (the LLVM_DEBUG macro and the llvm::dbgs() output 
+//    debugging operations (the LLVM_DEBUG macro and the llvm::dbgs() output
 //    stream). It also demonstrates how instructions can be modified without
-//    without having to completely replace them.
+//    having to completely replace them.
 //
 // USAGE:
 //    1. Legacy PM
@@ -24,9 +24,6 @@
 // License: MIT
 //=============================================================================
 #include "ConvertFCmpEq.h"
-
-#include <cassert>
-
 #include "llvm/ADT/APFloat.h"
 #include "llvm/ADT/APInt.h"
 #include "llvm/ADT/Statistic.h"
@@ -45,6 +42,7 @@
 #include "llvm/Support/Casting.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/ErrorHandling.h"
+#include <cassert>
 
 using namespace llvm;
 
@@ -138,7 +136,8 @@ PreservedAnalyses ConvertFCmpEq::run(Function &Func,
   return Modified ? PreservedAnalyses::none() : PreservedAnalyses::all();
 }
 
-bool ConvertFCmpEq::run(llvm::Function &Func, FindFCmpEq::Result Comparisons) {
+bool ConvertFCmpEq::run(llvm::Function &Func,
+                        const FindFCmpEq::Result &Comparisons) {
   bool Modified = false;
   // Functions marked explicitly 'optnone' should be ignored since we shouldn't
   // be changing anything in them anyway.
@@ -176,8 +175,6 @@ void ConvertFCmpEqWrapper::getAnalysisUsage(llvm::AnalysisUsage &AU) const {
   AU.addRequired<FindFCmpEqWrapper>();
 }
 
-char ConvertFCmpEqWrapper::ID = 0;
-
 //-----------------------------------------------------------------------------
 // New PM Registration
 //-----------------------------------------------------------------------------
@@ -206,7 +203,7 @@ llvmGetPassPluginInfo() {
 // Legacy PM Registration
 //-----------------------------------------------------------------------------
 
-char FindFCmpEqWrapper::ID = 0;
+char ConvertFCmpEqWrapper::ID = 0;
 
 static RegisterPass<ConvertFCmpEqWrapper> X(/*PassArg=*/PassArg,
                                             /*Name=*/PassName,

@@ -8,10 +8,10 @@
 //    a printing pass.
 //
 //    This example demonstrates how to separate printing logic into a separate
-//    printing pass, how to register it along with an analysis pass at the same 
+//    printing pass, how to register it along with an analysis pass at the same
 //    time, and how to parse pass pipeline elements to conditionally register a
-//    pass. This is achieved using a combination of llvm::formatv() (not 
-//    strictly required), 
+//    pass. This is achieved using a combination of llvm::formatv() (not
+//    strictly required),
 //    llvm::PassBuilder::registerAnalysisRegistrationCallback(), and
 //    llvm::PassBuilder::registerPipelineParsingCallback().
 //
@@ -26,9 +26,6 @@
 // License: MIT
 //=============================================================================
 #include "FindFCmpEq.h"
-
-#include <string>
-
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/IR/Function.h"
@@ -43,6 +40,7 @@
 #include "llvm/Support/Compiler.h"
 #include "llvm/Support/FormatVariadic.h"
 #include "llvm/Support/raw_ostream.h"
+#include <string>
 
 using namespace llvm;
 

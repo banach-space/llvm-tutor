@@ -12,10 +12,9 @@
 #ifndef LLVM_TUTOR_FIND_FCMP_EQ_H
 #define LLVM_TUTOR_FIND_FCMP_EQ_H
 
-#include <vector>
-
 #include "llvm/IR/PassManager.h"
 #include "llvm/Pass.h"
+#include <vector>
 
 // Forward declarations
 namespace llvm {
@@ -33,11 +32,17 @@ class raw_ostream;
 class FindFCmpEq : public llvm::AnalysisInfoMixin<FindFCmpEq> {
 public:
   using Result = std::vector<llvm::FCmpInst *>;
+  // This is one of the standard run() member functions expected by 
+  // PassInfoMixin. When the pass is executed by the new PM, this is the 
+  // function that will be called.
   Result run(llvm::Function &Func, llvm::FunctionAnalysisManager &FAM);
+  // This is a helper run() member function overload which can be called by the
+  // legacy pass (or any other code) without having to supply a
+  // FunctionAnalysisManager argument.
   Result run(llvm::Function &Func);
 
 private:
-  friend class llvm::AnalysisInfoMixin<FindFCmpEq>;
+  friend struct llvm::AnalysisInfoMixin<FindFCmpEq>;
   static llvm::AnalysisKey Key;
 };
 

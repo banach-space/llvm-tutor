@@ -895,7 +895,7 @@ $LLVM_DIR/bin/opt -load <build_dir>/lib/libFindFCmpEq.so -find-fcmp-eq -analyze 
 
 In either case, you should see the following output which lists the direct floating-point equality comparison instructions found:
 
-```bash
+```llvm
 Floating-point equality comparisons in "sqrt_impl":
   %cmp = fcmp oeq double %0, %1
 Floating-point equality comparisons in "compare_fp_values":
@@ -929,13 +929,13 @@ Notice that both `libFindFCmpEq.so` _and_ `libConvertFCmpEq.so` must be loaded -
 
 After transformation, both `fcmp oeq` instructions will have been converted to difference based `fcmp olt` instructions using the IEEE 754 double-precision machine epsilon constant as the round-off threshold:
 
-```bash
+```llvm
   %cmp = fcmp oeq double %0, %1
 ```
 
 ... has now become
 
-```bash
+```llvm
   %3 = fsub double %0, %1
   %4 = bitcast double %3 to i64
   %5 = and i64 %4, 9223372036854775807
