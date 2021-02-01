@@ -13,6 +13,10 @@
 //    stream). It also demonstrates how instructions can be modified without
 //    having to completely replace them.
 //
+//    Originally developed for [1].
+//
+//    [1] "Writing an LLVM Optimization" by Jonathan Smith
+//
 // USAGE:
 //    1. Legacy PM
 //      opt --load libConvertFCmpEq.dylib --convert-fcmp-eq `\`

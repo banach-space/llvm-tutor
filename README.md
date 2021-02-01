@@ -234,11 +234,11 @@ level of complexity.
 |[**DynamicCallCounter**](#dynamiccallcounter) | counts direct function calls at run-time (dynamic analysis) | Transformation |
 |[**MBASub**](#mbasub) | obfuscate integer `sub` instructions | Transformation |
 |[**MBAAdd**](#mbaadd) | obfuscate 8-bit integer `add` instructions | Transformation |
+|[**FindFCmpEq**](#findfcmpeq) | finds floating-point equality comparisons | Analysis |
+|[**ConvertFCmpEq**](#convertfcmpeq) | converts direct floating-point equality comparisons to difference comparisons | Transformation |
 |[**RIV**](#riv) | finds reachable integer values for each basic block | Analysis |
 |[**DuplicateBB**](#duplicatebb) | duplicates basic blocks, requires **RIV** analysis results | CFG |
 |[**MergeBB**](#mergebb) | merges duplicated basic blocks | CFG |
-|[**FindFCmpEq**](#findfcmpeq) | finds floating-point equality comparisons | Analysis |
-|[**ConvertFCmpEq**](#convertfcmpeq) | converts direct floating-point equality comparisons to difference comparisons | Transformation |
 
 Once you've [built](#build-instructions) this project, you can experiment with
 every pass separately. All passes, except for [**HelloWorld**](#helloworld),
@@ -907,10 +907,15 @@ Floating-point equality comparisons in "compare_fp_values":
 ```
 
 ## ConvertFCmpEq
-The **ConvertFCmpEq** pass is a transformation that uses the analysis results of [**FindFCmpEq**](#FindFCmpEq) to convert direct floating-point equality comparison instructions into logically equivalent ones that use a pre-calculated rounding threshold.
+The **ConvertFCmpEq** pass is a transformation that uses the analysis results
+of [**FindFCmpEq**](#FindFCmpEq) to convert direct floating-point equality
+comparison instructions into logically equivalent ones that use a
+pre-calculated rounding threshold.
 
 ### Run the pass
-As with [**FindFCmpEq**](#FindFCmpEq), we will use [input_for_fcmp_eq.ll](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_fcmp_eq.c) to test **ConvertFCmpEq**:
+As with [**FindFCmpEq**](#FindFCmpEq), we will use
+[input_for_fcmp_eq.ll](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_fcmp_eq.c)
+to test **ConvertFCmpEq**:
 
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/11>
@@ -929,9 +934,15 @@ $LLVM_DIR/bin/opt -load <build_dir>/lib/libFindFCmpEq.so \
   -S input_for_fcmp_eq.ll -o fcmp_eq_after_conversion.ll
 ```
 
-Notice that both `libFindFCmpEq.so` _and_ `libConvertFCmpEq.so` must be loaded -- and the load order matters. Since **ConvertFCmpEq** requires [**FindFCmpEq**](#FindFCmpEq), its library must be loaded before **ConvertFCmpEq**. If both passes were built as part of the same library, this would not be required.
+Notice that both `libFindFCmpEq.so` _and_ `libConvertFCmpEq.so` must be loaded
+-- and the load order matters. Since **ConvertFCmpEq** requires
+[**FindFCmpEq**](#FindFCmpEq), its library must be loaded before
+**ConvertFCmpEq**. If both passes were built as part of the same library, this
+would not be required.
 
-After transformation, both `fcmp oeq` instructions will have been converted to difference based `fcmp olt` instructions using the IEEE 754 double-precision machine epsilon constant as the round-off threshold:
+After transformation, both `fcmp oeq` instructions will have been converted to
+difference based `fcmp olt` instructions using the IEEE 754 double-precision
+machine epsilon constant as the round-off threshold:
 
 ```llvm
   %cmp = fcmp oeq double %0, %1
@@ -947,7 +958,10 @@ After transformation, both `fcmp oeq` instructions will have been converted to d
   %cmp = fcmp olt double %6, 0x3CB0000000000000
 ```
 
-The values are subtracted from each other and the absolute value of their difference is calculated. If this absolute difference is less than the value of the machine epsilon, the original two floating-point values are considered to be equal.
+The values are subtracted from each other and the absolute value of their
+difference is calculated. If this absolute difference is less than the value of
+the machine epsilon, the original two floating-point values are considered to
+be equal.
 
 Debugging
 ==========

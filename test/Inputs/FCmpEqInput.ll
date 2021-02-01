@@ -1,3 +1,5 @@
+; Generated from <llvm-tutor>/inputs/input_for_fcmp_eq.c
+
 @value.test = private constant double 2.000000e-01, align 8
 
 define double @sqrt_impl(double %x, double %hi, double %lo) {

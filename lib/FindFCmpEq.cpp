@@ -15,6 +15,10 @@
 //    llvm::PassBuilder::registerAnalysisRegistrationCallback(), and
 //    llvm::PassBuilder::registerPipelineParsingCallback().
 //
+//    Originally developed for [1].
+//
+//    [1] "Writing an LLVM Optimization" by Jonathan Smith
+//
 // USAGE:
 //    1. Legacy PM
 //      opt --load libFindFCmpEq.dylib --analyze --find-fcmp-eq `\`
