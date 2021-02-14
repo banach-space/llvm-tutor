@@ -51,7 +51,7 @@ private:
 //------------------------------------------------------------------------------
 class FindFCmpEqPrinter : public llvm::PassInfoMixin<FindFCmpEqPrinter> {
 public:
-  explicit FindFCmpEqPrinter(llvm::raw_ostream &OutStream);
+  explicit FindFCmpEqPrinter(llvm::raw_ostream &OutStream) : OS(OutStream){};
 
   llvm::PreservedAnalyses run(llvm::Function &Func,
                               llvm::FunctionAnalysisManager &FAM);
@@ -67,7 +67,7 @@ class FindFCmpEqWrapper : public llvm::FunctionPass {
 public:
   static char ID;
 
-  FindFCmpEqWrapper();
+  FindFCmpEqWrapper() : FunctionPass(ID) {}
 
   const FindFCmpEq::Result &getComparisons() const noexcept;
 

@@ -30,6 +30,7 @@
 // License: MIT
 //=============================================================================
 #include "FindFCmpEq.h"
+
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/IR/Function.h"
@@ -44,6 +45,7 @@
 #include "llvm/Support/Compiler.h"
 #include "llvm/Support/FormatVariadic.h"
 #include "llvm/Support/raw_ostream.h"
+
 #include <string>
 
 using namespace llvm;
@@ -54,17 +56,20 @@ namespace {
 static void
 printFCmpEqInstructions(raw_ostream &OS, Function &Func,
                         const FindFCmpEq::Result &FCmpEqInsts) noexcept {
-  if (!FCmpEqInsts.empty()) {
-    // Using a ModuleSlotTracker for printing makes it so full function analysis
-    // for slot numbering only occurs once instead of every time an instruction
-    // is printed.
-    ModuleSlotTracker Tracker(Func.getParent());
-    OS << "Floating-point equality comparisons in \"" << Func.getName()
-       << "\":\n";
-    for (FCmpInst *FCmpEq : FCmpEqInsts) {
-      FCmpEq->print(OS, Tracker);
-      OS << '\n';
-    }
+  if (FCmpEqInsts.empty())
+    return;
+
+  OS << "Floating-point equality comparisons in \"" << Func.getName()
+     << "\":\n";
+
+  // Using a ModuleSlotTracker for printing makes it so full function analysis
+  // for slot numbering only occurs once instead of every time an instruction
+  // is printed.
+  ModuleSlotTracker Tracker(Func.getParent());
+
+  for (FCmpInst *FCmpEq : FCmpEqInsts) {
+    FCmpEq->print(OS, Tracker);
+    OS << '\n';
   }
 }
 
@@ -78,9 +83,6 @@ static constexpr char PluginName[] = "FindFCmpEq";
 //------------------------------------------------------------------------------
 // FindFCmpEq implementation
 //------------------------------------------------------------------------------
-
-llvm::AnalysisKey FindFCmpEq::Key;
-
 FindFCmpEq::Result FindFCmpEq::run(Function &Func,
                                    FunctionAnalysisManager &FAM) {
   return run(Func);
@@ -102,17 +104,12 @@ FindFCmpEq::Result FindFCmpEq::run(Function &Func) {
   return Comparisons;
 }
 
-FindFCmpEqPrinter::FindFCmpEqPrinter(llvm::raw_ostream &OutStream)
-    : OS(OutStream) {}
-
 PreservedAnalyses FindFCmpEqPrinter::run(Function &Func,
                                          FunctionAnalysisManager &FAM) {
   auto &Comparisons = FAM.getResult<FindFCmpEq>(Func);
   printFCmpEqInstructions(OS, Func, Comparisons);
   return PreservedAnalyses::all();
 }
-
-FindFCmpEqWrapper::FindFCmpEqWrapper() : FunctionPass(ID) {}
 
 const FindFCmpEq::Result &FindFCmpEqWrapper::getComparisons() const noexcept {
   return Results;
@@ -130,26 +127,31 @@ void FindFCmpEqWrapper::getAnalysisUsage(llvm::AnalysisUsage &AU) const {
 
 void FindFCmpEqWrapper::print(llvm::raw_ostream &OS,
                               const llvm::Module *M /*= nullptr*/) const {
-  if (!Results.empty()) {
-    // Since this is a function pass, the list of comparison instructions will
-    // all be from the same function. Therefore, it's fine to pass the first
-    // containing function from the results list as the function argument to
-    // printFCmpEqInstructions().
-    Function &Func = *Results.front()->getFunction();
-    printFCmpEqInstructions(OS, Func, Results);
-  }
+  if (Results.empty())
+    return;
+
+  // Since this is a function pass, the list of comparison instructions will
+  // all be from the same function. Therefore, it's fine to pass the first
+  // containing function from the results list as the function argument to
+  // printFCmpEqInstructions().
+  Function &Func = *Results.front()->getFunction();
+  printFCmpEqInstructions(OS, Func, Results);
 }
 
 //-----------------------------------------------------------------------------
 // New PM Registration
 //-----------------------------------------------------------------------------
+llvm::AnalysisKey FindFCmpEq::Key;
+
 PassPluginLibraryInfo getFindFCmpEqPluginInfo() {
   return {LLVM_PLUGIN_API_VERSION, PluginName, LLVM_VERSION_STRING,
           [](PassBuilder &PB) {
+            // #1 REGISTRATION FOR "FAM.getResult<FindFCmpEq>(Function)"
             PB.registerAnalysisRegistrationCallback(
                 [](FunctionAnalysisManager &FAM) {
                   FAM.registerPass([&] { return FindFCmpEq(); });
                 });
+            // #2 REGISTRATION FOR "opt -passes=print<find-fcmp-eq>"
             // Printing passes format their pipeline element argument to the
             // pattern `print<pass-name>`. This is the pattern we're checking
             // for here.
@@ -176,7 +178,6 @@ llvmGetPassPluginInfo() {
 //-----------------------------------------------------------------------------
 // Legacy PM Registration
 //-----------------------------------------------------------------------------
-
 char FindFCmpEqWrapper::ID = 0;
 
 static RegisterPass<FindFCmpEqWrapper> X(/*PassArg=*/PassArg,

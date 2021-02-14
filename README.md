@@ -887,7 +887,9 @@ to test **FindFCmpEq**:
 
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/11>
+# Generate the input file
 $LLVM_DIR/bin/clang -emit-llvm -S -c <source_dir>/inputs/input_for_fcmp_eq.c -o input_for_fcmp_eq.ll
+# Run the pass
 $LLVM_DIR/bin/opt --load-pass-plugin <build_dir>/lib/libFindFCmpEq.so --passes="print<find-fcmp-eq>" input_for_fcmp_eq.ll
 ```
 

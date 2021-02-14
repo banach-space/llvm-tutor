@@ -29,5 +29,8 @@ int main() {
   double a = 0.2;
   double b = 1.0 / sqrt(5.0) / sqrt(5.0);
   // Second direct floating-point equality comparison
-  return a == b ? 1 : 0;
+  if (b == 1.0)
+    return a == b ? 1 : 0;
+  else
+    return a == b ? 0 : 1;
 }
