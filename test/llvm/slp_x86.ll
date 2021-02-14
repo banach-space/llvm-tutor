@@ -1,4 +1,4 @@
-; RUN: opt --basic-aa -slp-vectorizer -die -mtriple=x86_64-unknown-linuxgnu -S %s
+; RUN: opt --basic-aa -slp-vectorizer -dce -mtriple=x86_64-unknown-linuxgnu -S %s
 
 ; The input function can be expressed in C as:
 ; void foo(int a1, int a2, int b1, int b2, int *A) {

@@ -29,9 +29,8 @@ jobs:
         run: |
           # Adding the location of Ninja to $PATH
           export PATH=$GITHUB_WORKSPACE:$PATH
-          git clone --depth 10 --single-branch --branch release/11.x https://github.com/llvm/llvm-project
+          git clone --depth 10 --single-branch --branch release/12.x https://github.com/llvm/llvm-project
           cd llvm-project
-          git checkout tags/llvmorg-11.0.1
           mkdir build && cd build
           cmake -G Ninja -D CMAKE_MAKE_PROGRAM=$GITHUB_WORKSPACE/ninja \
             -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS="clang" \

@@ -16,20 +16,20 @@ jobs:
       - name: Install Dependencies
         run: |
           wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-          sudo apt-add-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-11 main"
+          sudo apt-add-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-12 main"
           sudo apt-get update
-          sudo apt-get install -y llvm-11 llvm-11-dev clang-11 llvm-11-tools
+          sudo apt-get install -y llvm-12 llvm-12-dev clang-12 llvm-12-tools
           sudo pip3 install lit
       - name: Build HelloWorld
         run: |
           cd HelloWorld
           mkdir build && cd build
-          cmake -DLT_LLVM_INSTALL_DIR="/usr/lib/llvm-11/" ../
+          cmake -DLT_LLVM_INSTALL_DIR="/usr/lib/llvm-12/" ../
           make -j2
       - name: Build llvm-tutor + run tests
         run: |
           cd $GITHUB_WORKSPACE
           mkdir build && cd build
-          cmake -DLT_LLVM_INSTALL_DIR="/usr/lib/llvm-11/" ../
+          cmake -DLT_LLVM_INSTALL_DIR="/usr/lib/llvm-12/" ../
           make -j2
           lit test/

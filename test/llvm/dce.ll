@@ -57,7 +57,7 @@ define signext i8 @foo_v2(i8 signext %0, i8 signext %1, i8 signext %2, i8 signex
 ;------------------------------------------------------------------------------
 ; Verify that all instructions except for the return statement are eliminated
 ; (they are `dead`)
-declare i8* @strcat(i8*, i8*) readonly nounwind
+declare i8* @strcat(i8*, i8*) readonly nounwind willreturn
 
 define void @foo_v3() {
 ; CHECK-LABEL: foo_v3

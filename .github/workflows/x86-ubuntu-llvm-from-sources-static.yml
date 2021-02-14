@@ -27,9 +27,8 @@ jobs:
           endif()
       - name: Clone llvm-project
         run: |
-          git clone --depth 10 --single-branch --branch release/11.x https://github.com/llvm/llvm-project
+          git clone --depth 10 --single-branch --branch release/12.x https://github.com/llvm/llvm-project
           cd llvm-project
-          git checkout tags/llvmorg-11.0.1
       - name: Register MBAAdd statically
         run: |
           bash utils/static_registration.sh --llvm_project_dir "$GITHUB_WORKSPACE/llvm-project"

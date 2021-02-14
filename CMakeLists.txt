@@ -28,11 +28,11 @@ endif()
 # find_package can locate it)
 list(APPEND CMAKE_PREFIX_PATH "${LT_LLVM_INSTALL_DIR}/lib/cmake/llvm/")
 
-find_package(LLVM REQUIRED CONFIG)
-# FIXME: This is a warkaround for #25. Remove once resolved and use
-# find_package(LLVM 11.0.0 REQUIERED CONFIG) above.
-if(NOT "11" VERSION_EQUAL "${LLVM_VERSION_MAJOR}")
-  message(FATAL_ERROR "Found LLVM ${LLVM_VERSION_MAJOR}, but need LLVM 11")
+find_package(LLVM 12.0.0 REQUIRED CONFIG)
+
+# Sanity check
+if(NOT "12" VERSION_EQUAL "${LLVM_VERSION_MAJOR}")
+  message(FATAL_ERROR "Found LLVM ${LLVM_VERSION_MAJOR}, but need LLVM 12")
 endif()
 
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")

@@ -15,7 +15,8 @@ jobs:
       - uses: actions/checkout@v1
       - name: Install Dependencies
         run: |
-          brew install llvm@11
+          brew update
+          brew upgrade llvm
           pip3 install lit
       - name: Build HelloWorld
         run: |
