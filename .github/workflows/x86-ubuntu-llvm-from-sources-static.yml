@@ -43,7 +43,7 @@ jobs:
           cmake -G Ninja -D CMAKE_MAKE_PROGRAM=$GITHUB_WORKSPACE/ninja \
             -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS="clang" \
             -DLLVM_TARGETS_TO_BUILD="host" -DLLVM_OPTIMIZED_TABLEGEN=ON \
-            -DLLVM_MBASUB_LINK_INTO_TOOLS=On \
+            -DLLVM_BUILD_EXAMPLES=On -DLLVM_MBASUB_LINK_INTO_TOOLS=On \
             ../llvm
           # Note that only the required tools are built
           ninja
@@ -52,7 +52,7 @@ jobs:
           sudo pip3 install lit
       - name: Run MBASub - sanity check
         run: |
-          $GITHUB_WORKSPACE/llvm-project/build/bin/opt -passes=mba-sub $GITHUB_WORKSPACE/test/MBA_sub.ll
+          $GITHUB_WORKSPACE/llvm-project/build/bin/opt -passes=mba-sub -S $GITHUB_WORKSPACE/test/MBA_sub.ll
       - name: Run MBASub tests
         run: |
           $GITHUB_WORKSPACE/llvm-project/build/bin/llvm-lit $GITHUB_WORKSPACE/llvm-project/llvm/test/Examples/MBASub/
