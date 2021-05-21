@@ -16,6 +16,9 @@ endif()
 
 set(LT_LLVM_CMAKE_FILE "${LT_LLVM_INSTALL_DIR}/lib/cmake/llvm/LLVMConfig.cmake")
 if(NOT EXISTS "${LT_LLVM_CMAKE_FILE}")
+set(LT_LLVM_CMAKE_FILE "${LT_LLVM_INSTALL_DIR}/lib64/cmake/llvm/LLVMConfig.cmake")
+endif()
+if(NOT EXISTS "${LT_LLVM_CMAKE_FILE}")
 message(FATAL_ERROR
     " LT_LLVM_CMAKE_FILE (${LT_LLVM_CMAKE_FILE}) is invalid.")
 endif()
