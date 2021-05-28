@@ -13,6 +13,8 @@ addons:
       - llvm-12-dev
       - llvm-12-tools
       - clang-12
+      - python3
+      - python3-pip
 
 env:
   - CONFIGURATION=Debug
@@ -25,7 +27,7 @@ compiler:
 # AFAIK, there's no other way of obtaining LLVM's lit other than via `pip
 # install`
 install:
-  - pip install --user lit
+  - pip3 install --user lit
 
 script:
   # The latest version of CMake available in Travis is 3.12.4. That's
