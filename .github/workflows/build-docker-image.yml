@@ -2,9 +2,9 @@ name: build-docker-image
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -13,4 +13,4 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build the Docker image
-        run: docker build . --file Dockerfile --tag llvm-tutor:llvm-11
+        run: docker build . --file Dockerfile --tag llvm-tutor:llvm-12

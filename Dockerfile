@@ -2,9 +2,9 @@
 # 1. Download the Dockerfile
 # $ wget https://raw.githubusercontent.com/banach-space/llvm-tutor/master/Dockerfile
 # 2. Build the Docker image
-# $ docker build -t=llvm-tutor:llvm-11 .
+# $ docker build -t=llvm-tutor:llvm-12 .
 # 3. Run the Docker container
-# $ docker run --rm -it --hostname=llvm-tutor llvm-tutor:llvm-11 /bin/bash
+# $ docker run --rm -it --hostname=llvm-tutor llvm-tutor:llvm-12 /bin/bash
 
 FROM debian:buster
 
@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
     cmake \
     ninja-build \
     build-essential \
-    python-minimal python-pip\
+    python3-minimal python3-pip\
     && rm -rf /var/lib/apt/lists/*
 
 # Installing lit
@@ -22,11 +22,11 @@ RUN apt-get update && apt-get install -y \
 # https://github.com/llvm/llvm-project/tree/master/llvm/utils/lit
 # So, we need to add -DLLVM_INSTALL_UTILS=ON cmake flag when trying to build LLVM.
 # https://llvm.org/docs/CMake.html
-RUN pip install lit
+RUN pip3 install lit
 
-# Building LLVM+Clang (release/11.x) from source
+# Building LLVM+Clang (release/12.x) from source
 ENV LLVM_DIR /opt/llvm
-RUN git clone --branch release/11.x --depth 1 https://github.com/llvm/llvm-project \
+RUN git clone --branch release/12.x --depth 1 https://github.com/llvm/llvm-project \
     && mkdir -p $LLVM_DIR \
     && mkdir -p llvm-project/build \
     && cd llvm-project/build \
