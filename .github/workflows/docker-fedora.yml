@@ -1,4 +1,4 @@
-name: build-docker-image
+name: docker-fedora
 
 on:
   push:
@@ -13,4 +13,4 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build the Docker image
-        run: docker build . --file Dockerfile --tag llvm-tutor:llvm-12
+        run: docker build . --file Dockerfile_fedora --tag llvm-tutor:llvm-12

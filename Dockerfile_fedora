@@ -1,0 +1,41 @@
+# How to run:
+# 1. Download the Dockerfile
+# $ wget https://raw.githubusercontent.com/banach-space/llvm-tutor/master/Dockerfile
+# 2. Build the Docker image
+# $ docker build -t=llvm-tutor:llvm-12 .
+# 3. Run the Docker container
+# $ docker run --rm -it --hostname=llvm-tutor llvm-tutor:llvm-12 /bin/bash
+
+FROM fedora:32
+
+RUN dnf --showduplicates list llvm-devel
+# Installing dependencies
+RUN dnf -y install \
+    git \
+    cmake \
+    ninja-build \
+    gcc \
+    gcc-c++ \
+    llvm-devel \
+    python3-pip
+
+# Installing lit
+# Note that lit's tests depend on 'not' and 'FileCheck', LLVM utilities.
+# https://github.com/llvm/llvm-project/tree/master/llvm/utils/lit
+# So, we need to add -DLLVM_INSTALL_UTILS=ON cmake flag when trying to build LLVM.
+# https://llvm.org/docs/CMake.html
+RUN pip3 install lit
+
+RUN ls /usr/lib64/cmake/llvm/AddLLVM.cmake
+
+# Building LLVM+Clang (release/12.x) from source
+ENV LLVM_DIR /usr/
+
+# Building llvm-tutor
+ENV TUTOR_DIR /llvm-tutor
+RUN git clone https://github.com/banach-space/llvm-tutor $TUTOR_DIR \
+    && mkdir -p $TUTOR_DIR/build \
+    && cd $TUTOR_DIR/build \
+    && cmake -DLT_LLVM_INSTALL_DIR=$LLVM_DIR ../ \
+    && make -j $(nproc --all) \
+    && lit test/
