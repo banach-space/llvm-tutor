@@ -70,7 +70,7 @@ Before you can test it, you need to prepare an input file:
 
 ```bash
 # Generate an LLVM test file
-$LLVM_DIR/bin/clang -S -emit-llvm <source/dir/llvm/tutor/>inputs/input_for_hello.c -o input_for_hello.ll
+$LLVM_DIR/bin/clang -O1 -S -emit-llvm <source/dir/llvm/tutor/>inputs/input_for_hello.c -o input_for_hello.ll
 ```
 
 Finally, run **HelloWorld** with
@@ -250,14 +250,20 @@ LLVM passes work with LLVM IR files. You can generate one like this:
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/12>
 # Textual form
-$LLVM_DIR/bin/clang  -emit-llvm input.c -S -o out.ll
+$LLVM_DIR/bin/clang -O1 -emit-llvm input.c -S -o out.ll
 # Binary/bit-code form
-$LLVM_DIR/bin/clang  -emit-llvm input.c -o out.bc
+$LLVM_DIR/bin/clang -O1 -emit-llvm input.c -o out.bc
 ```
 It doesn't matter whether you choose the binary, `*.bc` (default), or textual
 (`.ll`, requires the `-S` flag) form, but obviously the latter is more
 human-readable. Similar logic applies to **opt** (by default it generates
 `*.bc` files, use `-S` to generate an `*.ll` file instead).
+
+Note that recent clang versions add the `OptNone` tag to all functions if either
+no optimization level is specified or if `-O0` is specified. If you want to
+compile at `-O0` you need to specify `-O0 -Xclang -disable-O0-optnone`.
+Alternatively, you can specify `-O1` or higher. Otherwise the new pass
+manager will register the pass but your pass will not be executed.
 
 As noted [earlier](#llvm-plugins-as-shared-objecs), all examples in this file
 use the `*.so` extension for pass plugins. When working on Mac OS, use
@@ -291,7 +297,7 @@ need to choose which pass manager you want to use (see
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/12>
 # Generate an LLVM file to analyze
-$LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
+$LLVM_DIR/bin/clang -O1 -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
 # Run the pass through opt - Legacy PM
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libOpcodeCounter.so -legacy-opcode-counter -analyze input_for_cc.bc
 # Run the pass through opt - New PM
@@ -363,7 +369,7 @@ to test **InjectFuncCall**:
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/12>
 # Generate an LLVM file to analyze
-$LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/inputs/input_for_hello.c -o input_for_hello.bc
+$LLVM_DIR/bin/clang -O1 -emit-llvm -c <source_dir>/inputs/input_for_hello.c -o input_for_hello.bc
 # Run the pass through opt
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libInjectFuncCall.so -legacy-inject-func-call input_for_hello.bc -o instrumented.bin
 ```
@@ -434,7 +440,7 @@ to test **StaticCallCounter**:
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/12>
 # Generate an LLVM file to analyze
-$LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
+$LLVM_DIR/bin/clang -O1 -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
 # Run the pass through opt - Legacy PM
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libStaticCallCounter.so -legacy-static-cc -analyze input_for_cc.bc
 ```
@@ -487,7 +493,7 @@ to test **DynamicCallCounter**:
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/12>
 # Generate an LLVM file to analyze
-$LLVM_DIR/bin/clang  -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
+$LLVM_DIR/bin/clang -O1 -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
 # Instrument the input file
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libDynamicCallCounter.so -legacy-dynamic-cc input_for_cc.bc -o instrumented_bin
 ```
