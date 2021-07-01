@@ -1,15 +1,21 @@
-# How to run:
-# 1. Download the Dockerfile
-# $ wget https://raw.githubusercontent.com/banach-space/llvm-tutor/master/Dockerfile
-# 2. Build the Docker image
-# $ docker build -t=llvm-tutor:llvm-12 .
-# 3. Run the Docker container
-# $ docker run --rm -it --hostname=llvm-tutor llvm-tutor:llvm-12 /bin/bash
+# =============================================================================
+# A Fedora docker file for llvm-tutor. Clones and builds llvm-tutor, runs all
+# tests. It uses the precompiled LLVM packages from Fedora.
+#
+# USAGE:
+# ```bash
+# wget https://raw.githubusercontent.com/banach-space/llvm-tutor/main/Dockerfile_fedora
+# docker build -t=llvm-tutor:llvm-12 .
+# docker run --rm -it --hostname=llvm-tutor llvm-tutor:llvm-12 /bin/bash
+# ```
+# =============================================================================
 
-FROM fedora:32
+FROM fedora:34
 
-RUN dnf --showduplicates list llvm-devel
-# Installing dependencies
+ENV LLVM_DIR /usr/
+ENV TUTOR_DIR /llvm-tutor
+
+# 1. INSTALL DEPENDENCIES
 RUN dnf -y install \
     git \
     cmake \
@@ -17,24 +23,27 @@ RUN dnf -y install \
     gcc \
     gcc-c++ \
     llvm-devel \
+    clang \
+    zlib \
+    zlib-devel \
     python3-pip
 
-# Installing lit
-# Note that lit's tests depend on 'not' and 'FileCheck', LLVM utilities.
-# https://github.com/llvm/llvm-project/tree/master/llvm/utils/lit
-# So, we need to add -DLLVM_INSTALL_UTILS=ON cmake flag when trying to build LLVM.
-# https://llvm.org/docs/CMake.html
+# 2. INSTALL LIT
 RUN pip3 install lit
 
-RUN ls /usr/lib64/cmake/llvm/AddLLVM.cmake
+# 3. CLONE LLVM-TUTOR
+RUN git clone https://github.com/banach-space/llvm-tutor $TUTOR_DIR
 
-# Building LLVM+Clang (release/12.x) from source
-ENV LLVM_DIR /usr/
+# 4. BUILD AND RUN HELLO-WORLD
+RUN mkdir -p $TUTOR_DIR/hello-world-build \
+    && cd $TUTOR_DIR/hello-world-build \
+    && cmake -G Ninja -DLT_LLVM_INSTALL_DIR=$LLVM_DIR ../HelloWorld \
+    && ninja
+RUN cd $TUTOR_DIR/hello-world-build && $LLVM_DIR/bin/clang -S -O1 -emit-llvm ../inputs/input_for_hello.c -o input_for_hello.ll
+RUN cd $TUTOR_DIR/hello-world-build && $LLVM_DIR/bin/opt -load-pass-plugin ./libHelloWorld.so -passes=hello-world -disable-output input_for_hello.ll 2>&1 | grep "(llvm-tutor) Hello from: foo"
 
-# Building llvm-tutor
-ENV TUTOR_DIR /llvm-tutor
-RUN git clone https://github.com/banach-space/llvm-tutor $TUTOR_DIR \
-    && mkdir -p $TUTOR_DIR/build \
+# 5. BUILD AND RUN LLVM-TUTOR
+RUN mkdir -p $TUTOR_DIR/build \
     && cd $TUTOR_DIR/build \
     && cmake -DLT_LLVM_INSTALL_DIR=$LLVM_DIR ../ \
     && make -j $(nproc --all) \
