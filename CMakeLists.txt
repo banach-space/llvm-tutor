@@ -3,24 +3,35 @@ project(llvm-tutor)
 
 #===============================================================================
 # 1. VERIFY LLVM INSTALLATION DIR
+# This is just a bit of a sanity checking.
 #===============================================================================
-# Set this to a valid LLVM installation dir
 set(LT_LLVM_INSTALL_DIR "" CACHE PATH "LLVM installation directory")
 
-# A bit of a sanity checking
+# 1.1 Check the "include| directory
 set(LT_LLVM_INCLUDE_DIR "${LT_LLVM_INSTALL_DIR}/include/llvm")
 if(NOT EXISTS "${LT_LLVM_INCLUDE_DIR}")
 message(FATAL_ERROR
   " LT_LLVM_INSTALL_DIR (${LT_LLVM_INCLUDE_DIR}) is invalid.")
 endif()
 
-set(LT_LLVM_CMAKE_FILE "${LT_LLVM_INSTALL_DIR}/lib/cmake/llvm/LLVMConfig.cmake")
-if(NOT EXISTS "${LT_LLVM_CMAKE_FILE}")
-set(LT_LLVM_CMAKE_FILE "${LT_LLVM_INSTALL_DIR}/lib64/cmake/llvm/LLVMConfig.cmake")
+# 1.2 Check that the LLVMConfig.cmake file exists (the location depends on the
+# OS)
+set(LT_VALID_INSTALLATION FALSE)
+
+# Ubuntu + Darwin
+if(EXISTS "${LT_LLVM_INSTALL_DIR}/lib/cmake/llvm/LLVMConfig.cmake")
+  set(LT_VALID_INSTALLATION TRUE)
 endif()
-if(NOT EXISTS "${LT_LLVM_CMAKE_FILE}")
-message(FATAL_ERROR
-    " LT_LLVM_CMAKE_FILE (${LT_LLVM_CMAKE_FILE}) is invalid.")
+
+# Fedora
+if(EXISTS "${LT_LLVM_INSTALL_DIR}/lib64/cmake/llvm/LLVMConfig.cmake")
+  set(LT_VALID_INSTALLATION TRUE)
+endif()
+
+if(NOT ${LT_VALID_INSTALLATION})
+  message(FATAL_ERROR
+    "LLVM installation directory, (${LT_LLVM_INSTALL_DIR}), is invalid. Couldn't
+    find LLVMConfig.cmake.")
 endif()
 
 #===============================================================================
@@ -29,11 +40,15 @@ endif()
 #===============================================================================
 # Add the location of LLVMConfig.cmake to CMake search paths (so that
 # find_package can locate it)
+# Note: On Fedora, when using the pre-compiled binaries installed with `dnf`,
+# LLVMConfig.cmake is located in "/usr/lib64/cmake/llvm". But this path is
+# among other paths that will be checked by default when using
+# `find_package(llvm)`. So there's no need to add it here.
 list(APPEND CMAKE_PREFIX_PATH "${LT_LLVM_INSTALL_DIR}/lib/cmake/llvm/")
 
 find_package(LLVM 12.0.0 REQUIRED CONFIG)
 
-# Sanity check
+# Another sanity check
 if(NOT "12" VERSION_EQUAL "${LLVM_VERSION_MAJOR}")
   message(FATAL_ERROR "Found LLVM ${LLVM_VERSION_MAJOR}, but need LLVM 12")
 endif()
