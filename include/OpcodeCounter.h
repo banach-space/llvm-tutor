@@ -30,6 +30,9 @@ struct OpcodeCounter : public llvm::AnalysisInfoMixin<OpcodeCounter> {
                               llvm::FunctionAnalysisManager &);
 
   OpcodeCounter::Result generateOpcodeMap(llvm::Function &F);
+  // Part of the official API:
+  //  https://llvm.org/docs/WritingAnLLVMNewPMPass.html#required-passes
+  static bool isRequired() { return true; }
 
 private:
   // A special type used by analysis passes to provide an address that
@@ -46,6 +49,9 @@ public:
   explicit OpcodeCounterPrinter(llvm::raw_ostream &OutS) : OS(OutS) {}
   llvm::PreservedAnalyses run(llvm::Function &Func,
                               llvm::FunctionAnalysisManager &FAM);
+  // Part of the official API:
+  //  https://llvm.org/docs/WritingAnLLVMNewPMPass.html#required-passes
+  static bool isRequired() { return true; }
 
 private:
   llvm::raw_ostream &OS;
