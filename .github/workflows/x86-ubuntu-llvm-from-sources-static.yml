@@ -48,6 +48,7 @@ jobs:
           ninja
       - name: Install lit
         run: |
+          sudo apt-get install python3-setuptools
           sudo pip3 install lit
       - name: Run MBASub - sanity check
         run: |
