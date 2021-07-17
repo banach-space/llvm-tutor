@@ -440,7 +440,7 @@ to test **StaticCallCounter**:
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/12>
 # Generate an LLVM file to analyze
-$LLVM_DIR/bin/clang -O1 -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
+$LLVM_DIR/bin/clang -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
 # Run the pass through opt - Legacy PM
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libStaticCallCounter.so -legacy-static-cc -analyze input_for_cc.bc
 ```
