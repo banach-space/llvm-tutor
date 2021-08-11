@@ -75,7 +75,7 @@
 //      -passes=duplicate-bb -S <bitcode-file>
 //
 // REFERENCES:
-//    Based on examples from: 
+//    Based on examples from:
 //    "Building, Testing and Debugging a Simple out-of-tree LLVM Pass", Serge
 //    Guelton and Adrien Guinet, LLVM Dev Meeting 2015
 //
@@ -227,7 +227,7 @@ void DuplicateBB::cloneBB(BasicBlock &BB, Value *ContextValue,
     // Instruction that produce a value should not require a slot in the
     // TAIL *but* they can be used from the context, so just always
     // generate a PHI, and let further optimization do the cleaning
-    PHINode *Phi = PHINode::Create(ThenClone->getType(), 3);
+    PHINode *Phi = PHINode::Create(ThenClone->getType(), 2);
     Phi->addIncoming(ThenClone, ThenTerm->getParent());
     Phi->addIncoming(ElseClone, ElseTerm->getParent());
     TailVMap[&Instr] = Phi;
