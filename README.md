@@ -27,7 +27,7 @@ implemented examples and contains some background information on writing LLVM
 passes. The source files, apart from the code itself, contain comments that
 will guide you through the implementation. All examples are complemented with
 [LIT](https://llvm.org/docs/TestingGuide.html) tests and reference [input
-files](https://github.com/banach-space/llvm-tutor/blob/master/inputs).
+files](https://github.com/banach-space/llvm-tutor/blob/main/inputs).
 
 Visit [**clang-tutor**](https://github.com/banach-space/clang-tutor/) if you
 are internested in similar tutorial for Clang.
@@ -50,9 +50,9 @@ are internested in similar tutorial for Clang.
 HelloWorld: Your First Pass
 ===========================
 The **HelloWorld** pass from
-[HelloWorld.cpp](https://github.com/banach-space/llvm-tutor/blob/master/HelloWorld/HelloWorld.cpp)
+[HelloWorld.cpp](https://github.com/banach-space/llvm-tutor/blob/main/HelloWorld/HelloWorld.cpp)
 is a self-contained *reference example*. The corresponding
-[CMakeLists.txt](https://github.com/banach-space/llvm-tutor/blob/master/HelloWorld/CMakeLists.txt)
+[CMakeLists.txt](https://github.com/banach-space/llvm-tutor/blob/main/HelloWorld/CMakeLists.txt)
 implements the minimum set-up for an out-of-source pass.
 
 For every function defined in the input module, **HelloWord** prints its name
@@ -279,7 +279,7 @@ first.
 
 ### Run the pass
 We will use
-[input_for_cc.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_cc.c)
+[input_for_cc.c](https://github.com/banach-space/llvm-tutor/blob/main/inputs/input_for_cc.c)
 to test **OpcodeCounter**. Since **OpcodeCounter** is an Analysis pass, we want
 **opt** to print its results. There are two ways of achieving this. First, you
 need to choose which pass manager you want to use (see
@@ -342,10 +342,10 @@ $LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libOpcodeCounter.so --passes
 ```
 
 This is implemented in
-[OpcodeCounter.cpp](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp),
+[OpcodeCounter.cpp](https://github.com/banach-space/llvm-tutor/blob/main/lib/OpcodeCounter.cpp),
 on
-[line 122](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp#L122-L126) for the New PM, and on
-[line 159](https://github.com/banach-space/llvm-tutor/blob/master/lib/OpcodeCounter.cpp#L159-L164) for the Legacy PM.
+[line 122](https://github.com/banach-space/llvm-tutor/blob/main/lib/OpcodeCounter.cpp#L122-L126) for the New PM, and on
+[line 159](https://github.com/banach-space/llvm-tutor/blob/main/lib/OpcodeCounter.cpp#L159-L164) for the Legacy PM.
 This [section](#about-pass-managers-in-llvm) contains more information about
 the pass managers in LLVM.
 
@@ -363,7 +363,7 @@ number of arguments that the function takes.
 
 ### Run the pass
 We will use
-[input_for_hello.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_hello.c)
+[input_for_hello.c](https://github.com/banach-space/llvm-tutor/blob/main/inputs/input_for_hello.c)
 to test **InjectFuncCall**:
 
 ```bash
@@ -434,7 +434,7 @@ function pointers are not taken into account.
 
 ### Run the pass through **opt**
 We will use
-[input_for_cc.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_cc.c)
+[input_for_cc.c](https://github.com/banach-space/llvm-tutor/blob/main/inputs/input_for_cc.c)
 to test **StaticCallCounter**:
 
 ```bash
@@ -465,7 +465,7 @@ option in more detail [here](#run-the-pass).
 ### Run the pass through `static`
 You can run **StaticCallCounter** through a standalone tool called `static`.
 `static` is an LLVM based tool implemented in
-[StaticMain.cpp](https://github.com/banach-space/llvm-tutor/blob/master/tools/StaticMain.cpp).
+[StaticMain.cpp](https://github.com/banach-space/llvm-tutor/blob/main/tools/StaticMain.cpp).
 It is a command line wrapper that allows you to run **StaticCallCounter**
 without the need for **opt**:
 
@@ -487,7 +487,7 @@ example first.
 
 ### Run the pass
 We will use
-[input_for_cc.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_cc.c)
+[input_for_cc.c](https://github.com/banach-space/llvm-tutor/blob/main/inputs/input_for_cc.c)
 to test **DynamicCallCounter**:
 
 ```bash
@@ -553,7 +553,7 @@ implementation are correct.
 
 #### Run the pass
 We will use
-[input_for_mba_sub.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_mba_sub.c)
+[input_for_mba_sub.c](https://github.com/banach-space/llvm-tutor/blob/main/inputs/input_for_mba_sub.c)
 to test **MBASub**:
 
 ```bash
@@ -575,7 +575,7 @@ the formula and the implementation are correct.
 
 #### Run the pass
 We will use
-[input_for_add.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_mba.c)
+[input_for_add.c](https://github.com/banach-space/llvm-tutor/blob/main/inputs/input_for_mba.c)
 to test **MBAAdd**:
 
 ```bash
@@ -609,7 +609,7 @@ in the input function.
 
 ### Run the pass
 We will use
-[input_for_riv.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_riv.c)
+[input_for_riv.c](https://github.com/banach-space/llvm-tutor/blob/main/inputs/input_for_riv.c)
 to test **RIV**:
 
 ```bash
@@ -721,7 +721,7 @@ words, it's an elaborate wrapper for LLVM's `SplitBlockAndInsertIfThenElse`.
 ### Run the pass
 This pass depends on the **RIV** pass, which also needs be loaded in order for
 **DuplicateBB** to work. Lets use
-[input_for_duplicate_bb.c](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_duplicate_bb.c)
+[input_for_duplicate_bb.c](https://github.com/banach-space/llvm-tutor/blob/main/inputs/input_for_duplicate_bb.c)
 as our sample input. First, generate the LLVM file:
 
 ```bash
@@ -889,7 +889,7 @@ printing pass (`FindFCmpEqPrinter`). The legacy implementation (`FindFCmpEqWrapp
 makes use of both of these passes.
 
 ### Run the pass
-We will use [input_for_fcmp_eq.ll](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_fcmp_eq.c)
+We will use [input_for_fcmp_eq.ll](https://github.com/banach-space/llvm-tutor/blob/main/inputs/input_for_fcmp_eq.c)
 to test **FindFCmpEq**:
 
 ```bash
@@ -923,7 +923,7 @@ pre-calculated rounding threshold.
 
 ### Run the pass
 As with [**FindFCmpEq**](#FindFCmpEq), we will use
-[input_for_fcmp_eq.ll](https://github.com/banach-space/llvm-tutor/blob/master/inputs/input_for_fcmp_eq.c)
+[input_for_fcmp_eq.ll](https://github.com/banach-space/llvm-tutor/blob/main/inputs/input_for_fcmp_eq.c)
 to test **ConvertFCmpEq**:
 
 ```bash
@@ -1167,7 +1167,7 @@ runtime with either `-load` or `-load-pass-plugin` options.
 
 Static plugins are normally developed in-tree, i.e. within `llvm-project/llvm`,
 and all examples in **llvm-tutor** can be adapted to work this way. You can use
-[static_registation.sh](https://github.com/banach-space/llvm-tutor/blob/master/utils/static_registration.sh)
+[static_registation.sh](https://github.com/banach-space/llvm-tutor/blob/main/utils/static_registration.sh)
 to see it can be done for [**MBASub**](#mbasub). This script will:
 
 * copy the required source and test files into `llvm-project/llvm`
@@ -1229,13 +1229,13 @@ examples.
 
 | Name      | Description     | Test files in llvm-tutor |
 |-----------|-----------------|--------------------------|
-|[**dce**](https://github.com/llvm/llvm-project/blob/release/12.x/llvm/lib/Transforms/Scalar/DCE.cpp) | Dead Code Elimination | [dce.ll](https://github.com/banach-space/llvm-tutor/blob/master/test/llvm/dce.ll) |
-|[**memcpyopt**](https://github.com/llvm/llvm-project/blob/release/12.x/llvm/lib/Transforms/Scalar/MemCpyOptimizer.cpp) | Optimise calls to `memcpy` (e.g. replace them with `memset`) | [memcpyopt.ll](https://github.com/banach-space/llvm-tutor/blob/master/test/llvm/memcpyopt.ll) |
-|[**reassociate**](https://github.com/llvm/llvm-project/blob/release/12.x/llvm/lib/Transforms/Scalar/Reassociate.cpp) | Reassociate (e.g. 4 + (x + 5) -> x + (4 + 5)). This enables further optimisations, e.g. LICM. | [reassociate.ll](https://github.com/banach-space/llvm-tutor/blob/master/test/llvm/reassociate.ll) |
-|[**always-inline**](https://github.com/llvm/llvm-project/blob/release/12.x/llvm/lib/Transforms/IPO/AlwaysInliner.cpp) | Always inlines functions decorated with [`alwaysinline`](https://llvm.org/docs/LangRef.html#function-attributes) | [always-inline.ll](https://github.com/banach-space/llvm-tutor/blob/master/test/llvm/always-inline.ll) |
-|[**loop-deletion**](https://github.com/llvm/llvm-project/blob/release/12.x/llvm/lib/Transforms/Scalar/LoopDeletion.cpp) | Delete unused loops | [loop-deletion.ll](https://github.com/banach-space/llvm-tutor/blob/master/test/llvm/loop-deletion.ll) |
-|[**licm**](https://github.com/llvm/llvm-project/blob/release/12.x/llvm/lib/Transforms/Scalar/LICM.cpp) | [Loop-Invariant Code Motion](https://en.wikipedia.org/wiki/Loop-invariant_code_motion) (a.k.a. LICM) | [licm.ll](https://github.com/banach-space/llvm-tutor/blob/master/test/llvm/licm.ll) |
-|[**slp**](https://github.com/llvm/llvm-project/blob/release/12.x/llvm/lib/Transforms/Vectorize/SLPVectorizer.cpp) | [Superword-level parallelism vectorisation](https://llvm.org/docs/Vectorizers.html#the-slp-vectorizer) | [slp\_x86.ll](https://github.com/banach-space/llvm-tutor/blob/master/test/llvm/slp_x86.ll), [slp\_aarch64.ll](https://github.com/banach-space/llvm-tutor/blob/master/test/llvm/slp_aarch64.ll)  |
+|[**dce**](https://github.com/llvm/llvm-project/blob/release/12.x/llvm/lib/Transforms/Scalar/DCE.cpp) | Dead Code Elimination | [dce.ll](https://github.com/banach-space/llvm-tutor/blob/main/test/llvm/dce.ll) |
+|[**memcpyopt**](https://github.com/llvm/llvm-project/blob/release/12.x/llvm/lib/Transforms/Scalar/MemCpyOptimizer.cpp) | Optimise calls to `memcpy` (e.g. replace them with `memset`) | [memcpyopt.ll](https://github.com/banach-space/llvm-tutor/blob/main/test/llvm/memcpyopt.ll) |
+|[**reassociate**](https://github.com/llvm/llvm-project/blob/release/12.x/llvm/lib/Transforms/Scalar/Reassociate.cpp) | Reassociate (e.g. 4 + (x + 5) -> x + (4 + 5)). This enables further optimisations, e.g. LICM. | [reassociate.ll](https://github.com/banach-space/llvm-tutor/blob/main/test/llvm/reassociate.ll) |
+|[**always-inline**](https://github.com/llvm/llvm-project/blob/release/12.x/llvm/lib/Transforms/IPO/AlwaysInliner.cpp) | Always inlines functions decorated with [`alwaysinline`](https://llvm.org/docs/LangRef.html#function-attributes) | [always-inline.ll](https://github.com/banach-space/llvm-tutor/blob/main/test/llvm/always-inline.ll) |
+|[**loop-deletion**](https://github.com/llvm/llvm-project/blob/release/12.x/llvm/lib/Transforms/Scalar/LoopDeletion.cpp) | Delete unused loops | [loop-deletion.ll](https://github.com/banach-space/llvm-tutor/blob/main/test/llvm/loop-deletion.ll) |
+|[**licm**](https://github.com/llvm/llvm-project/blob/release/12.x/llvm/lib/Transforms/Scalar/LICM.cpp) | [Loop-Invariant Code Motion](https://en.wikipedia.org/wiki/Loop-invariant_code_motion) (a.k.a. LICM) | [licm.ll](https://github.com/banach-space/llvm-tutor/blob/main/test/llvm/licm.ll) |
+|[**slp**](https://github.com/llvm/llvm-project/blob/release/12.x/llvm/lib/Transforms/Vectorize/SLPVectorizer.cpp) | [Superword-level parallelism vectorisation](https://llvm.org/docs/Vectorizers.html#the-slp-vectorizer) | [slp\_x86.ll](https://github.com/banach-space/llvm-tutor/blob/main/test/llvm/slp_x86.ll), [slp\_aarch64.ll](https://github.com/banach-space/llvm-tutor/blob/main/test/llvm/slp_aarch64.ll)  |
 
 This list focuses on [LLVM's transform
 passes](https://llvm.org/docs/Passes.html#transform-passes) that are relatively
@@ -1246,7 +1246,7 @@ individual test like this:
 lit <source/dir/llvm/tutor>/test/llvm/always-inline.ll
 ```
 
-To run an individual pass, extract one [RUN line](https://github.com/banach-space/llvm-tutor/blob/master/test/llvm/always-inline.ll#L2)
+To run an individual pass, extract one [RUN line](https://github.com/banach-space/llvm-tutor/blob/main/test/llvm/always-inline.ll#L2)
 from the test file and run it:
 
 ```bash
