@@ -44,7 +44,7 @@
 //        |           |                  [ if-then-else-1 ]                    x
 //        |           |                         / \                            e
 //        |           |                       /     \                          c
-//        |           |          [ lt-clone-1-1 ] [ lt-clone-2-1 ]             u
+//        |           |          [ lt-clone-1-1 ] [ lt-clone-1-2 ]             u
 //     [ BB1 ]       <                        \     /                          t
 //        |           |                         \ /                            i
 //        |           |                          v                             o
@@ -54,7 +54,7 @@
 //        |           |                 [ lt-if-then-else-2 ]                  i
 //        |           |                         / \                            r
 //        |           |                       /     \                          e
-//        |           |          [ lt-clone-1-2 ] [ lt-clone-2-2 ]             c
+//        |           |          [ lt-clone-2-1 ] [ lt-clone-2-2 ]             c
 //     [ BB2 ]       <                        \     /                          t
 //        |           |                         \ /                            i
 //        |           |                          v                             o
