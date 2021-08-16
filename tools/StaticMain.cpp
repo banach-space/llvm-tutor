@@ -9,7 +9,7 @@
 //
 // USAGE:
 //    # First, generate an LLVM file:
-//      clang -emit-llvm <input-file> -o <output-llvm-file>
+//      clang -emit-llvm <input-file> -c -o <output-llvm-file>
 //    # Now you can run this tool as follows:
 //      <BUILD/DIR>/bin/static <output-llvm-file>
 //
