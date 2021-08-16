@@ -252,7 +252,7 @@ export LLVM_DIR=<installation/dir/of/llvm/12>
 # Textual form
 $LLVM_DIR/bin/clang -O1 -emit-llvm input.c -S -o out.ll
 # Binary/bit-code form
-$LLVM_DIR/bin/clang -O1 -emit-llvm input.c -o out.bc
+$LLVM_DIR/bin/clang -O1 -emit-llvm input.c -c -o out.bc
 ```
 It doesn't matter whether you choose the binary, `*.bc` (default), or textual
 (`.ll`, requires the `-S` flag) form, but obviously the latter is more
