@@ -254,16 +254,24 @@ $LLVM_DIR/bin/clang -O1 -emit-llvm input.c -S -o out.ll
 # Binary/bit-code form
 $LLVM_DIR/bin/clang -O1 -emit-llvm input.c -c -o out.bc
 ```
-It doesn't matter whether you choose the binary, `*.bc` (default), or textual
-(`.ll`, requires the `-S` flag) form, but obviously the latter is more
-human-readable. Similar logic applies to **opt** (by default it generates
-`*.bc` files, use `-S` to generate an `*.ll` file instead).
+It doesn't matter whether you choose the binary, `*.bc` (default), or
+textual/LLVM assembly form (`.ll`, requires the `-S` flag). Obviously, the
+latter is more human-readable. Similar logic applies to **opt** - by default it
+generates `*.bc` files. You can use `-S` to have the output written as `*.ll`
+files instead.
 
-Note that recent clang versions add the `OptNone` tag to all functions if either
-no optimization level is specified or if `-O0` is specified. If you want to
-compile at `-O0` you need to specify `-O0 -Xclang -disable-O0-optnone`.
-Alternatively, you can specify `-O1` or higher. Otherwise the new pass
-manager will register the pass but your pass will not be executed.
+Note that `clang` adds the `optnone` [function
+attribute](https://llvm.org/docs/LangRef.html#function-attributes) if either
+
+* no optimization level is specified, or
+* `-O0` is specified.
+
+If you want to compile at `-O0`, you need to specify `-O0 -Xclang
+-disable-O0-optnone` or define a static
+[isRequired](https://llvm.org/docs/WritingAnLLVMNewPMPass.html#required-passes)
+method in your pass.  Alternatively, you can specify `-O1` or higher.
+Otherwise the new pass manager will register the pass but your pass will not be
+executed.
 
 As noted [earlier](#llvm-plugins-as-shared-objecs), all examples in this file
 use the `*.so` extension for pass plugins. When working on Mac OS, use
