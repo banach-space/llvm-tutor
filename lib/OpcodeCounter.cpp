@@ -125,7 +125,7 @@ llvm::PassPluginLibraryInfo getOpcodeCounterPluginInfo() {
                 PM.addPass(OpcodeCounterPrinter(llvm::errs()));
               });
           // #3 REGISTRATION FOR "FAM.getResult<OpcodeCounter>(Func)"
-          // Register OpcodeCounter as an alysis pass. This is required so that
+          // Register OpcodeCounter as an analysis pass. This is required so that
           // OpcodeCounterPrinter (or any other pass) can requests the results
           // of OpcodeCounter.
           PB.registerAnalysisRegistrationCallback(
