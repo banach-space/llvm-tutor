@@ -103,7 +103,7 @@ llvm::PassPluginLibraryInfo getOpcodeCounterPluginInfo() {
         [](PassBuilder &PB) {
           // #1 REGISTRATION FOR "opt -passes=print<opcode-counter>"
           // Register OpcodeCounterPrinter so that it can be used when
-          // specyfying pass pipelines with `-passes=`.
+          // specifying pass pipelines with `-passes=`.
           PB.registerPipelineParsingCallback(
               [&](StringRef Name, FunctionPassManager &FPM,
                   ArrayRef<PassBuilder::PipelineElement>) {
@@ -126,7 +126,7 @@ llvm::PassPluginLibraryInfo getOpcodeCounterPluginInfo() {
               });
           // #3 REGISTRATION FOR "FAM.getResult<OpcodeCounter>(Func)"
           // Register OpcodeCounter as an analysis pass. This is required so that
-          // OpcodeCounterPrinter (or any other pass) can requests the results
+          // OpcodeCounterPrinter (or any other pass) can request the results
           // of OpcodeCounter.
           PB.registerAnalysisRegistrationCallback(
               [](FunctionAnalysisManager &FAM) {
