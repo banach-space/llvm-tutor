@@ -378,8 +378,10 @@ to test **InjectFuncCall**:
 export LLVM_DIR=<installation/dir/of/llvm/12>
 # Generate an LLVM file to analyze
 $LLVM_DIR/bin/clang -O1 -emit-llvm -c <source_dir>/inputs/input_for_hello.c -o input_for_hello.bc
-# Run the pass through opt
+# Run the pass through opt - Legacy PM
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libInjectFuncCall.so -legacy-inject-func-call input_for_hello.bc -o instrumented.bin
+# Run the pass through opt - New PM
+$LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libInjectFuncCall.so --passes="inject-func-call" input_for_hello.bc -o instrumented.bin
 ```
 This generates `instrumented.bin`, which is the instrumented version of
 `input_for_hello.bc`. In order to verify that **InjectFuncCall** worked as
