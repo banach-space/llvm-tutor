@@ -1,4 +1,4 @@
-; RUN:  opt -load %shlibdir/libDynamicCallCounter%shlibext -legacy-dynamic-cc -verify  -S %s | FileCheck %s
+; RUN:  opt --enable-new-pm=0 -load %shlibdir/libDynamicCallCounter%shlibext -legacy-dynamic-cc -verify  -S %s | FileCheck %s
 
 declare void @foo()
 

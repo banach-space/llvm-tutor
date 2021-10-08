@@ -1,15 +1,15 @@
 ; 1. LEGACY PASS MANAGER
-; RUN: opt < %s -inline-threshold=0 -always-inline -S | FileCheck %s --check-prefix=CHECK --check-prefix=CHECK-CALL
+; RUN: opt < %s -enable-new-pm=0 -inline-threshold=0 -always-inline -S | FileCheck %s --check-prefix=CHECK --check-prefix=CHECK-CALL
 ;
 ; Ensure the threshold has no impact on these decisions.
-; RUN: opt < %s -inline-threshold=20000000 -always-inline -S | FileCheck %s --check-prefix=CHECK --check-prefix=CHECK-CALL
-; RUN: opt < %s -inline-threshold=-20000000 -always-inline -S | FileCheck %s --check-prefix=CHECK --check-prefix=CHECK-CALL
+; RUN: opt < %s -enable-new-pm=0 -inline-threshold=20000000 -always-inline -S | FileCheck %s --check-prefix=CHECK --check-prefix=CHECK-CALL
+; RUN: opt < %s -enable-new-pm=0 -inline-threshold=-20000000 -always-inline -S | FileCheck %s --check-prefix=CHECK --check-prefix=CHECK-CALL
 ;
 ; 2. NEW PASS MANAGER
 ; The new pass manager doesn't re-use any threshold based infrastructure for
 ; the always inliner. The new PM always inliner also doesn't support inlining
 ; call-site alwaysinline annotations.
-; RUN: opt < %s -passes=always-inline -S | FileCheck %s --check-prefix=CHECK
+; RUN: opt < %s -enable-new-pm=0 -passes=always-inline -S | FileCheck %s --check-prefix=CHECK
 
 ;------------------------------------------------------------------------------
 ; CASE 1: most obvious scenario for inlining

@@ -1,4 +1,4 @@
-; RUN: opt -load %shlibdir/libMergeBB%shlibext -legacy-merge-bb -S %s | FileCheck  %s
+; RUN: opt --enable-new-pm=0 -load %shlibdir/libMergeBB%shlibext -legacy-merge-bb -S %s | FileCheck  %s
 ; RUN: opt -load-pass-plugin %shlibdir/libMergeBB%shlibext -passes=merge-bb -S %s | FileCheck  %s
 
 ; Conditional branch and the successors (BB3 and BB5) generated *different*

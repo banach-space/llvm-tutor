@@ -1,5 +1,5 @@
 ; Legacy PM - OpcodeCounter explicitly requested
-; RUN:  opt -load %shlibdir/libOpcodeCounter%shlibext -analyze --legacy-opcode-counter %S/Inputs/CallCounterInput.ll 2>&1\
+; RUN:  opt --enable-new-pm=0 -load %shlibdir/libOpcodeCounter%shlibext -analyze --legacy-opcode-counter %S/Inputs/CallCounterInput.ll 2>&1\
 ; RUN:   | FileCheck %s
 
 ; New PM - OpcodeCounter explicitly requested

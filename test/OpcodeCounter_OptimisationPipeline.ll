@@ -1,11 +1,11 @@
 ; Legacy PM - OpcodeCounter is run as part of existing pass pipeline
-; RUN:  opt -load %shlibdir/libOpcodeCounter%shlibext -O0 -disable-verify -debug-pass=Executions %s -disable-output 2>&1\
+; RUN:  opt --enable-new-pm=0 -load %shlibdir/libOpcodeCounter%shlibext -O0 -disable-verify -debug-pass=Executions %s -disable-output 2>&1\
 ; RUN:   | FileCheck --check-prefix=LEGACY_PM %s
-; RUN:  opt -load %shlibdir/libOpcodeCounter%shlibext -O3 -disable-verify -debug-pass=Executions %s -disable-output 2>&1\
+; RUN:  opt --enable-new-pm=0 -load %shlibdir/libOpcodeCounter%shlibext -O3 -disable-verify -debug-pass=Executions %s -disable-output 2>&1\
 ; RUN:   | FileCheck --check-prefix=LEGACY_PM %s
-; RUN:  opt -load %shlibdir/libOpcodeCounter%shlibext -Os -disable-verify -debug-pass=Executions %s -disable-output 2>&1\
+; RUN:  opt --enable-new-pm=0 -load %shlibdir/libOpcodeCounter%shlibext -Os -disable-verify -debug-pass=Executions %s -disable-output 2>&1\
 ; RUN:   | FileCheck --check-prefix=LEGACY_PM %s
-; RUN:  opt -load %shlibdir/libOpcodeCounter%shlibext -Oz -disable-verify -debug-pass=Executions %s -disable-output 2>&1\
+; RUN:  opt --enable-new-pm=0 -load %shlibdir/libOpcodeCounter%shlibext -Oz -disable-verify -debug-pass=Executions %s -disable-output 2>&1\
 ; RUN:   | FileCheck --check-prefix=LEGACY_PM %s
 
 ; New PM - OpcodeCounter is run as part of existing pass pipeline

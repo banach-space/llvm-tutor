@@ -1,4 +1,4 @@
-; RUN: opt -load %shlibdir/libRIV%shlibext -load %shlibdir/libDuplicateBB%shlibext -legacy-duplicate-bb -S %s | FileCheck  %s
+; RUN: opt --enable-new-pm=0 -load %shlibdir/libRIV%shlibext -load %shlibdir/libDuplicateBB%shlibext -legacy-duplicate-bb -S %s | FileCheck  %s
 ; RUN: opt -load-pass-plugin %shlibdir/libRIV%shlibext -load-pass-plugin %shlibdir/libDuplicateBB%shlibext -passes=duplicate-bb -S %s | FileCheck  %s
 
 ; Verify that the output from DuplicateBB is correct, i.e.

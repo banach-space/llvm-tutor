@@ -14,24 +14,19 @@ jobs:
         uses: microsoft/setup-msbuild@v1.0.2
 
       - name: Download Ninja
-        shell: cmake -P {0}
         run: |
-          # The following steps are implemented using CMake commands
-          set(ninja_version "1.9.0")
-          set(ninja_suffix "windows.zip")
-          set(ninja_url "https://github.com/ninja-build/ninja/releases/download/v${ninja_version}/ninja-${ninja_suffix}")
-          file(DOWNLOAD "${ninja_url}" ./ninja.zip SHOW_PROGRESS)
-          execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./ninja.zip)
-          if (NOT "${{ runner.os }}" STREQUAL "Windows")
-            execute_process(
-            COMMAND chmod +x ninja
-            )
-          endif()
-      - name: Build LLVM
+          git clone git://github.com/ninja-build/ninja.git
+          pushd ninja
+          ./configure.py --bootstrap
+          popd
+      - name: Add Ninja to $PATH
         run: |
-          # Adding the location of Ninja to $PATH
-          $env:Path += "$;GITHUB_WORKSPACE"
-          git clone --depth 1 --single-branch --branch release/11.x https://github.com/llvm/llvm-project
+          echo "${GITHUB_WORKSPACE}/ninja" >> $GITHUB_PATH
+      - name: Clone llvm-project
+        run: |
+          git clone --depth 1 --single-branch --branch release/13.x https://github.com/llvm/llvm-project
+      - name: Build LLVM & Clang
+        run: |
           cd llvm-project
           mkdir build
           cd build

@@ -1,5 +1,5 @@
-; RUN: opt -load %shlibdir/libMBAAdd%shlibext -legacy-mba-add -mba-ratio=1 -S %s  | FileCheck -check-prefix=MBA %s
-; RUN: opt -load %shlibdir/libMBAAdd%shlibext -legacy-mba-add -mba-ratio=0 -S %s  | FileCheck -check-prefix=NO_MBA %s
+; RUN: opt --enable-new-pm=0 -load %shlibdir/libMBAAdd%shlibext -legacy-mba-add -mba-ratio=1 -S %s  | FileCheck -check-prefix=MBA %s
+; RUN: opt --enable-new-pm=0 -load %shlibdir/libMBAAdd%shlibext -legacy-mba-add -mba-ratio=0 -S %s  | FileCheck -check-prefix=NO_MBA %s
 
 ; Verify that -mba-ratio has the expected effect.
 ; 1st '+'

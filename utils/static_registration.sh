@@ -170,11 +170,11 @@ update_mbasub_test()
 	--- a/llvm/test/Examples/MBASub/MBA_sub.ll
 	+++ b/llvm/test/Examples/MBASub/MBA_sub.ll
 	@@ -1,7 +1,5 @@
-	-; RUN:  opt -load %shlibdir/libMBASub%shlibext -legacy-mba-sub -S %s\
+	-; RUN:  opt --enable-new-pm=0 -load %shlibdir/libMBASub%shlibext -legacy-mba-sub -S %s\
 	-; RUN:  | FileCheck %s
 	-; RUN:  opt -load-pass-plugin=%shlibdir/libMBASub%shlibext -passes="mba-sub" -S %s \
 	-; RUN:  | FileCheck %s
-	+; RUN:  opt -legacy-mba-sub -S %s | FileCheck %s
+	+; RUN:  opt --enable-new-pm=0 -legacy-mba-sub -S %s | FileCheck %s
 	+; RUN:  opt -passes="mba-sub" -S %s | FileCheck %s
 	 
 	 define signext i32 @foo(i32 signext, i32 signext, i32 signext, i32 signext) {

@@ -43,8 +43,7 @@ static cl::opt<std::string> InputModule{cl::Positional,
 static void countStaticCalls(Module &M) {
   // Create a module pass manager and add StaticCallCounterPrinter to it.
   ModulePassManager MPM;
-  StaticCallCounterPrinter SCCP(llvm::errs());
-  MPM.addPass(SCCP);
+  MPM.addPass(StaticCallCounterPrinter(llvm::errs()));
 
   // Create an analysis manager and register StaticCallCounter with it.
   ModuleAnalysisManager MAM;

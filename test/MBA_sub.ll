@@ -1,4 +1,4 @@
-; RUN:  opt -load %shlibdir/libMBASub%shlibext -legacy-mba-sub -S %s\
+; RUN:  opt --enable-new-pm=0 -load %shlibdir/libMBASub%shlibext -legacy-mba-sub -S %s\
 ; RUN:  | FileCheck %s
 ; RUN:  opt -load-pass-plugin=%shlibdir/libMBASub%shlibext -passes="mba-sub" -S %s \
 ; RUN:  | FileCheck %s

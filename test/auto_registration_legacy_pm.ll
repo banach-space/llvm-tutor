@@ -1,8 +1,8 @@
-; RUN: opt -mtriple=x86_64-- -load %shlibdir/libOpcodeCounter%shlibext -O0 -debug-pass=Structure  %s -o /dev/null 2>&1 | FileCheck --check-prefixes=CHECK-O1 %s
-; RUN: opt -mtriple=x86_64-- -load %shlibdir/libOpcodeCounter%shlibext -O1 -debug-pass=Structure  %s -o /dev/null 2>&1 | FileCheck --check-prefixes=CHECK-O1 %s
-; RUN: opt -mtriple=x86_64-- -load %shlibdir/libOpcodeCounter%shlibext -O2 -debug-pass=Structure  %s -o /dev/null 2>&1 | FileCheck --check-prefixes=CHECK-O2 %s
-; RUN: opt -mtriple=x86_64-- -load %shlibdir/libOpcodeCounter%shlibext -O3 -debug-pass=Structure  %s -o /dev/null 2>&1 | FileCheck --check-prefixes=CHECK-O3 %s
-; RUN: opt -mtriple=x86_64-- -load %shlibdir/libOpcodeCounter%shlibext -Os -debug-pass=Structure  %s -o /dev/null 2>&1 | FileCheck --check-prefixes=CHECK-Os %s
+; RUN: opt --enable-new-pm=0 -mtriple=x86_64-- -load %shlibdir/libOpcodeCounter%shlibext -O0 -debug-pass=Structure  %s -o /dev/null 2>&1 | FileCheck --check-prefixes=CHECK-O1 %s
+; RUN: opt --enable-new-pm=0 -mtriple=x86_64-- -load %shlibdir/libOpcodeCounter%shlibext -O1 -debug-pass=Structure  %s -o /dev/null 2>&1 | FileCheck --check-prefixes=CHECK-O1 %s
+; RUN: opt --enable-new-pm=0 -mtriple=x86_64-- -load %shlibdir/libOpcodeCounter%shlibext -O2 -debug-pass=Structure  %s -o /dev/null 2>&1 | FileCheck --check-prefixes=CHECK-O2 %s
+; RUN: opt --enable-new-pm=0 -mtriple=x86_64-- -load %shlibdir/libOpcodeCounter%shlibext -O3 -debug-pass=Structure  %s -o /dev/null 2>&1 | FileCheck --check-prefixes=CHECK-O3 %s
+; RUN: opt --enable-new-pm=0 -mtriple=x86_64-- -load %shlibdir/libOpcodeCounter%shlibext -Os -debug-pass=Structure  %s -o /dev/null 2>&1 | FileCheck --check-prefixes=CHECK-Os %s
 
 ; Verify that OpcodeCounter is run when an optimisation level is specified
 ; (e.g. -O0 or -O3). Note that contrary to other tests, there's no explicit
