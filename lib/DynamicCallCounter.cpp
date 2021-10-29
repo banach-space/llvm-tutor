@@ -108,7 +108,7 @@ bool DynamicCallCounter::runOnModule(Module &M) {
 
     // Inject instruction to increment the call count each time this function
     // executes
-    LoadInst *Load2 = Builder.CreateLoad(Var);
+    LoadInst *Load2 = Builder.CreateLoad(IntegerType::getInt32Ty(CTX), Var);
     Value *Inc2 = Builder.CreateAdd(Builder.getInt32(1), Load2);
     Builder.CreateStore(Inc2, Var);
 
@@ -201,7 +201,8 @@ bool DynamicCallCounter::runOnModule(Module &M) {
 
   LoadInst *LoadCounter;
   for (auto &item : CallCounterMap) {
-    LoadCounter = Builder.CreateLoad(item.second);
+    LoadCounter = Builder.CreateLoad(IntegerType::getInt32Ty(CTX), item.second);
+    // LoadCounter = Builder.CreateLoad(item.second);
     Builder.CreateCall(
         Printf, {ResultFormatStrPtr, FuncNameMap[item.first()], LoadCounter});
   }
