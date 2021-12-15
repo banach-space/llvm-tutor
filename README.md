@@ -377,7 +377,7 @@ to test **InjectFuncCall**:
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/13>
 # Generate an LLVM file to analyze
-$LLVM_DIR/bin/clang -O1 -emit-llvm -c <source_dir>/inputs/input_for_hello.c -o input_for_hello.bc
+$LLVM_DIR/bin/clang -O0 -emit-llvm -c <source_dir>/inputs/input_for_hello.c -o input_for_hello.bc
 # Run the pass through opt - Legacy PM
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libInjectFuncCall.so -legacy-inject-func-call input_for_hello.bc -o instrumented.bin
 # Run the pass through opt - New PM
