@@ -1,0 +1,60 @@
+# =============================================================================
+# An Ubuntu docker file for llvm-tutor. Clones and builds llvm-tutor, runs all
+# tests. It uses the precompiled LLVM packages from Ubuntu.
+#
+# USAGE:
+# ```bash
+# wget https://raw.githubusercontent.com/banach-space/llvm-tutor/main/Dockerfile_ubuntu
+# docker build -t=llvm-tutor:llvm-13 .
+# docker run --rm -it --hostname=llvm-tutor llvm-tutor:llvm-13 /bin/bash
+# ```
+# =============================================================================
+
+FROM ubuntu:20.04
+
+ENV LLVM_DIR /usr/
+ENV TUTOR_DIR /llvm-tutor
+
+# 1. INSTALL DEPENDENCIES
+# As `tzdata` gets installed automatically (AFAIK, Python depends on it), it
+# will interrupt the set-up with a question about the time-zone to use. However,
+# this is a non-interactive sessions and that won't work. Work around it by
+# setting the time-zone here.
+ENV TZ=Europe/London
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN apt-get update && apt-get install -y \
+    git \
+    cmake \
+    ninja-build \
+    build-essential \
+    python3-minimal python3-pip\
+    wget \
+    software-properties-common \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
+RUN apt-add-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-13 main"
+RUN apt-get update
+RUN apt-get install -y llvm-13 llvm-13-dev clang-13 llvm-13-tools libllvm13
+RUN apt-get install -y python3-setuptools
+
+# 2. INSTALL LIT
+RUN pip3 install lit
+
+# 3. CLONE LLVM-TUTOR
+RUN git clone https://github.com/banach-space/llvm-tutor $TUTOR_DIR
+
+# 4. BUILD AND RUN HELLO-WORLD
+RUN mkdir -p $TUTOR_DIR/hello-world-build \
+    && cd $TUTOR_DIR/hello-world-build \
+    && cmake -G Ninja -DLT_LLVM_INSTALL_DIR=$LLVM_DIR ../HelloWorld \
+    && ninja
+RUN cd $TUTOR_DIR/hello-world-build && $LLVM_DIR/bin/clang -S -O1 -emit-llvm ../inputs/input_for_hello.c -o input_for_hello.ll
+RUN cd $TUTOR_DIR/hello-world-build && $LLVM_DIR/bin/opt -load-pass-plugin ./libHelloWorld.so -passes=hello-world -disable-output input_for_hello.ll 2>&1 | grep "(llvm-tutor) Hello from: foo"
+
+# 5. BUILD AND RUN LLVM-TUTOR
+RUN mkdir -p $TUTOR_DIR/build \
+    && cd $TUTOR_DIR/build \
+    && cmake -DLT_LLVM_INSTALL_DIR=$LLVM_DIR ../ \
+    && make -j $(nproc --all) \
+    && lit test/
