@@ -35,7 +35,7 @@ RUN apt-get update && apt-get install -y \
 RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
 RUN apt-add-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-13 main"
 RUN apt-get update
-RUN apt-get install -y llvm-13 llvm-13-dev clang-13 llvm-13-tools libllvm13
+RUN apt-get install -y llvm-13 llvm-13-dev libllvm13 clang-13 llvm-13-tools libmlir-13 libmlir-13-dev
 RUN apt-get install -y python3-setuptools
 
 # 2. INSTALL LIT

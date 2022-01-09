@@ -97,14 +97,11 @@ flag is used to prevent **opt** from printing the output bitcode file.
 Development Environment
 =======================
 ## Platform Support And Requirements
-This project has been tested on **Ubuntu 18.04** and **Mac OS X 10.14.4**. In
+This project has been tested on **Ubuntu 20.04** and **Mac OS X 10.14.4**. In
 order to build **llvm-tutor** you will need:
   * LLVM 13
   * C++ compiler that supports C++14
   * CMake 3.13.4 or higher
-
-Note that the default version of CMake in **Ubuntu 18.04** is 3.10.2, so you
-may need to update it manually.
 
 In order to run the passes, you will need:
   * **clang-13** (to generate input LLVM files)
@@ -143,7 +140,7 @@ from the official [repository](http://apt.llvm.org/):
 wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
 sudo apt-add-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-13 main"
 sudo apt-get update
-sudo apt-get install -y llvm-13 llvm-13-dev clang-13 llvm-13-tools
+sudo apt-get install -y llvm-13 llvm-13-dev libllvm13 clang-13 llvm-13-tools libmlir-13 libmlir-13-dev
 ```
 This will install all the required header files, libraries and tools in
 `/usr/lib/llvm-13/`.
