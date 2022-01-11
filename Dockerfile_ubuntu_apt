@@ -12,7 +12,7 @@
 
 FROM ubuntu:20.04
 
-ENV LLVM_DIR /usr/
+ENV LLVM_DIR /usr/lib/llvm-13/
 ENV TUTOR_DIR /llvm-tutor
 
 # 1. INSTALL DEPENDENCIES
@@ -49,8 +49,8 @@ RUN mkdir -p $TUTOR_DIR/hello-world-build \
     && cd $TUTOR_DIR/hello-world-build \
     && cmake -G Ninja -DLT_LLVM_INSTALL_DIR=$LLVM_DIR ../HelloWorld \
     && ninja
-RUN cd $TUTOR_DIR/hello-world-build && $LLVM_DIR/bin/clang-13 -S -O1 -emit-llvm ../inputs/input_for_hello.c -o input_for_hello.ll
-RUN cd $TUTOR_DIR/hello-world-build && $LLVM_DIR/bin/opt-13 -load-pass-plugin ./libHelloWorld.so -passes=hello-world -disable-output input_for_hello.ll 2>&1 | grep "(llvm-tutor) Hello from: foo"
+RUN cd $TUTOR_DIR/hello-world-build && /usr/bin/clang-13 -S -O1 -emit-llvm ../inputs/input_for_hello.c -o input_for_hello.ll
+RUN cd $TUTOR_DIR/hello-world-build && /usr/bin/opt-13 -load-pass-plugin ./libHelloWorld.so -passes=hello-world -disable-output input_for_hello.ll 2>&1 | grep "(llvm-tutor) Hello from: foo"
 
 # 5. BUILD AND RUN LLVM-TUTOR
 RUN mkdir -p $TUTOR_DIR/build \
