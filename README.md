@@ -140,7 +140,7 @@ from the official [repository](http://apt.llvm.org/):
 wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
 sudo apt-add-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-13 main"
 sudo apt-get update
-sudo apt-get install -y llvm-13 llvm-13-dev libllvm13 clang-13 llvm-13-tools libmlir-13 libmlir-13-dev
+sudo apt-get install -y llvm-13 llvm-13-dev llvm-13-tools clang-13
 ```
 This will install all the required header files, libraries and tools in
 `/usr/lib/llvm-13/`.
