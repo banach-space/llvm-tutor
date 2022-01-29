@@ -21,7 +21,7 @@
 //    * unconditional branch, and
 //    * switch
 //  For the edges from BB1 to BBsucc and BB2 to BBsucc, only unconditional
-//  branch instructions are allowed. Finally, BB1 is identical to BB2 iff all
+//  branch instructions are allowed. Finally, BB1 is identical to BB2 if all
 //  instructions in BB1 are identical to the instructions in BB2. For finer
 //  details please consult the implementation.
 //
