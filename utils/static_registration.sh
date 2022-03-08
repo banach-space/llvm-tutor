@@ -130,7 +130,7 @@ add_mbasub_subdir_in_cmake()
   # These tabs will be suppressed when the command (i.e. cat) is executed.
   # That's thanks to the delimiter token, EOF, being prefixed with `-`.
   cat > file.diff <<-'EOF'
-  patch_str='diff --git a/llvm/examples/CMakeLists.txt b/llvm/examples/CMakeLists.txt
+  diff --git a/llvm/examples/CMakeLists.txt b/llvm/examples/CMakeLists.txt
   index 74613bd1350b..917bb2e59371 100644
   --- a/llvm/examples/CMakeLists.txt
   +++ b/llvm/examples/CMakeLists.txt
@@ -141,7 +141,7 @@ add_mbasub_subdir_in_cmake()
   +add_subdirectory(MBASub)
 
    if(LLVM_ENABLE_EH AND (NOT WIN32) AND (NOT "${LLVM_NATIVE_ARCH}" STREQUAL "ARM"))
-       add_subdirectory(ExceptionDemo)'
+       add_subdirectory(ExceptionDemo)
 EOF
 
   patch -p1 < file.diff
