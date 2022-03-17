@@ -55,7 +55,7 @@ is a self-contained *reference example*. The corresponding
 [CMakeLists.txt](https://github.com/banach-space/llvm-tutor/blob/main/HelloWorld/CMakeLists.txt)
 implements the minimum set-up for an out-of-source pass.
 
-For every function defined in the input module, **HelloWord** prints its name
+For every function defined in the input module, **HelloWorld** prints its name
 and the number of arguments that it takes. You can build it like this:
 
 ```bash
