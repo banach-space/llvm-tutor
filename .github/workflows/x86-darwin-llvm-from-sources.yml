@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v1
       - name: Download Ninja
         run: |
-          git clone git://github.com/ninja-build/ninja.git
+          git clone https://github.com/ninja-build/ninja.git
           pushd ninja
           ./configure.py --bootstrap
           popd
