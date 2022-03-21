@@ -47,6 +47,11 @@ struct HelloWorld : PassInfoMixin<HelloWorld> {
     visitor(F);
     return PreservedAnalyses::all();
   }
+
+  // Without isRequired returning true, this pass will be skipped for functions
+  // decorated with the optnone LLVM attribute. Note that clang -O0 decorates
+  // all functions with optnone.
+  static bool isRequired() { return true; }
 };
 
 // Legacy PM implementation
