@@ -500,7 +500,7 @@ to test **DynamicCallCounter**:
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/13>
 # Generate an LLVM file to analyze
-$LLVM_DIR/bin/clang -O1 -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
+$LLVM_DIR/bin/clang -O0 -Xclang -disable-O0-optnone -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
 # Instrument the input file
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libDynamicCallCounter.so -legacy-dynamic-cc input_for_cc.bc -o instrumented_bin
 ```
@@ -511,7 +511,7 @@ new call-counting instructions) or run it:
 
 ```bash
 # Run the instrumented binary
-$LLVM_DIR/bin/lli ./instrumented_bin
+$LLVM_DIR/bin/lli -jit-kind=mcjit ./instrumented_bin
 ```
 You will see the following output:
 
