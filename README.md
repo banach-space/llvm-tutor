@@ -500,9 +500,9 @@ to test **DynamicCallCounter**:
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/13>
 # Generate an LLVM file to analyze
-$LLVM_DIR/bin/clang -O0 -Xclang -disable-O0-optnone -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
+$LLVM_DIR/bin/clang -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
 # Instrument the input file
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libDynamicCallCounter.so -legacy-dynamic-cc input_for_cc.bc -o instrumented_bin
+$LLVM_DIR/bin/opt -enable-new-pm=0 -load <build_dir>/lib/libDynamicCallCounter.so -legacy-dynamic-cc input_for_cc.bc -o instrumented_bin
 ```
 This generates `instrumented.bin`, which is the instrumented version of
 `input_for_cc.bc`. In order to verify that **DynamicCallCounter** worked as
