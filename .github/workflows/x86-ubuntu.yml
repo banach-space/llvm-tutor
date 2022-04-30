@@ -11,9 +11,18 @@ on:
 jobs:
   build:
     runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        compiler:
+          - { compiler: GNU,  CC: gcc-10,   CXX: g++-10 }
+          - { compiler: LLVM, CC: clang-10, CXX: clang++-10 }
+        type: [Debug, Release]
     steps:
       - uses: actions/checkout@v1
       - name: Install Dependencies
+        env:
+          CC: ${{ matrix.compiler.CC }}
+          CXX: ${{ matrix.compiler.CXX }}
         run: |
           wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
           sudo apt-add-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-13 main"
@@ -22,15 +31,18 @@ jobs:
           sudo apt-get install python3-setuptools
           sudo pip3 install lit
       - name: Build HelloWorld
+        env:
+          CC: ${{ matrix.compiler.CC }}
+          CXX: ${{ matrix.compiler.CXX }}
         run: |
           cd HelloWorld
           mkdir build && cd build
-          cmake -DLT_LLVM_INSTALL_DIR="/usr/lib/llvm-13/" ../
+          cmake -DLT_LLVM_INSTALL_DIR="/usr/lib/llvm-13/" -DCMAKE_BUILD_TYPE=${{ matrix.type }} ../
           make -j2
       - name: Build llvm-tutor + run tests
         run: |
           cd $GITHUB_WORKSPACE
           mkdir build && cd build
-          cmake -DLT_LLVM_INSTALL_DIR="/usr/lib/llvm-13/" ../
+          cmake -DLT_LLVM_INSTALL_DIR="/usr/lib/llvm-13/" -DCMAKE_BUILD_TYPE=${{ matrix.type }} ../
           make -j2
           lit -va test/
