@@ -2,9 +2,9 @@
 # 1. Download the Dockerfile
 # $ wget https://raw.githubusercontent.com/banach-space/llvm-tutor/master/Dockerfile
 # 2. Build the Docker image
-# $ docker build -t=llvm-tutor:llvm-13 .
+# $ docker build -t=llvm-tutor:llvm-14 .
 # 3. Run the Docker container
-# $ docker run --rm -it --hostname=llvm-tutor llvm-tutor:llvm-13 /bin/bash
+# $ docker run --rm -it --hostname=llvm-tutor llvm-tutor:llvm-14 /bin/bash
 
 FROM debian:buster
 
@@ -24,9 +24,9 @@ RUN apt-get update && apt-get install -y \
 # https://llvm.org/docs/CMake.html
 RUN pip3 install lit
 
-# Building LLVM+Clang (release/13.x) from source
+# Building LLVM+Clang (release/14.x) from source
 ENV LLVM_DIR /opt/llvm
-RUN git clone --branch release/13.x --depth 1 https://github.com/llvm/llvm-project \
+RUN git clone --branch release/14.x --depth 1 https://github.com/llvm/llvm-project \
     && mkdir -p $LLVM_DIR \
     && mkdir -p llvm-project/build \
     && cd llvm-project/build \

@@ -19,18 +19,18 @@ jobs:
       - name: Install Dependencies
         run: |
           brew update
-          brew install llvm@13
+          brew install llvm
           pip3 install lit
       - name: Build HelloWorld
         run: |
           cd HelloWorld
           mkdir build && cd build
-          cmake -DLT_LLVM_INSTALL_DIR="/usr/local/opt/llvm@13/" -DCMAKE_BUILD_TYPE=${{ matrix.type }} ../
+          cmake -DLT_LLVM_INSTALL_DIR="/usr/local/opt/llvm@14/" -DCMAKE_BUILD_TYPE=${{ matrix.type }} ../
           make -j2
       - name: Build llvm-tutor + run tests
         run: |
           cd $GITHUB_WORKSPACE
           mkdir build && cd build
-          cmake -DLT_LLVM_INSTALL_DIR="/usr/local/opt/llvm@13/" -DCMAKE_BUILD_TYPE=${{ matrix.type }} ../
+          cmake -DLT_LLVM_INSTALL_DIR="/usr/local/opt/llvm@14/" -DCMAKE_BUILD_TYPE=${{ matrix.type }} ../
           make -j2
           lit test/

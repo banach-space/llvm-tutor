@@ -5,8 +5,8 @@
 # USAGE:
 # ```bash
 # wget https://raw.githubusercontent.com/banach-space/llvm-tutor/main/Dockerfile_archlinux
-# docker build -t=llvm-tutor:llvm-13 .
-# docker run --rm -it --hostname=llvm-tutor llvm-tutor:llvm-13 /bin/bash
+# docker build -t=llvm-tutor:llvm-14 .
+# docker run --rm -it --hostname=llvm-tutor llvm-tutor:llvm-14 /bin/bash
 # ```
 # =============================================================================
 

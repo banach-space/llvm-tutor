@@ -121,7 +121,7 @@ llvm::PassPluginLibraryInfo getOpcodeCounterPluginInfo() {
           // whenever the vectoriser is used (i.e. when using '-O{1|2|3|s}'.
           PB.registerVectorizerStartEPCallback(
               [](llvm::FunctionPassManager &PM,
-                 llvm::PassBuilder::OptimizationLevel Level) {
+                 llvm::OptimizationLevel Level) {
                 PM.addPass(OpcodeCounterPrinter(llvm::errs()));
               });
           // #3 REGISTRATION FOR "FAM.getResult<OpcodeCounter>(Func)"

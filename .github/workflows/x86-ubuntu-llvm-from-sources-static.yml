@@ -21,7 +21,7 @@ jobs:
           echo "${GITHUB_WORKSPACE}/ninja" >> $GITHUB_PATH
       - name: Clone llvm-project
         run: |
-          git clone --depth 1 --single-branch --branch release/13.x https://github.com/llvm/llvm-project
+          git clone --depth 1 --single-branch --branch release/14.x https://github.com/llvm/llvm-project
           cd llvm-project
       - name: Register MBAAdd statically
         run: |
