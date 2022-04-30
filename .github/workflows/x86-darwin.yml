@@ -11,6 +11,9 @@ on:
 jobs:
   build:
     runs-on: macos-latest
+    strategy:
+      matrix:
+        type: [Debug, Release]
     steps:
       - uses: actions/checkout@v1
       - name: Install Dependencies
@@ -22,12 +25,12 @@ jobs:
         run: |
           cd HelloWorld
           mkdir build && cd build
-          cmake -DLT_LLVM_INSTALL_DIR="/usr/local/opt/llvm@13/"  ../
+          cmake -DLT_LLVM_INSTALL_DIR="/usr/local/opt/llvm@13/" -DCMAKE_BUILD_TYPE=${{ matrix.type }} ../
           make -j2
       - name: Build llvm-tutor + run tests
         run: |
           cd $GITHUB_WORKSPACE
           mkdir build && cd build
-          cmake -DLT_LLVM_INSTALL_DIR="/usr/local/opt/llvm@13/"  ../
+          cmake -DLT_LLVM_INSTALL_DIR="/usr/local/opt/llvm@13/" -DCMAKE_BUILD_TYPE=${{ matrix.type }} ../
           make -j2
           lit test/
