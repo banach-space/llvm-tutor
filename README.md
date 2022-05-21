@@ -90,6 +90,23 @@ $LLVM_DIR/bin/opt -load-pass-plugin ./libHelloWorld.{so|dylib} -passes=hello-wor
 (llvm-tutor)   number of arguments: 2
 ```
 
+If you are using the example with a modern LLVM version, in which the new pass manager is turned on by default,
+the invocation command becomes slightly different
+
+```bash
+# Run the pass with legacy pass manager in e.g LLVM 13
+$LLVM_DIR/bin/opt -enable-new-pm=0 -load ./libHelloWorld.{so|dylib} -legacy-hello-world -disable-output input_for_hello.ll
+# Expected output
+(llvm-tutor) Hello from: foo
+(llvm-tutor)   number of arguments: 1
+(llvm-tutor) Hello from: bar
+(llvm-tutor)   number of arguments: 2
+(llvm-tutor) Hello from: fez
+(llvm-tutor)   number of arguments: 3
+(llvm-tutor) Hello from: main
+(llvm-tutor)   number of arguments: 2
+```
+
 The **HelloWorld** pass doesn't modify the input module. The `-disable-output`
 flag is used to prevent **opt** from printing the output bitcode file.
 
