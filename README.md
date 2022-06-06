@@ -69,7 +69,7 @@ Before you can test it, you need to prepare an input file:
 
 ```bash
 # Generate an LLVM test file
-$LLVM_DIR/bin/clang -O1 -S -emit-llvm <source/dir/llvm/tutor/>inputs/input_for_hello.c -o input_for_hello.ll
+$LLVM_DIR/bin/clang -O1 -S -emit-llvm <source/dir/llvm/tutor>/inputs/input_for_hello.c -o input_for_hello.ll
 ```
 
 Finally, run **HelloWorld** with
@@ -198,7 +198,7 @@ In **llvm-tutor** every LLVM pass is implemented in a separate shared object
 (you can learn more about shared objects
 [here](http://www.yolinux.com/TUTORIALS/LibraryArchives-StaticAndDynamic.html)).
 These shared objects are essentially dynamically loadable plugins for **opt**.
-All plugins are built in the `<build/dir/lib>` directory.
+All plugins are built in the `<build/dir>/lib` directory.
 
 Note that the extension of dynamically loaded shared objects differs between
 Linux and Mac OS. For example, for the **HelloWorld** pass you will get:
