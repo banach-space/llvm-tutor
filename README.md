@@ -303,7 +303,7 @@ export LLVM_DIR=<installation/dir/of/llvm/13>
 # Generate an LLVM file to analyze
 $LLVM_DIR/bin/clang -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
 # Run the pass through opt - Legacy PM
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libOpcodeCounter.so -legacy-opcode-counter -analyze input_for_cc.bc
+$LLVM_DIR/bin/opt -enable-new-pm=0 -load <build_dir>/lib/libOpcodeCounter.so -legacy-opcode-counter -analyze input_for_cc.bc
 # Run the pass through opt - New PM
 $LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libOpcodeCounter.so --passes="print<opcode-counter>" -disable-output input_for_cc.bc
 ```
@@ -375,7 +375,7 @@ export LLVM_DIR=<installation/dir/of/llvm/13>
 # Generate an LLVM file to analyze
 $LLVM_DIR/bin/clang -O0 -emit-llvm -c <source_dir>/inputs/input_for_hello.c -o input_for_hello.bc
 # Run the pass through opt - Legacy PM
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libInjectFuncCall.so -legacy-inject-func-call input_for_hello.bc -o instrumented.bin
+$LLVM_DIR/bin/opt -enable-new-pm=0 -load <build_dir>/lib/libInjectFuncCall.so -legacy-inject-func-call input_for_hello.bc -o instrumented.bin
 # Run the pass through opt - New PM
 $LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libInjectFuncCall.so --passes="inject-func-call" input_for_hello.bc -o instrumented.bin
 ```
@@ -448,7 +448,7 @@ export LLVM_DIR=<installation/dir/of/llvm/13>
 # Generate an LLVM file to analyze
 $LLVM_DIR/bin/clang -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
 # Run the pass through opt - Legacy PM
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libStaticCallCounter.so -legacy-static-cc -analyze input_for_cc.bc
+$LLVM_DIR/bin/opt -enable-new-pm=0 -load <build_dir>/lib/libStaticCallCounter.so -legacy-static-cc -analyze input_for_cc.bc
 ```
 You should see the following output:
 
@@ -623,7 +623,7 @@ export LLVM_DIR=<installation/dir/of/llvm/13>
 # Generate an LLVM file to analyze
 $LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>/inputs/input_for_riv.c -o input_for_riv.ll
 # Run the pass through opt - Legacy PM
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libRIV.so -legacy-riv -analyze input_for_riv.ll
+$LLVM_DIR/bin/opt -enable-new-pm=0 -load <build_dir>/lib/libRIV.so -legacy-riv -analyze input_for_riv.ll
 ```
 You will see the following output:
 
