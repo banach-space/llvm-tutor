@@ -6,6 +6,12 @@ llvm-tutor
 
 Example LLVM passes - based on **LLVM 13**
 
+> **NOTE:** The switch to LLVM 14 is awaiting
+> [#97618](https://github.com/Homebrew/homebrew-core/pull/97618) to be
+> resolved. In the meantime, you can use the  
+> [release_14](https://github.com/banach-space/llvm-tutor/tree/release_14)
+> branch.
+
 **llvm-tutor** is a collection of self-contained reference LLVM passes. It's a
 tutorial that targets novice and aspiring LLVM developers. Key features:
 
