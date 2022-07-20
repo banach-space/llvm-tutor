@@ -144,6 +144,13 @@ sudo apt-get install -y llvm-14 llvm-14-dev llvm-14-tools clang-14
 This will install all the required header files, libraries and tools in
 `/usr/lib/llvm-14/`.
 
+To set LLVM 14 as the default version, create a soft link by 
+
+```bash
+sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-14 100
+sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-14 100
+```
+
 ## Building LLVM 14 From Sources
 Building from sources can be slow and tricky to debug. It is not necessary, but
 might be your preferred way of obtaining LLVM 14. The following steps will work
