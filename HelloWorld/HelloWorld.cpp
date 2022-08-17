@@ -10,7 +10,7 @@
 //
 // USAGE:
 //    1. Legacy PM
-//      opt -load libHelloWorld.dylib -legacy-hello-world -disable-output `\`
+//      opt -enable-new-pm=0 -load libHelloWorld.dylib -legacy-hello-world -disable-output `\`
 //        <input-llvm-file>
 //    2. New PM
 //      opt -load-pass-plugin=libHelloWorld.dylib -passes="hello-world" `\`
