@@ -14,8 +14,8 @@ jobs:
     strategy:
       matrix:
         compiler:
-          - { compiler: GNU,  CC: gcc-10,   CXX: g++-10 }
-          - { compiler: LLVM, CC: clang-10, CXX: clang++-10 }
+          - { compiler: GNU,  CC: gcc,   CXX: g++ }
+          - { compiler: LLVM, CC: clang, CXX: clang++ }
         type: [Debug, Release]
     steps:
       - uses: actions/checkout@v1
