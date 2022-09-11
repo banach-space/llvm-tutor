@@ -96,7 +96,7 @@ flag is used to prevent **opt** from printing the output bitcode file.
 Development Environment
 =======================
 ## Platform Support And Requirements
-This project has been tested on **Ubuntu 20.04** and **Mac OS X 10.14.4**. In
+This project has been tested on **Ubuntu 22.04** and **Mac OS X 10.14.4**. In
 order to build **llvm-tutor** you will need:
   * LLVM 14
   * C++ compiler that supports C++14
@@ -137,7 +137,7 @@ from the official [repository](http://apt.llvm.org/):
 
 ```bash
 wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-sudo apt-add-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-14 main"
+sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-14 main"
 sudo apt-get update
 sudo apt-get install -y llvm-14 llvm-14-dev llvm-14-tools clang-14
 ```

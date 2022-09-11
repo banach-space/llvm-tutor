@@ -10,7 +10,7 @@
 # ```
 # =============================================================================
 
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 ENV LLVM_DIR /usr/lib/llvm-14/
 ENV TUTOR_DIR /llvm-tutor
@@ -33,7 +33,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
-RUN apt-add-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-14 main"
+RUN apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-14 main"
 RUN apt-get update
 RUN apt-get install -y llvm-14 llvm-14-dev llvm-14-tools clang-14
 RUN apt-get install -y python3-setuptools

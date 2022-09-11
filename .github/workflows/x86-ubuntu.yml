@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         compiler:
@@ -25,7 +25,7 @@ jobs:
           CXX: ${{ matrix.compiler.CXX }}
         run: |
           wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-          sudo apt-add-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-14 main"
+          sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-14 main"
           sudo apt-get update
           sudo apt-get install -y llvm-14 llvm-14-dev llvm-14-tools clang-14
           sudo apt-get install python3-setuptools
