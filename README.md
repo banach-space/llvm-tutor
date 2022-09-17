@@ -4,7 +4,7 @@ llvm-tutor
 [![Build Status](https://github.com/banach-space/llvm-tutor/workflows/x86-Darwin/badge.svg?branch=main)](https://github.com/banach-space/llvm-tutor/actions?query=workflow%3Ax86-Darwin+branch%3Amain)
 
 
-Example LLVM passes - based on **LLVM 14**
+Example LLVM passes - based on **LLVM 15**
 
 **llvm-tutor** is a collection of self-contained reference LLVM passes. It's a
 tutorial that targets novice and aspiring LLVM developers. Key features:
@@ -58,7 +58,7 @@ For every function defined in the input module, **HelloWorld** prints its name
 and the number of arguments that it takes. You can build it like this:
 
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/14>
+export LLVM_DIR=<installation/dir/of/llvm/15>
 mkdir build
 cd build
 cmake -DLT_LLVM_INSTALL_DIR=$LLVM_DIR <source/dir/llvm/tutor>/HelloWorld/
@@ -96,32 +96,32 @@ flag is used to prevent **opt** from printing the output bitcode file.
 Development Environment
 =======================
 ## Platform Support And Requirements
-This project has been tested on **Ubuntu 22.04** and **Mac OS X 10.14.4**. In
+This project has been tested on **Ubuntu 22.04** and **Mac OS X 11.7**. In
 order to build **llvm-tutor** you will need:
-  * LLVM 14
-  * C++ compiler that supports C++14
+  * LLVM 15
+  * C++ compiler that supports C++17
   * CMake 3.13.4 or higher
 
 In order to run the passes, you will need:
-  * **clang-14** (to generate input LLVM files)
+  * **clang-15** (to generate input LLVM files)
   * [**opt**](http://llvm.org/docs/CommandGuide/opt.html) (to run the passes)
 
 There are additional requirements for tests (these will be satisfied by
-installing LLVM 14):
+installing LLVM 15):
   * [**lit**](https://llvm.org/docs/CommandGuide/lit.html) (aka **llvm-lit**,
     LLVM tool for executing the tests)
   * [**FileCheck**](https://llvm.org/docs/CommandGuide/FileCheck.html) (LIT
     requirement, it's used to check whether tests generate the expected output)
 
-## Installing LLVM 14 on Mac OS X
-On Darwin you can install LLVM 14 with [Homebrew](https://brew.sh/):
+## Installing LLVM 15 on Mac OS X
+On Darwin you can install LLVM 15 with [Homebrew](https://brew.sh/):
 
 ```bash
-brew install llvm@14
+brew install llvm@15
 ```
 
 If you already have an older version of LLVM installed, you can upgrade it to
-LLVM 14 like this:
+LLVM 15 like this:
 
 ```bash
 brew upgrade llvm
@@ -130,29 +130,29 @@ brew upgrade llvm
 Once the installation (or upgrade) is complete, all the required header files,
 libraries and tools will be located in `/usr/local/opt/llvm/`.
 
-## Installing LLVM 14 on Ubuntu
-On Ubuntu Bionic, you can [install modern
+## Installing LLVM 15 on Ubuntu
+On Ubuntu Jammy Jellyfish, you can [install modern
 LLVM](https://blog.kowalczyk.info/article/k/how-to-install-latest-clang-6.0-on-ubuntu-16.04-xenial-wsl.html)
 from the official [repository](http://apt.llvm.org/):
 
 ```bash
 wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-14 main"
+sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-15 main"
 sudo apt-get update
-sudo apt-get install -y llvm-14 llvm-14-dev llvm-14-tools clang-14
+sudo apt-get install -y llvm-15 llvm-15-dev llvm-15-tools clang-15
 ```
 This will install all the required header files, libraries and tools in
-`/usr/lib/llvm-14/`.
+`/usr/lib/llvm-15/`.
 
-## Building LLVM 14 From Sources
+## Building LLVM 15 From Sources
 Building from sources can be slow and tricky to debug. It is not necessary, but
-might be your preferred way of obtaining LLVM 14. The following steps will work
+might be your preferred way of obtaining LLVM 15. The following steps will work
 on Linux and Mac OS X:
 
 ```bash
 git clone https://github.com/llvm/llvm-project.git
 cd llvm-project
-git checkout release/14.x
+git checkout release/15.x
 mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=host -DLLVM_ENABLE_PROJECTS=clang <llvm-project/root/dir>/llvm/
@@ -168,18 +168,18 @@ You can build **llvm-tutor** (and all the provided pass plugins) as follows:
 
 ```bash
 cd <build/dir>
-cmake -DLT_LLVM_INSTALL_DIR=<installation/dir/of/llvm/14> <source/dir/llvm/tutor>
+cmake -DLT_LLVM_INSTALL_DIR=<installation/dir/of/llvm/15> <source/dir/llvm/tutor>
 make
 ```
 
 The `LT_LLVM_INSTALL_DIR` variable should be set to the root of either the
-installation or build directory of LLVM 14. It is used to locate the
+installation or build directory of LLVM 15. It is used to locate the
 corresponding `LLVMConfig.cmake` script that is used to set the include and
 library paths.
 
 ## Testing
 In order to run **llvm-tutor** tests, you need to install **llvm-lit** (aka
-**lit**). It's not bundled with LLVM 14 packages, but you can install it with
+**lit**). It's not bundled with LLVM 15 packages, but you can install it with
 **pip**:
 
 ```bash
@@ -244,7 +244,7 @@ below.
 LLVM passes work with LLVM IR files. You can generate one like this:
 
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/14>
+export LLVM_DIR=<installation/dir/of/llvm/15>
 # Textual form
 $LLVM_DIR/bin/clang -O1 -emit-llvm input.c -S -o out.ll
 # Binary/bit-code form
@@ -275,7 +275,7 @@ use the `*.so` extension for pass plugins. When working on Mac OS, use
 
 ## OpcodeCounter
 **OpcodeCounter** is an Analysis pass that prints a summary of the [LLVM IR
-opcodes](https://github.com/llvm/llvm-project/blob/release/14.x/llvm/lib/IR/Instruction.cpp#L347-L426)
+opcodes](https://github.com/llvm/llvm-project/blob/release/15.x/llvm/lib/IR/Instruction.cpp#L347-L426)
 encountered in every function in the input module. This pass can be [run
 automatically](#auto-registration-with-optimisation-pipelines) with one of the
 pre-defined optimisation pipelines. However, let's use our tried and tested method
@@ -285,26 +285,20 @@ first.
 We will use
 [input_for_cc.c](https://github.com/banach-space/llvm-tutor/blob/main/inputs/input_for_cc.c)
 to test **OpcodeCounter**. Since **OpcodeCounter** is an Analysis pass, we want
-**opt** to print its results. There are two ways of achieving this. First, you
-need to choose which pass manager you want to use (see
-[here](#about-pass-managers-in-llvm) for more details). Next:
-
-* Legacy Pass Manager: use the `-analyze` command line option. This option is
-  used to instruct **opt** to print the results of the analysis pass that has
-  just been run.
-* New Pass Manager: Simply use the [printing
-  pass](#printing-passes-for-the-new-pass-manager) that corresponds to
-  **OpcodeCounter**. This pass is called `print<opcode-counter>`. No extra
-  arguments are needed, but it's a good idea to add `-disable-output` (it is
-  not required when using `-analyze`).
+**opt** to _print_ its results. To this end, we will use a [printing
+pass](#printing-passes-for-the-new-pass-manager) that corresponds to
+**OpcodeCounter**. This pass is called `print<opcode-counter>`. No extra
+arguments are needed, but it's a good idea to add `-disable-output` to prevent
+**opt** from printing the output LLVM IR module - we are only interested in the
+results of the analysis rather than the module itself. In fact, as this pass
+does not modify the input IR, the output module would be indentical to the
+input anyway.
 
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/14>
+export LLVM_DIR=<installation/dir/of/llvm/15>
 # Generate an LLVM file to analyze
 $LLVM_DIR/bin/clang -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
-# Run the pass through opt - Legacy PM
-$LLVM_DIR/bin/opt -enable-new-pm=0 -load <build_dir>/lib/libOpcodeCounter.so -legacy-opcode-counter -analyze input_for_cc.bc
-# Run the pass through opt - New PM
+# Run the pass through opt
 $LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libOpcodeCounter.so --passes="print<opcode-counter>" -disable-output input_for_cc.bc
 ```
 
@@ -335,14 +329,15 @@ optimisation pass pipelines. Note that you still have to specify the plugin
 file to be loaded:
 
 ```bash
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libOpcodeCounter.so -O1 input_for_cc.bc
+$LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libOpcodeCounter.so --passes='default<O1>' input_for_cc.bc
 ```
-In this example I used the Legacy Pass Manager (the plugin file was specified
-with `-load` rather than `-load-pass-plugin`). The auto-registration also works
-with the New Pass Manager:
+
+In this example I used the New Pass Manager (the plugin file was specified
+with `-load-pass-plugin` rather than `-load`). The auto-registration also works
+with the Legacy Pass Manager:
 
 ```bash
-$LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libOpcodeCounter.so --passes='default<O1>' input_for_cc.bc
+$LLVM_DIR/bin/opt -load <build_dir>/lib/libOpcodeCounter.so -O1 input_for_cc.bc
 ```
 
 This is implemented in
@@ -371,13 +366,13 @@ We will use
 to test **InjectFuncCall**:
 
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/14>
+export LLVM_DIR=<installation/dir/of/llvm/15>
 # Generate an LLVM file to analyze
 $LLVM_DIR/bin/clang -O0 -emit-llvm -c <source_dir>/inputs/input_for_hello.c -o input_for_hello.bc
-# Run the pass through opt - Legacy PM
-$LLVM_DIR/bin/opt -enable-new-pm=0 -load <build_dir>/lib/libInjectFuncCall.so -legacy-inject-func-call input_for_hello.bc -o instrumented.bin
 # Run the pass through opt - New PM
 $LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libInjectFuncCall.so --passes="inject-func-call" input_for_hello.bc -o instrumented.bin
+# Run the pass through opt - Legacy PM
+$LLVM_DIR/bin/opt -enable-new-pm=0 -load <build_dir>/lib/libInjectFuncCall.so -legacy-inject-func-call input_for_hello.bc -o instrumented.bin
 ```
 This generates `instrumented.bin`, which is the instrumented version of
 `input_for_hello.bc`. In order to verify that **InjectFuncCall** worked as
@@ -444,7 +439,7 @@ We will use
 to test **StaticCallCounter**:
 
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/14>
+export LLVM_DIR=<installation/dir/of/llvm/15>
 # Generate an LLVM file to analyze
 $LLVM_DIR/bin/clang -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
 # Run the pass through opt - Legacy PM
@@ -497,11 +492,11 @@ We will use
 to test **DynamicCallCounter**:
 
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/14>
+export LLVM_DIR=<installation/dir/of/llvm/15>
 # Generate an LLVM file to analyze
 $LLVM_DIR/bin/clang -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
 # Instrument the input file
-$LLVM_DIR/bin/opt -enable-new-pm=0 -load <build_dir>/lib/libDynamicCallCounter.so -legacy-dynamic-cc input_for_cc.bc -o instrumented_bin
+$LLVM_DIR/bin/opt -load-pass-plugin=<build_dir>/lib/libDynamicCallCounter.so -passes="dynamic-cc" input_for_cc.bc -o instrumented_bin
 ```
 This generates `instrumented.bin`, which is the instrumented version of
 `input_for_cc.bc`. In order to verify that **DynamicCallCounter** worked as
@@ -510,7 +505,7 @@ new call-counting instructions) or run it:
 
 ```bash
 # Run the instrumented binary
-$LLVM_DIR/bin/lli -jit-kind=mcjit ./instrumented_bin
+$LLVM_DIR/bin/lli  ./instrumented_bin
 ```
 You will see the following output:
 
@@ -563,9 +558,9 @@ We will use
 to test **MBASub**:
 
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/14>
+export LLVM_DIR=<installation/dir/of/llvm/15>
 $LLVM_DIR/bin/clang -emit-llvm -S <source_dir>/inputs/input_for_mba_sub.c -o input_for_sub.ll
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libMBASub.so -legacy-mba-sub -S input_for_sub.ll -o out.ll
+$LLVM_DIR/bin/opt -load-pass-plugin=<build_dir>/lib/libMBASub.so -passes="mba-add" -S input_for_sub.ll -o out.ll
 ```
 
 ### MBAAdd
@@ -585,13 +580,14 @@ We will use
 to test **MBAAdd**:
 
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/14>
+export LLVM_DIR=<installation/dir/of/llvm/15>
 $LLVM_DIR/bin/clang -O1 -emit-llvm -S <source_dir>/inputs/input_for_mba.c -o input_for_mba.ll
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libMBAAdd.so -legacy-mba-add -S input_for_mba.ll -o out.ll
+$LLVM_DIR/bin/opt -load-pass-plugin=<build_dir>/lib/libMBAAdd.so -passes="mba-add" -S input_for_mba.ll -o out.ll
 ```
-You can also specify the level of _obfuscation_ on a scale of `0.0` to `1.0`, with
-`0` corresponding to no obfuscation and `1` meaning that all `add` instructions
-are to be replaced with `(((a ^ b) + 2 * (a & b)) * 39 + 23) * 151 + 111`, e.g.:
+You can also specify the level of _obfuscation_ on a scale from `0.0` to `1.0`,
+with `0.0` corresponding to no obfuscation and `1.0` meaning that all `add`
+instructions are to be replaced with the formula above. However, for this extra
+functionality to work you will have to use the Legacy Pass Manager:
 ```bash
 $LLVM_DIR/bin/opt -load <build_dir>/lib/libMBAAdd.so -legacy-mba-add -mba-ratio=0.3 <source_dir>/inputs/input_for_mba.c -o out.ll
 ```
@@ -619,11 +615,11 @@ We will use
 to test **RIV**:
 
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/14>
+export LLVM_DIR=<installation/dir/of/llvm/15>
 # Generate an LLVM file to analyze
 $LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>/inputs/input_for_riv.c -o input_for_riv.ll
 # Run the pass through opt - Legacy PM
-$LLVM_DIR/bin/opt -enable-new-pm=0 -load <build_dir>/lib/libRIV.so -legacy-riv -analyze input_for_riv.ll
+$LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libRIV.so -passes="print<riv>" -disable-output input_for_riv.ll
 ```
 You will see the following output:
 
@@ -720,7 +716,7 @@ LEGEND:
 ```
 As depicted above, **DuplicateBB** replaces qualifying basic blocks with 4 new
 basic blocks. This is implemented through LLVM's
-[SplitBlockAndInsertIfThenElse](https://github.com/llvm/llvm-project/blob/release/14.x/llvm/include/llvm/Transforms/Utils/BasicBlockUtils.h#L468).
+[SplitBlockAndInsertIfThenElse](https://github.com/llvm/llvm-project/blob/release/15.x/llvm/include/llvm/Transforms/Utils/BasicBlockUtils.h#L467).
 **DuplicateBB** does all the necessary preparation and clean-up. In other
 words, it's an elaborate wrapper for LLVM's `SplitBlockAndInsertIfThenElse`.
 
@@ -731,7 +727,7 @@ This pass depends on the **RIV** pass, which also needs be loaded in order for
 as our sample input. First, generate the LLVM file:
 
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/14>
+export LLVM_DIR=<installation/dir/of/llvm/15>
 $LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>/inputs/input_for_duplicate_bb.c -o input_for_duplicate_bb.ll
 ```
 
@@ -747,7 +743,7 @@ one argument (this means that the result from **RIV** will be a non-empty set).
 We will now apply **DuplicateBB** to `foo`:
 
 ```bash
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libRIV.so -load <build_dir>/lib/libDuplicateBB.so -legacy-duplicate-bb -S input_for_duplicate_bb.ll -o duplicate.ll
+$LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libRIV.so -load-pass-plugin <build_dir>/lib/libDuplicateBB.so -passes=duplicate-bb -S input_for_duplicate_bb.ll -o duplicate.ll
 ```
 After the instrumentation `foo` will look like this (all metadata has been stripped):
 
@@ -851,7 +847,7 @@ It is really interesting to see the effect of **MergeBB** on the output from
 **DuplicateBB**. Lets start with the same input as we used for **DuplicateBB**:
 
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/14>
+export LLVM_DIR=<installation/dir/of/llvm/15>
 $LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>/inputs/input_for_duplicate_bb.c -o input_for_duplicate_bb.ll
 ```
 
@@ -899,20 +895,14 @@ We will use [input_for_fcmp_eq.ll](https://github.com/banach-space/llvm-tutor/bl
 to test **FindFCmpEq**:
 
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/14>
+export LLVM_DIR=<installation/dir/of/llvm/15>
 # Generate the input file
 $LLVM_DIR/bin/clang -emit-llvm -S -c <source_dir>/inputs/input_for_fcmp_eq.c -o input_for_fcmp_eq.ll
 # Run the pass
 $LLVM_DIR/bin/opt --load-pass-plugin <build_dir>/lib/libFindFCmpEq.so --passes="print<find-fcmp-eq>" -disable-output input_for_fcmp_eq.ll
 ```
 
-For the legacy implementation, the `opt` command would be changed to the following:
-
-```bash
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libFindFCmpEq.so -find-fcmp-eq -analyze input_for_fcmp_eq.ll
-```
-
-In either case, you should see the following output which lists the direct floating-point equality comparison instructions found:
+You should see the following output which lists the direct floating-point equality comparison instructions found:
 
 ```llvm
 Floating-point equality comparisons in "sqrt_impl":
@@ -933,7 +923,7 @@ As with [**FindFCmpEq**](#FindFCmpEq), we will use
 to test **ConvertFCmpEq**:
 
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/14>
+export LLVM_DIR=<installation/dir/of/llvm/15>
 $LLVM_DIR/bin/clang -emit-llvm -S -Xclang -disable-O0-optnone \
   -c <source_dir>/inputs/input_for_fcmp_eq.c -o input_for_fcmp_eq.ll
 $LLVM_DIR/bin/opt --load-pass-plugin <build_dir>/lib/libFindFCmpEq.so \
@@ -987,7 +977,7 @@ and
 macros. For example, for **MBAAdd**:
 
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/14>
+export LLVM_DIR=<installation/dir/of/llvm/15>
 $LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>/inputs/input_for_mba.c -o input_for_mba.ll
 $LLVM_DIR/bin/opt -S -load-pass-plugin <build_dir>/lib/libMBAAdd.so -passes=mba-add input_for_mba.ll -debug-only=mba-add -stats -o out.ll
 ```
@@ -1018,7 +1008,7 @@ The default debugger on OS X is [LLDB](http://lldb.llvm.org). You will
 normally use it like this:
 
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/14>
+export LLVM_DIR=<installation/dir/of/llvm/15>
 $LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>/inputs/input_for_mba.c -o input_for_mba.ll
 lldb -- $LLVM_DIR/bin/opt -S -load-pass-plugin <build_dir>/lib/libMBAAdd.dylib -passes=mba-add input_for_mba.ll -o out.ll
 (lldb) breakpoint set --name MBAAdd::run
@@ -1027,7 +1017,7 @@ lldb -- $LLVM_DIR/bin/opt -S -load-pass-plugin <build_dir>/lib/libMBAAdd.dylib -
 or, equivalently, by using LLDBs aliases:
 
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/14>
+export LLVM_DIR=<installation/dir/of/llvm/15>
 $LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>/inputs/input_for_mba.c -o input_for_mba.ll
 lldb -- $LLVM_DIR/bin/opt -S -load-pass-plugin <build_dir>/lib/libMBAAdd.dylib -passes=mba-add input_for_mba.ll -o out.ll
 (lldb) b MBAAdd::run
@@ -1040,7 +1030,7 @@ On most Linux systems, [GDB](https://www.gnu.org/software/gdb/) is the most
 popular debugger. A typical session will look like this:
 
 ```bash
-export LLVM_DIR=<installation/dir/of/llvm/14>
+export LLVM_DIR=<installation/dir/of/llvm/15>
 $LLVM_DIR/bin/clang -emit-llvm -S -O1 <source_dir>/inputs/input_for_mba.c -o input_for_mba.ll
 gdb --args $LLVM_DIR/bin/opt -S -load-pass-plugin <build_dir>/lib/libMBAAdd.so -passes=mba-add input_for_mba.ll -o out.ll
 (gdb) b MBAAdd.cpp:MBAAdd::run
@@ -1067,66 +1057,52 @@ As I mentioned earlier, there are two pass managers in LLVM:
   base), which is the default pass manager for the optimisation pipeline in
   LLVM.
 * _Legacy Pass Manager_, which used to be the default pass managers for many years,
-  is deprecated and will be [removed after LLVM 14](https://releases.llvm.org/14.0.0/docs/ReleaseNotes.html#changes-to-the-llvm-ir).
+  is now deprecated and will be [removed after LLVM 14](https://releases.llvm.org/14.0.0/docs/ReleaseNotes.html#changes-to-the-llvm-ir).
 
-As the Legacy Pass Manager is to be deprecated in the near future (after LLVM
-14), it is probably best to use the New Pass Manager for your passes. If you
-are already using it - that's great! Otherwise, don't worry, it's relatively
-straightforward to port passes from the Legacy to the New pass manager. In
-**llvm-tutor** all passes work with both pass managers.
+As the Legacy Pass Manager is deprecated, it is probably best to use the New
+Pass Manager for your passes. If you are already using it - that's great!
+Otherwise, don't worry, it's relatively straightforward to port passes from the
+Legacy to the New pass manager. In **llvm-tutor** most passes work with both
+pass managers.
 
 ## New vs Legacy PM When Running Opt
-We will demonstrate the difference between the pass managers when running
+To demonstrate the difference between the pass managers, lets run
 **MBAAdd**. This is how you will use it with the legacy pass manager:
-
-```bash
-$LLVM_DIR/bin/opt -S --enable-new-pm=0 -load <build_dir>/lib/libMBAAdd.so -legacy-mba-add input_for_mba.ll -o out.ll
-```
-
-And this is how you run it with the new pass manager:
 
 ```bash
 $LLVM_DIR/bin/opt -S -load-pass-plugin <build_dir>/lib/libMBAAdd.so -passes=mba-add input_for_mba.ll -o out.ll
 ```
 
-There are three differences:
-* the way you load your plugin: `-load` vs `-load-pass-plugin`
-* the way you specify which pass/plugin to run: `-legacy-mba-add` vs
-  `-passes=mba-add`
-* if you want to use the Legacy Pass Manager, you need to use  `--enable-new-pm=0` to
-  disable the New Pass Manager
+And this is how you run it with the Legacy Pass Manager:
 
-These differences stem from the fact that in the case of Legacy Pass Manager you
-register a new command line option for **opt**, whereas  New Pass Manager
-simply requires you to define a pass pipeline (with `-passes=`).
+```bash
+$LLVM_DIR/bin/opt -S --enable-new-pm=0 -load <build_dir>/lib/libMBAAdd.so -legacy-mba-add input_for_mba.ll -o out.ll
+```
+
+There are three differences:
+
+* the way you load your plugin: `-load-pass-plugin` vs `-load`,
+* the way you specify which pass/plugin to run: `-passes=mba-add` vs  `-legacy-mba-add`,
+* when using the Legacy Pass Manager, you need to disable the New PM with  `--enable-new-pm=0`.
+
+These differences stem from the fact that New Pass Manager simply requires you
+to define a pass pipeline (with `-passes=`), whereas in the case of Legacy Pass
+Manager you register a new command line option for **opt**.
 
 Analysis vs Transformation Pass
 ===============================
 The implementation of a pass depends on whether it is an Analysis or a
-Transformation pass. The difference in the API that you will use is often
-subtle and further differs between the pass managers.
+Transformation pass:
 
-For example, for the New Pass Manager: 
-
-* a transformation pass will normally inherit from [PassInfoMixin](https://github.com/llvm/llvm-project/blob/release/14.x/llvm/include/llvm/IR/PassManager.h#L371),
-* an analysis pass will inherit from [AnalysisInfoMixin](https://github.com/llvm/llvm-project/blob/release/14.x/llvm/include/llvm/IR/PassManager.h#L394).
+* a transformation pass will normally inherit from [PassInfoMixin](https://github.com/llvm/llvm-project/blob/release/15.x/llvm/include/llvm/IR/PassManager.h#L371),
+* an analysis pass will inherit from [AnalysisInfoMixin](https://github.com/llvm/llvm-project/blob/release/15.x/llvm/include/llvm/IR/PassManager.h#L394).
 
 This is one of the key characteristics of the New Pass Managers - it makes the
 split into Analysis and Transformation passes very explicit. An Analysis pass
 requires a bit more bookkeeping and hence a bit more code.  For example, you
 need to add an instance of
-[AnalysisKey](https://github.com/llvm/llvm-project/blob/release/14.x/llvm/include/llvm/IR/PassManager.h#L410)
+[AnalysisKey](https://github.com/llvm/llvm-project/blob/release/15.x/llvm/include/llvm/IR/PassManager.h#L410)
 so that it can be identified by the New Pass Manager.
-
-In the case of the Legacy Pass Manager, an Analysis pass is required to
-implement the [print
-method](https://github.com/llvm/llvm-project/blob/release/14.x/llvm/tools/opt/PassPrinters.cpp#L48).
-But otherwise, the API splits passes based on the unit of IR they operate on,
-e.g.
-[ModulePass](https://github.com/llvm/llvm-project/blob/release/14.x/llvm/include/llvm/Pass.h#L238)
-vs
-[FunctionPass](https://github.com/llvm/llvm-project/blob/release/14.x/llvm/include/llvm/Pass.h#L298).
-This is one of the main differences between the pass managers in LLVM. 
 
 Note that for small standalone examples, the difference between Analysis and
 Transformation passes becomes less relevant.
@@ -1141,23 +1117,15 @@ and Transformation examples:
 * [**OpcodeCounter**](#opcodecounter) - analysis pass
 * [**MBASub**](#mbasub) - transformation pass
 
-Other examples also adhere to LLVM's convention, but contain other
-complexities. Only in the case of [**HelloWorld**](#helloworld-your-first-pass)
-simplicity was favoured over strictness.
+Other examples also adhere to LLVM's convention, but may contain other
+complexities. However, only in the case of
+[**HelloWorld**](#helloworld-your-first-pass) simplicity was favoured over
+strictness (i.e. it is neither a transformation nor analysis pass).
 
 ### Printing passes for the new pass manager
-You might have noticed that some passes implement the
-[`print`](https://llvm.org/docs/WritingAnLLVMPass.html#the-print-method) member
-method. This method is used by the Legacy Pass Manager to print the results of
-the corresponding Analysis pass.  You can run it by passing the `-analyze`
-command line option when using **opt**. Interestingly, nothing of this sort is
-available in the New Pass Manager.  Instead, you just implement a _printing
-pass_.
+A printing pass for an Analysis pass is basically a Transformation pass that:
 
-A printing pass for an Analysis pass is basically a
-Transformation pass that:
-
-* requests the results of the analysis from the original pass
+* requests the results of the analysis from the original pass, and
 * prints these results.
 
 In other words, it's just a wrapper pass. There's a convention to register such
@@ -1171,7 +1139,7 @@ infrastructure for both _dynamic_ and _static_ plugins (
 [documentation](https://llvm.org/docs/WritingAnLLVMPass.html#building-pass-plugins)).
 Static plugins are simply libraries linked into your executable (e.g. **opt**)
 statically. This way, unlike dynamic plugins, they don't require to be loaded at
-runtime with either `-load` or `-load-pass-plugin` options.
+runtime with `-load-pass-plugin`.
 
 Static plugins are normally developed in-tree, i.e. within `llvm-project/llvm`,
 and all examples in **llvm-tutor** can be adapted to work this way. You can use
@@ -1205,8 +1173,8 @@ into **opt**. Now you can run it like this:
 $LLVM_BUILD_DIR/bin/opt --passes=mba-sub -S $LLVM_TUTOR_DIR/test/MBA_sub.ll
 ```
 
-Note that this time we didn't have to use `-load-pass-plugin` (or `-load`) to
-load **MBASub**. If you want to dive deeper into the required steps for static
+Note that this time we didn't have to use `-load-pass-plugin` to load
+**MBASub**. If you want to dive deeper into the required steps for static
 registration, you can scan `static_registation.sh` or run:
 
 ```bash
@@ -1237,13 +1205,13 @@ examples.
 
 | Name      | Description     | Test files in llvm-tutor |
 |-----------|-----------------|--------------------------|
-|[**dce**](https://github.com/llvm/llvm-project/blob/release/14.x/llvm/lib/Transforms/Scalar/DCE.cpp) | Dead Code Elimination | [dce.ll](https://github.com/banach-space/llvm-tutor/blob/main/test/llvm/dce.ll) |
-|[**memcpyopt**](https://github.com/llvm/llvm-project/blob/release/14.x/llvm/lib/Transforms/Scalar/MemCpyOptimizer.cpp) | Optimise calls to `memcpy` (e.g. replace them with `memset`) | [memcpyopt.ll](https://github.com/banach-space/llvm-tutor/blob/main/test/llvm/memcpyopt.ll) |
-|[**reassociate**](https://github.com/llvm/llvm-project/blob/release/14.x/llvm/lib/Transforms/Scalar/Reassociate.cpp) | Reassociate (e.g. 4 + (x + 5) -> x + (4 + 5)). This enables further optimisations, e.g. LICM. | [reassociate.ll](https://github.com/banach-space/llvm-tutor/blob/main/test/llvm/reassociate.ll) |
-|[**always-inline**](https://github.com/llvm/llvm-project/blob/release/14.x/llvm/lib/Transforms/IPO/AlwaysInliner.cpp) | Always inlines functions decorated with [`alwaysinline`](https://llvm.org/docs/LangRef.html#function-attributes) | [always-inline.ll](https://github.com/banach-space/llvm-tutor/blob/main/test/llvm/always-inline.ll) |
-|[**loop-deletion**](https://github.com/llvm/llvm-project/blob/release/14.x/llvm/lib/Transforms/Scalar/LoopDeletion.cpp) | Delete unused loops | [loop-deletion.ll](https://github.com/banach-space/llvm-tutor/blob/main/test/llvm/loop-deletion.ll) |
-|[**licm**](https://github.com/llvm/llvm-project/blob/release/14.x/llvm/lib/Transforms/Scalar/LICM.cpp) | [Loop-Invariant Code Motion](https://en.wikipedia.org/wiki/Loop-invariant_code_motion) (a.k.a. LICM) | [licm.ll](https://github.com/banach-space/llvm-tutor/blob/main/test/llvm/licm.ll) |
-|[**slp**](https://github.com/llvm/llvm-project/blob/release/14.x/llvm/lib/Transforms/Vectorize/SLPVectorizer.cpp) | [Superword-level parallelism vectorisation](https://llvm.org/docs/Vectorizers.html#the-slp-vectorizer) | [slp\_x86.ll](https://github.com/banach-space/llvm-tutor/blob/main/test/llvm/slp_x86.ll), [slp\_aarch64.ll](https://github.com/banach-space/llvm-tutor/blob/main/test/llvm/slp_aarch64.ll)  |
+|[**dce**](https://github.com/llvm/llvm-project/blob/release/15.x/llvm/lib/Transforms/Scalar/DCE.cpp) | Dead Code Elimination | [dce.ll](https://github.com/banach-space/llvm-tutor/blob/main/test/llvm/dce.ll) |
+|[**memcpyopt**](https://github.com/llvm/llvm-project/blob/release/15.x/llvm/lib/Transforms/Scalar/MemCpyOptimizer.cpp) | Optimise calls to `memcpy` (e.g. replace them with `memset`) | [memcpyopt.ll](https://github.com/banach-space/llvm-tutor/blob/main/test/llvm/memcpyopt.ll) |
+|[**reassociate**](https://github.com/llvm/llvm-project/blob/release/15.x/llvm/lib/Transforms/Scalar/Reassociate.cpp) | Reassociate (e.g. 4 + (x + 5) -> x + (4 + 5)). This enables further optimisations, e.g. LICM. | [reassociate.ll](https://github.com/banach-space/llvm-tutor/blob/main/test/llvm/reassociate.ll) |
+|[**always-inline**](https://github.com/llvm/llvm-project/blob/release/15.x/llvm/lib/Transforms/IPO/AlwaysInliner.cpp) | Always inlines functions decorated with [`alwaysinline`](https://llvm.org/docs/LangRef.html#function-attributes) | [always-inline.ll](https://github.com/banach-space/llvm-tutor/blob/main/test/llvm/always-inline.ll) |
+|[**loop-deletion**](https://github.com/llvm/llvm-project/blob/release/15.x/llvm/lib/Transforms/Scalar/LoopDeletion.cpp) | Delete unused loops | [loop-deletion.ll](https://github.com/banach-space/llvm-tutor/blob/main/test/llvm/loop-deletion.ll) |
+|[**licm**](https://github.com/llvm/llvm-project/blob/release/15.x/llvm/lib/Transforms/Scalar/LICM.cpp) | [Loop-Invariant Code Motion](https://en.wikipedia.org/wiki/Loop-invariant_code_motion) (a.k.a. LICM) | [licm.ll](https://github.com/banach-space/llvm-tutor/blob/main/test/llvm/licm.ll) |
+|[**slp**](https://github.com/llvm/llvm-project/blob/release/15.x/llvm/lib/Transforms/Vectorize/SLPVectorizer.cpp) | [Superword-level parallelism vectorisation](https://llvm.org/docs/Vectorizers.html#the-slp-vectorizer) | [slp\_x86.ll](https://github.com/banach-space/llvm-tutor/blob/main/test/llvm/slp_x86.ll), [slp\_aarch64.ll](https://github.com/banach-space/llvm-tutor/blob/main/test/llvm/slp_aarch64.ll)  |
 
 This list focuses on [LLVM's transform
 passes](https://llvm.org/docs/Passes.html#transform-passes) that are relatively

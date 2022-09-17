@@ -15,24 +15,24 @@
 define void @foo() {
 ; CHECK-LABEL: @foo(
 ; Call-counting instructions inserted by the pass
-; CHECK-NEXT:    [[TMP1:%.*]] = load i32, i32* @CounterFor_foo
+; CHECK-NEXT:    [[TMP1:%.*]] = load i32, ptr @CounterFor_foo
 ; CHECK-NEXT:    [[TMP2:%.*]] = add i32 1, [[TMP1]]
-; CHECK-NEXT:    store i32 [[TMP2]], i32* @CounterFor_foo
+; CHECK-NEXT:    store i32 [[TMP2]], ptr @CounterFor_foo
 ; CHECK-NEXT:    ret void
 ;
   ret void
 }
 
 ; Declaration of `printf` inserted by the pass
-; CHECK: declare i32 @printf(i8* nocapture readonly, ...) #0
+; CHECK: declare i32 @printf(ptr nocapture readonly, ...) #0
 
 ; Definition of `printf_wrapper` inserted by the pass
 ; CHECK: define void @printf_wrapper() {
 ; CHECK-NEXT: enter:
-; CHECK-NEXT:  %0 = call i32 (i8*, ...) @printf
+; CHECK-NEXT:  %0 = call i32 (ptr, ...) @printf
 ; CHECK-SAME: @ResultHeaderStrIR
-; CHECK-NEXT:  %1 = load i32, i32* @CounterFor_foo
-; CHECK-NEXT:  %2 = call i32 (i8*, ...) @printf
+; CHECK-NEXT:  %1 = load i32, ptr @CounterFor_foo
+; CHECK-NEXT:  %2 = call i32 (ptr, ...) @printf
 ; CHECK-SAME: @ResultFormatStrIR
 ; CHECK-NEXT:  ret void
 ; CHECK-NEXT: }

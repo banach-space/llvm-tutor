@@ -1,4 +1,3 @@
-; RUN:  opt --enable-new-pm=0 -load %shlibdir/libStaticCallCounter%shlibext --legacy-static-cc -analyze %s | FileCheck %s
 ; RUN:  opt -load-pass-plugin %shlibdir/libStaticCallCounter%shlibext -passes="print<static-cc>" -disable-output %s 2>&1 | FileCheck %s
 
 ; Check that a call within a loop is counted only once. Note that the loop will

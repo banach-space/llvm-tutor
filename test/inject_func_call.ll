@@ -15,18 +15,18 @@
 ; CHECK-NEXT: @3 = private unnamed_addr constant [4 x i8] c"bez\00", align 1
 
 ; CHECK-LABEL: @foo
-; CHECK-NEXT:  %2 = call i32 (i8*, ...) @printf
+; CHECK-NEXT:  %2 = call i32 (ptr, ...) @printf
 
 ; CHECK-LABEL: @bar
-; CHECK-NEXT:  %3 = call i32 (i8*, ...) @printf
+; CHECK-NEXT:  %3 = call i32 (ptr, ...) @printf
 
 ; CHECK-LABEL: @baz
-; CHECK-NEXT:  %4 = call i32 (i8*, ...) @printf
+; CHECK-NEXT:  %4 = call i32 (ptr, ...) @printf
 
 ; CHECK-LABEL: @bez
-; CHECK-NEXT: %2 = call i32 (i8*, ...) @printf
+; CHECK-NEXT: %2 = call i32 (ptr, ...) @printf
 
-; CHECK: declare i32 @printf(i8* nocapture readonly, ...) #0
+; CHECK: declare i32 @printf(ptr nocapture readonly, ...) #0
 
 ; CHECK: attributes #0 = { nounwind }
 

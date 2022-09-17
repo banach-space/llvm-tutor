@@ -1,4 +1,3 @@
-; RUN:  opt --enable-new-pm=0 -load %shlibdir/libStaticCallCounter%shlibext --legacy-static-cc -analyze %s | FileCheck %s
 ; RUN:  opt -load-pass-plugin %shlibdir/libStaticCallCounter%shlibext -passes="print<static-cc>" -disable-output %s 2>&1 | FileCheck %s
 
 ; Makes sure that calls via function pointers are not analysed

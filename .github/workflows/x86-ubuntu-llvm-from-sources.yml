@@ -23,7 +23,7 @@ jobs:
           echo "${GITHUB_WORKSPACE}/ninja" >> $GITHUB_PATH
       - name: Clone llvm-project
         run: |
-          git clone --depth 10 --single-branch --branch release/14.x https://github.com/llvm/llvm-project
+          git clone --depth 10 --single-branch --branch release/15.x https://github.com/llvm/llvm-project
       - name: Build LLVM
         run: |
           cd llvm-project
@@ -32,9 +32,10 @@ jobs:
           cmake -G Ninja \
             -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS="clang" \
             -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_OPTIMIZED_TABLEGEN=ON \
-            -DBUILD_SHARED_LIBS=On ../llvm
+            -DLLVM_BUILD_LLVM_DYLIB=ON \
+            ../llvm
           # Note that only the required tools are built
-          ninja clang opt lli not FileCheck
+          ninja clang opt lli not FileCheck LLVM
       - name: Install lit
         run: |
           sudo apt-get install python3-setuptools

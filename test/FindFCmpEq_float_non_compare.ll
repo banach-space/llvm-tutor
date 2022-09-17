@@ -1,4 +1,3 @@
-; RUN:  opt --enable-new-pm=0 -load %shlibdir/libFindFCmpEq%shlibext -find-fcmp-eq -analyze %s | FileCheck %s
 ; RUN:  opt --load-pass-plugin=%shlibdir/libFindFCmpEq%shlibext --passes="print<find-fcmp-eq>" -disable-output %s | FileCheck -allow-empty %s
 
 ; Verify that float comparisons that are not "equal" comparisons are ignored
