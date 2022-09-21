@@ -19,7 +19,7 @@ jobs:
       - name: Install Dependencies
         run: |
           brew update
-          brew install llvm
+          brew install llvm@14
           pip3 install lit
       - name: Build HelloWorld
         run: |
