@@ -34,7 +34,6 @@ jobs:
           cmake -G Ninja \
             -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS="clang" \
             -DLLVM_TARGETS_TO_BUILD="host" -DLLVM_OPTIMIZED_TABLEGEN=ON \
-            -DLLVM_BUILD_LLVM_DYLIB=ON \
             -DLLVM_BUILD_EXAMPLES=On -DLLVM_MBASUB_LINK_INTO_TOOLS=On \
             ../llvm
           # Note that only the required tools are built
