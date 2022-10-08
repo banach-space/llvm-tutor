@@ -5,12 +5,12 @@
 # USAGE:
 # ```bash
 # wget https://raw.githubusercontent.com/banach-space/llvm-tutor/main/Dockerfile_fedora
-# docker build -t=llvm-tutor:llvm-14 .
-# docker run --rm -it --hostname=llvm-tutor llvm-tutor:llvm-14 /bin/bash
+# docker build -t=llvm-tutor:llvm-15 .
+# docker run --rm -it --hostname=llvm-tutor llvm-tutor:llvm-15 /bin/bash
 # ```
 # =============================================================================
 
-FROM fedora:36
+FROM fedora:37
 
 ENV LLVM_DIR /usr/
 ENV TUTOR_DIR /llvm-tutor
