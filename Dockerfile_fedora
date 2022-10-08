@@ -24,7 +24,7 @@ RUN dnf -y install \
     gcc-c++ \
     llvm-devel \
     clang \
-    zlib \
+    zlib-devel \
     python3-pip
 
 # 2. INSTALL LIT
