@@ -25,7 +25,6 @@ RUN dnf -y install \
     llvm-devel \
     clang \
     zlib \
-    zlib-devel \
     python3-pip
 
 # 2. INSTALL LIT
