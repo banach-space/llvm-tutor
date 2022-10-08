@@ -1,10 +1,11 @@
 # =============================================================================
-# An Ubuntu docker file for llvm-tutor. Clones and builds llvm-tutor, runs all
-# tests. It uses the precompiled LLVM packages from Ubuntu.
+# An Ubuntu docker file for llvm-tutor that installs LLVM via apt. Clones and
+# builds llvm-tutor, runs all tests. It uses the precompiled LLVM packages from
+# Ubuntu.
 #
 # USAGE:
 # ```bash
-# wget https://raw.githubusercontent.com/banach-space/llvm-tutor/main/Dockerfile_ubuntu
+# wget https://raw.githubusercontent.com/banach-space/llvm-tutor/main/Dockerfile_ubuntu_apt
 # docker build -t=llvm-tutor:llvm-15 .
 # docker run --rm -it --hostname=llvm-tutor llvm-tutor:llvm-15 /bin/bash
 # ```
