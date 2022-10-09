@@ -291,7 +291,7 @@ pass](#printing-passes-for-the-new-pass-manager) that corresponds to
 arguments are needed, but it's a good idea to add `-disable-output` to prevent
 **opt** from printing the output LLVM IR module - we are only interested in the
 results of the analysis rather than the module itself. In fact, as this pass
-does not modify the input IR, the output module would be indentical to the
+does not modify the input IR, the output module would be identical to the
 input anyway.
 
 ```bash
