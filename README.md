@@ -414,7 +414,7 @@ print `Hello from` is determined at either:
 
 Also, note that in the case of **InjectFuncCall** we had to first run the pass
 with **opt** and then execute the instrumented IR module in order to see the
-output.  For **HelloWorld** it was sufficient to run run the pass with **opt**.
+output.  For **HelloWorld** it was sufficient to run the pass with **opt**.
 
 ## StaticCallCounter
 The **StaticCallCounter** pass counts the number of _static_ function calls in
@@ -538,7 +538,7 @@ may also know them from [Hacker's
 Delight](https://www.amazon.co.uk/Hackers-Delight-Henry-S-Warren/dp/0201914654))
 and are a great illustration of what and how LLVM passes can be used for.
 
-Similar transformation are possible at the source-code level. The relevant
+Similar transformations are possible at the source-code level. The relevant
 Clang plugins are available in
 [**clang-tutor**](https://github.com/banach-space/clang-tutor#obfuscator).
 
@@ -606,7 +606,7 @@ at the LLVM IR level booleans are represented as 1-bit wide integers (i.e.
 This pass demonstrates how to request results from other analysis passes in
 LLVM. In particular, it relies on the [Dominator
 Tree](https://en.wikipedia.org/wiki/Dominator_(graph_theory)) analysis pass
-from LLVM, which is is used to obtain the dominance tree for the basic blocks
+from LLVM, which is used to obtain the dominance tree for the basic blocks
 in the input function.
 
 ### Run the pass
@@ -722,7 +722,7 @@ words, it's an elaborate wrapper for LLVM's `SplitBlockAndInsertIfThenElse`.
 
 ### Run the pass
 This pass depends on the **RIV** pass, which also needs be loaded in order for
-**DuplicateBB** to work. Lets use
+**DuplicateBB** to work. Let's use
 [input_for_duplicate_bb.c](https://github.com/banach-space/llvm-tutor/blob/main/inputs/input_for_duplicate_bb.c)
 as our sample input. First, generate the LLVM file:
 
@@ -798,7 +798,7 @@ merge those two clones back together, but it will not remove the remaining two
 blocks added by **DuplicateBB** (it will update them though).
 
 ### Run the pass
-Lets use the following IR implementation of `foo` as input. Note that basic
+Let's use the following IR implementation of `foo` as input. Note that basic
 blocks 3 and 5 are identical and can safely be merged:
 
 ```llvm
@@ -844,7 +844,7 @@ into one basic block.
 
 ### Run MergeBB on the output from DuplicateBB
 It is really interesting to see the effect of **MergeBB** on the output from
-**DuplicateBB**. Lets start with the same input as we used for **DuplicateBB**:
+**DuplicateBB**. Let's start with the same input as we used for **DuplicateBB**:
 
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/15>
@@ -1066,7 +1066,7 @@ Legacy to the New pass manager. In **llvm-tutor** most passes work with both
 pass managers.
 
 ## New vs Legacy PM When Running Opt
-To demonstrate the difference between the pass managers, lets run
+To demonstrate the difference between the pass managers, let's run
 **MBAAdd**. This is how you will use it with the legacy pass manager:
 
 ```bash
