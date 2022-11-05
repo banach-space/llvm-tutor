@@ -20,7 +20,7 @@ jobs:
         run: |
           brew update
           brew install llvm@15
-          pip3 install lit
+          brew install lit
       - name: Build HelloWorld
         run: |
           cd HelloWorld
