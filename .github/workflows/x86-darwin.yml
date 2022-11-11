@@ -20,6 +20,10 @@ jobs:
         run: |
           brew update
           brew install llvm@15
+          # This feels wrong, but otherwise `brew install lit` fails and I have
+          # no time to investigate further just now.
+          # TODO: Revisit
+          sudo rm -rf '/usr/local/bin/2to3-3.11' '/usr/local/bin/idle3.11' '/usr/local/bin/pydoc3.11' '/usr/local/bin/python3.11' '/usr/local/bin/python3.11-config'
           brew install lit
       - name: Build HelloWorld
         run: |
