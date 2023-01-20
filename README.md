@@ -1067,7 +1067,7 @@ pass managers.
 
 ## New vs Legacy PM When Running Opt
 To demonstrate the difference between the pass managers, let's run
-**MBAAdd**. This is how you will use it with the legacy pass manager:
+**MBAAdd**. This is how you will use it with the new pass manager:
 
 ```bash
 $LLVM_DIR/bin/opt -S -load-pass-plugin <build_dir>/lib/libMBAAdd.so -passes=mba-add input_for_mba.ll -o out.ll
