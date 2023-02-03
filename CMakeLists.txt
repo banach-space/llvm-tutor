@@ -7,7 +7,7 @@ project(llvm-tutor)
 #===============================================================================
 set(LT_LLVM_INSTALL_DIR "" CACHE PATH "LLVM installation directory")
 
-# 1.1 Check the "include| directory
+# 1.1 Check the "include" directory
 set(LT_LLVM_INCLUDE_DIR "${LT_LLVM_INSTALL_DIR}/include/llvm")
 if(NOT EXISTS "${LT_LLVM_INCLUDE_DIR}")
 message(FATAL_ERROR
