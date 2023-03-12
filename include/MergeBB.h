@@ -44,6 +44,11 @@ struct MergeBB : public llvm::PassInfoMixin<MergeBB> {
   bool
   mergeDuplicatedBlock(llvm::BasicBlock *BB,
                        llvm::SmallPtrSet<llvm::BasicBlock *, 8> &DeleteList);
+
+  // Without isRequired returning true, this pass will be skipped for functions
+  // decorated with the optnone LLVM attribute. Note that clang -O0 decorates
+  // all functions with optnone.
+  static bool isRequired() { return true; }
 };
 
 //------------------------------------------------------------------------------

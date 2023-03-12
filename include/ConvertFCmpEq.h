@@ -36,6 +36,11 @@ struct ConvertFCmpEq : llvm::PassInfoMixin<ConvertFCmpEq> {
   // legacy pass (or any other code) without having to supply a
   // FunctionAnalysisManager argument.
   bool run(llvm::Function &Func, const FindFCmpEq::Result &Comparisons);
+
+  // Without isRequired returning true, this pass will be skipped for functions
+  // decorated with the optnone LLVM attribute. Note that clang -O0 decorates
+  // all functions with optnone.
+  static bool isRequired() { return true; }
 };
 
 //------------------------------------------------------------------------------
