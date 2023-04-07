@@ -5,7 +5,6 @@
 // DESCRIPTION:
 //    Declares the OpcodeCounter Passes:
 //      * new pass manager interface
-//      * legacy pass manager interface
 //      * printer pass for the new pass manager
 //
 // License: MIT
@@ -55,21 +54,5 @@ public:
 
 private:
   llvm::raw_ostream &OS;
-};
-
-//------------------------------------------------------------------------------
-// Legacy PM interface
-//------------------------------------------------------------------------------
-struct LegacyOpcodeCounter : public llvm::FunctionPass {
-  static char ID;
-  LegacyOpcodeCounter() : llvm::FunctionPass(ID) {}
-  bool runOnFunction(llvm::Function &F) override;
-  // The print method must be implemented by Legacy analysis passes in order to
-  // print a human readable version of the analysis results:
-  //    http://llvm.org/docs/WritingAnLLVMPass.html#the-print-method
-  void print(llvm::raw_ostream &OutS, llvm::Module const *M) const override;
-
-  ResultOpcodeCounter ROC;
-  OpcodeCounter Impl;
 };
 #endif

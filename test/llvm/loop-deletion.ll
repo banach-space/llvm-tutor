@@ -1,5 +1,4 @@
-; 1. LEGACY PASS MANAGER
-; RUN: opt -loop-deletion -S < %s | FileCheck %s
+; RUN: opt -passes=loop-deletion -S < %s | FileCheck %s
 
 ;------------------------------------------------------------------------------
 ; CASE 1: A loop that's never executed

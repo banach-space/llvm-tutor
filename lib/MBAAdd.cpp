@@ -133,7 +133,7 @@ bool MBAAdd::runOnBasicBlock(BasicBlock &BB) {
 
     // Replace `(a + b)` (original instructions) with `(((a ^ b) + 2 * (a & b))
     // * 39 + 23) * 151 + 111` (the new instruction)
-    ReplaceInstWithInst(BB.getInstList(), Inst, NewInst);
+    ReplaceInstWithInst(&BB, Inst, NewInst);
     Changed = true;
 
     // Update the statistics

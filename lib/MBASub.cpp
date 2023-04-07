@@ -72,7 +72,7 @@ bool MBASub::runOnBasicBlock(BasicBlock &BB) {
 
     // Replace `(a - b)` (original instructions) with `(a + ~b) + 1`
     // (the new instruction)
-    ReplaceInstWithInst(BB.getInstList(), Inst, NewValue);
+    ReplaceInstWithInst(&BB, Inst, NewValue);
     Changed = true;
 
     // Update the statistics

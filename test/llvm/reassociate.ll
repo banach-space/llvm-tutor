@@ -1,5 +1,4 @@
-; 1. LEGACY PASS MANAGER
-; RUN: opt -reassociate -S < %s | FileCheck %s
+; RUN: opt -passes=reassociate -S < %s | FileCheck %s
 
 ;------------------------------------------------------------------------------
 ; CASE 1: (A&B)&~A == 0

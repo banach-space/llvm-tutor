@@ -13,4 +13,4 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build the Docker image
-        run: docker build . --file Dockerfile_ubuntu_apt --tag llvm-tutor:llvm-15
+        run: docker build . --file Dockerfile_ubuntu_apt --tag llvm-tutor:llvm-16

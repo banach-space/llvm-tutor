@@ -13,17 +13,11 @@
 //    new PM).
 //
 // USAGE:
-//    1. Legacy PM
-//      opt -load libOpcodeCounter.dylib -legacy-opcode-counter `\`
-//        -analyze <input-llvm-file>
-//    2. New PM
+//    1. New PM
 //      opt -load-pass-plugin libOpcodeCounter.dylib `\`
 //        -passes="print<opcode-counter>" `\`
 //        -disable-output <input-llvm-file>
-//    3. Automatically through an optimisation pipeline - legacy PM
-//      opt -load libOpcodeCounter.dylib -O{0|1|2|3|s} -disable-output `\`
-//        <input-llvm-file>
-//    4. Automatically through an optimisation pipeline - new PM
+//    2. Automatically through an optimisation pipeline - new PM
 //      opt -load-pass-plugin libOpcodeCounter.dylib --passes='default<O1>' `\`
 //        -disable-output <input-llvm-file>
 //
@@ -84,16 +78,6 @@ PreservedAnalyses OpcodeCounterPrinter::run(Function &Func,
   return PreservedAnalyses::all();
 }
 
-bool LegacyOpcodeCounter::runOnFunction(llvm::Function &Func) {
-  ROC = Impl.generateOpcodeMap(Func);
-
-  return false;
-}
-
-void LegacyOpcodeCounter::print(raw_ostream &OutS, Module const *) const {
-  printOpcodeCounterResult(OutS, ROC);
-}
-
 //-----------------------------------------------------------------------------
 // New PM Registration
 //-----------------------------------------------------------------------------
@@ -140,28 +124,6 @@ extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
 llvmGetPassPluginInfo() {
   return getOpcodeCounterPluginInfo();
 }
-
-//-----------------------------------------------------------------------------
-// Legacy PM Registration
-//-----------------------------------------------------------------------------
-char LegacyOpcodeCounter::ID = 0;
-
-// #1 REGISTRATION FOR "opt -analyze -legacy-opcode-counter"
-static RegisterPass<LegacyOpcodeCounter> X(/*PassArg=*/"legacy-opcode-counter",
-                                           /*Name=*/"Legacy OpcodeCounter Pass",
-                                           /*CFGOnly=*/true,
-                                           /*is_analysis=*/false);
-
-// #2 REGISTRATION FOR "-O{0|1|2|3}"
-// Register LegacyOpcodeCounter as a step of an existing pipeline. The insertion
-// point is set to 'EP_EarlyAsPossible', which means that LegacyOpcodeCounter
-// will be run automatically at '-O{0|1|2|3}'.
-static llvm::RegisterStandardPasses
-    RegisterOpcodeCounter(llvm::PassManagerBuilder::EP_EarlyAsPossible,
-                          [](const llvm::PassManagerBuilder &Builder,
-                             llvm::legacy::PassManagerBase &PM) {
-                            PM.add(new LegacyOpcodeCounter());
-                          });
 
 //------------------------------------------------------------------------------
 // Helper functions - implementation

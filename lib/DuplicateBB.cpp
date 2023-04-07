@@ -236,7 +236,7 @@ void DuplicateBB::cloneBB(BasicBlock &BB, Value *ContextValue,
 
     // Instructions are modified as we go, use the iterator version of
     // ReplaceInstWithInst.
-    ReplaceInstWithInst(Tail->getInstList(), IIT, Phi);
+    ReplaceInstWithInst(Tail, IIT, Phi);
   }
 
   // Purge instructions that don't produce any value

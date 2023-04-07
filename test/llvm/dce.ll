@@ -1,4 +1,4 @@
-; RUN: opt -S --dce %s | FileCheck %s
+; RUN: opt -S --passes=dce %s | FileCheck %s
 
 ;------------------------------------------------------------------------------
 ; CASE 1: A loop without functions calls - hoisting successful

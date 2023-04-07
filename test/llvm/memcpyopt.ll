@@ -1,5 +1,4 @@
-; 1. LEGACY PASS MANAGER
-; RUN: opt -memcpyopt -S < %s | FileCheck %s
+; RUN: opt -passes=memcpyopt -S < %s | FileCheck %s
 
 ; memcpyopt will only work if the specified value can be set by repeating the
 ; same byte in memory. This is always true for i8 values, but not necesarilly for i16, i32, etc.

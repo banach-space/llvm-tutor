@@ -6,14 +6,14 @@
 # USAGE:
 # ```bash
 # wget https://raw.githubusercontent.com/banach-space/llvm-tutor/main/Dockerfile_ubuntu_apt
-# docker build -t=llvm-tutor:llvm-15 .
-# docker run --rm -it --hostname=llvm-tutor llvm-tutor:llvm-15 /bin/bash
+# docker build -t=llvm-tutor:llvm-16 .
+# docker run --rm -it --hostname=llvm-tutor llvm-tutor:llvm-16 /bin/bash
 # ```
 # =============================================================================
 
 FROM ubuntu:22.04
 
-ENV LLVM_DIR /usr/lib/llvm-15/
+ENV LLVM_DIR /usr/lib/llvm-16/
 ENV TUTOR_DIR /llvm-tutor
 
 # 1. INSTALL DEPENDENCIES
@@ -34,9 +34,9 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
-RUN apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-15 main"
+RUN apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-16 main"
 RUN apt-get update
-RUN apt-get install -y llvm-15 llvm-15-dev llvm-15-tools clang-15
+RUN apt-get install -y llvm-16 llvm-16-dev llvm-16-tools clang-16
 RUN apt-get install -y python3-setuptools
 
 # 2. INSTALL LIT
@@ -50,8 +50,8 @@ RUN mkdir -p $TUTOR_DIR/hello-world-build \
     && cd $TUTOR_DIR/hello-world-build \
     && cmake -G Ninja -DLT_LLVM_INSTALL_DIR=$LLVM_DIR ../HelloWorld \
     && ninja
-RUN cd $TUTOR_DIR/hello-world-build && /usr/bin/clang-15 -S -O1 -emit-llvm ../inputs/input_for_hello.c -o input_for_hello.ll
-RUN cd $TUTOR_DIR/hello-world-build && /usr/bin/opt-15 -load-pass-plugin ./libHelloWorld.so -passes=hello-world -disable-output input_for_hello.ll 2>&1 | grep "(llvm-tutor) Hello from: foo"
+RUN cd $TUTOR_DIR/hello-world-build && /usr/bin/clang-16 -S -O1 -emit-llvm ../inputs/input_for_hello.c -o input_for_hello.ll
+RUN cd $TUTOR_DIR/hello-world-build && /usr/bin/opt-16 -load-pass-plugin ./libHelloWorld.so -passes=hello-world -disable-output input_for_hello.ll 2>&1 | grep "(llvm-tutor) Hello from: foo"
 
 # 5. BUILD AND RUN LLVM-TUTOR
 RUN mkdir -p $TUTOR_DIR/build \

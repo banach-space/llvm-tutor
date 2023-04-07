@@ -1,5 +1,4 @@
-; 1. LEGACY PASS MANAGER
-; RUN: opt -licm -S < %s | FileCheck %s
+; RUN: opt -passes=licm -S < %s | FileCheck %s
 
 ; Some random methods that will be used inside the loops. What's key is whether
 ; these can throw an exception.
@@ -41,7 +40,7 @@ exit:
 ;------------------------------------------------------------------------------
 ; CASE 2: A loop with a function call - hoisting successful
 ;------------------------------------------------------------------------------
-define void @call_after_hoistable_inst(i64 %x, i64 %y, i1* %cond) {
+define void @call_after_hoistable_inst(i64 %x, i64 %y, i1 %cond) {
 ; CHECK-LABEL: call_after_hoistable_inst
 ; CHECK-LABEL: {{^}}entry
 ; CHECK: %div = udiv i64 %x, %y
@@ -63,7 +62,7 @@ latch_block:
 ;------------------------------------------------------------------------------
 ; CASE 3: A loop with a function call - hoisting unsuccessful
 ;------------------------------------------------------------------------------
-define void @call_before_hoistable_inst(i64 %x, i64 %y, i1* %cond) {
+define void @call_before_hoistable_inst(i64 %x, i64 %y, i1 %cond) {
 ; CHECK-LABEL: call_before_hoistable_inst
 ; CHECK-LABEL: {{^}}entry
 ; CHECK-LABEL: {{^}}header_block
@@ -87,7 +86,7 @@ latch_block:
 ;------------------------------------------------------------------------------
 ; CASE 3: A loop with a function call - hoisting successful
 ;------------------------------------------------------------------------------
-define void @call_before_hoistable_inst_v2(i64 %x, i64 %y, i1* %cond) {
+define void @call_before_hoistable_inst_v2(i64 %x, i64 %y, i1 %cond) {
 ; CHECK-LABEL: call_before_hoistable_inst_v2
 ; CHECK-LABEL: {{^}}entry
 ; CHECK-LABEL: {{^}}header_block:
@@ -110,11 +109,11 @@ latch_block:
 ;------------------------------------------------------------------------------
 ; CASE 4: A loop with load instructions & a function call - hoisting succesful
 ;------------------------------------------------------------------------------
-define void @throw_header_after_rec(i64* %xp, i64* %yp, i1* %cond) {
+define void @throw_header_after_rec(ptr %xp, ptr %yp, i1 %cond) {
 ; CHECK-LABEL: throw_header_after_rec
 ; CHECK-LABEL: {{^}}entry
-; CHECK: %x = load i64, i64* %xp
-; CHECK: %y = load i64, i64* %yp
+; CHECK: %x = load i64, ptr %xp
+; CHECK: %y = load i64, ptr %yp
 ; CHECK: %div = udiv i64 %x, %y
 ; CHECK-LABEL: {{^}}header_block
 ; CHECK-LABEL: {{^}}latch_block
@@ -123,8 +122,8 @@ entry:
   br label %header_block
 
 header_block:
-  %x = load i64, i64* %xp
-  %y = load i64, i64* %yp
+  %x = load i64, ptr %xp
+  %y = load i64, ptr %yp
   %div = udiv i64 %x, %y
   br label %latch_block
 
