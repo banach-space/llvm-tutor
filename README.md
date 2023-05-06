@@ -192,7 +192,7 @@ $ lit <build_dir>/test
 ```
 Voilà! You should see all tests passing.
 
-## LLVM Plugins as shared objecs
+## LLVM Plugins as shared objects
 In **llvm-tutor** every LLVM pass is implemented in a separate shared object
 (you can learn more about shared objects
 [here](http://www.yolinux.com/TUTORIALS/LibraryArchives-StaticAndDynamic.html)).
