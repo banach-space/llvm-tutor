@@ -547,7 +547,7 @@ to test **MBASub**:
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/16>
 $LLVM_DIR/bin/clang -emit-llvm -S <source_dir>/inputs/input_for_mba_sub.c -o input_for_sub.ll
-$LLVM_DIR/bin/opt -load-pass-plugin=<build_dir>/lib/libMBASub.so -passes="mba-add" -S input_for_sub.ll -o out.ll
+$LLVM_DIR/bin/opt -load-pass-plugin=<build_dir>/lib/libMBASub.so -passes="mba-sub" -S input_for_sub.ll -o out.ll
 ```
 
 ### MBAAdd
