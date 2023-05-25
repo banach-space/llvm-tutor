@@ -39,6 +39,22 @@ set(OpcodeCounter_SOURCES
 set(MergeBB_SOURCES
   MergeBB.cpp)
 
+# Display header files in Xcode
+foreach(plugin ${LLVM_TUTOR_PLUGINS})
+  if(XCODE)
+    if((plugin STREQUAL MBAAdd) OR (plugin STREQUAL MBASub))
+      set(extra_headers ../include/Ratio.h)
+    else()
+      set(extra_headers)
+    endif()
+    file(GLOB ${plugin}_HEADERS ../include/${plugin}.h ${extra_headers})
+    set_source_files_properties(${${plugin}_HEADERS} PROPERTIES HEADER_FILE_ONLY true)
+    source_group("Header Files" FILES ${${plugin}_HEADERS})
+  else()
+    set(${plugin}_HEADERS)
+  endif()
+endforeach()
+
 # CONFIGURE THE PLUGIN LIBRARIES
 # ==============================
 foreach( plugin ${LLVM_TUTOR_PLUGINS} )
@@ -47,6 +63,7 @@ foreach( plugin ${LLVM_TUTOR_PLUGINS} )
       ${plugin}
       SHARED
       ${${plugin}_SOURCES}
+      ${${plugin}_HEADERS}
       )
 
     # Configure include directories for 'plugin'
