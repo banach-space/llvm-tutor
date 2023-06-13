@@ -10,7 +10,7 @@
 # ```
 # =============================================================================
 
-FROM fedora:37
+FROM fedora:38
 
 ENV LLVM_DIR /usr/
 ENV TUTOR_DIR /llvm-tutor
