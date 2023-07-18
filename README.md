@@ -1071,8 +1071,8 @@ Dynamic vs Static Plugins
 =========================
 By default, all examples in **llvm-tutor** are built as
 [dynamic plugins](#llvm-plugins-as-shared-objecs). However, LLVM provides
-infrastructure for both _dynamic_ and _static_ plugins (
-[documentation](https://llvm.org/docs/WritingAnLLVMPass.html#building-pass-plugins)).
+infrastructure for both _dynamic_ and _static_ plugins
+([documentation](https://llvm.org/docs/WritingAnLLVMPass.html#building-pass-plugins)).
 Static plugins are simply libraries linked into your executable (e.g. **opt**)
 statically. This way, unlike dynamic plugins, they don't require to be loaded at
 runtime with `-load-pass-plugin`.
