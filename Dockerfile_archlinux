@@ -14,6 +14,7 @@ FROM archlinux
 
 ENV LLVM_DIR /usr/
 ENV TUTOR_DIR /llvm-tutor
+ENV VNEV_DIR /venv
 
 # 1. INSTALL DEPENDENCIES
 RUN pacman -Syu --noconfirm \
@@ -26,7 +27,9 @@ RUN pacman -Syu --noconfirm \
     python-pip
 
 # 2. INSTALL LIT
-RUN pip3 install lit
+RUN python3 -m venv $VENV_DIR
+RUN source ./env/bin/activate
+RUN pip install lit
 
 # 3. CLONE LLVM-TUTOR
 RUN git clone https://github.com/banach-space/llvm-tutor $TUTOR_DIR
@@ -44,4 +47,4 @@ RUN mkdir -p $TUTOR_DIR/build \
     && cd $TUTOR_DIR/build \
     && cmake -G Ninja -DLT_LLVM_INSTALL_DIR=$LLVM_DIR ../ \
     && ninja \
-    && lit test/
+    && $VNEV_DIR/bin/lit test/
