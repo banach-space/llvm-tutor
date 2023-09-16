@@ -26,7 +26,7 @@
 //    -------------------------------------------------------------------------
 //
 // REFERENCES:
-//    Based on examples from: 
+//    Based on examples from:
 //    "Building, Testing and Debugging a Simple out-of-tree LLVM Pass", Serge
 //    Guelton and Adrien Guinet, LLVM Dev Meeting 2015
 //
@@ -75,7 +75,11 @@ RIV::Result RIV::buildRIV(Function &F, NodeTy CFGRoot) {
   // variables and input arguments.
   auto &EntryBBValues = ResultMap[&F.getEntryBlock()];
 
+#if LLVM_VERSION_MAJOR >= 17
+  for (auto &Global : F.getParent()->globals())
+#else
   for (auto &Global : F.getParent()->getGlobalList())
+#endif
     if (Global.getValueType()->isIntegerTy())
       EntryBBValues.insert(&Global);
 
@@ -120,9 +124,8 @@ RIV::Result RIV::run(llvm::Function &F, llvm::FunctionAnalysisManager &FAM) {
   return Res;
 }
 
-PreservedAnalyses
-RIVPrinter::run(Function &Func,
-                              FunctionAnalysisManager &FAM) {
+PreservedAnalyses RIVPrinter::run(Function &Func,
+                                  FunctionAnalysisManager &FAM) {
 
   auto RIVMap = FAM.getResult<RIV>(Func);
 
