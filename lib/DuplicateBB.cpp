@@ -65,11 +65,6 @@
 //    --------------------------------------------------------------------------
 //
 //  USAGE:
-//    1. Legacy Pass Manager:
-//      $ opt -load <BUILD_DIR>/lib/libRIV.so `\`
-//        -load <BUILD_DIR>/lib/libDuplicateBB%shlibext -legacy-duplicate-bb `\`
-//        -S <bitcode-file>
-//    2. New Pass Manager:
 //      $ opt -load-pass-plugin <BUILD_DIR>/lib//libRIV.so `\`
 //      -load-pass-plugin <BUILD_DIR>/lib//libDuplicateBB.so `\`
 //      -passes=duplicate-bb -S <bitcode-file>
@@ -264,24 +259,6 @@ PreservedAnalyses DuplicateBB::run(llvm::Function &F,
                           : llvm::PreservedAnalyses::none());
 }
 
-bool LegacyDuplicateBB::runOnFunction(llvm::Function &F) {
-  // Find BBs to duplicate
-  DuplicateBB::BBToSingleRIVMap Targets =
-      Impl.findBBsToDuplicate(F, getAnalysis<LegacyRIV>().getRIVMap());
-
-  // This map is used to keep track of the new bindings. Otherwise, the
-  // information from RIV will become obsolete.
-  DuplicateBB::ValueToPhiMap ReMapper;
-
-  // Duplicate
-  for (auto &BB_Ctx : Targets) {
-    Impl.cloneBB(*std::get<0>(BB_Ctx), std::get<1>(BB_Ctx), ReMapper);
-  }
-
-  DuplicateBBCountStats = Impl.DuplicateBBCount;
-  return (Targets.empty() ? false : true);
-}
-
 //------------------------------------------------------------------------------
 // New PM Registration
 //------------------------------------------------------------------------------
@@ -304,17 +281,3 @@ extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
 llvmGetPassPluginInfo() {
   return getDuplicateBBPluginInfo();
 }
-
-//------------------------------------------------------------------------------
-// Legacy PM Registration
-//------------------------------------------------------------------------------
-// This method defines how this pass interacts with other passes
-void LegacyDuplicateBB::getAnalysisUsage(AnalysisUsage &Info) const {
-  Info.addRequired<LegacyRIV>();
-}
-
-char LegacyDuplicateBB::ID = 0;
-static RegisterPass<LegacyDuplicateBB> X(/*PassArg=*/"legacy-duplicate-bb",
-                                         /*Name=*/"Duplicate Basic Blocks Pass",
-                                         /*CFGOnly=*/false,
-                                         /*is_analysis=*/false);

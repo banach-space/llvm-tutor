@@ -18,10 +18,6 @@
 //    [1] "Writing an LLVM Optimization" by Jonathan Smith
 //
 // USAGE:
-//    1. Legacy PM
-//      opt --load libConvertFCmpEq.dylib --convert-fcmp-eq `\`
-//        --disable-output <input-llvm-file>
-//    2. Manual pass pipeline - new PM
 //      opt --load-pass-plugin libConvertFCmpEq.dylib [--stats] `\`
 //        --passes='convert-fcmp-eq' --disable-output <input-llvm-file>
 //
@@ -161,24 +157,6 @@ bool ConvertFCmpEq::run(llvm::Function &Func,
   return Modified;
 }
 
-ConvertFCmpEqWrapper::ConvertFCmpEqWrapper() : FunctionPass(ID) {}
-
-bool ConvertFCmpEqWrapper::runOnFunction(llvm::Function &Func) {
-  auto &Analysis = getAnalysis<FindFCmpEqWrapper>();
-  ConvertFCmpEq Transform;
-  bool Modified = Transform.run(Func, Analysis.getComparisons());
-  return Modified;
-}
-
-void ConvertFCmpEqWrapper::getAnalysisUsage(llvm::AnalysisUsage &AU) const {
-  // This transform does not modify the control flow graph, so we mark it as
-  // preserved here.
-  AU.setPreservesCFG();
-  // Since we're using the results of FindFCmpEqWrapper, we add it as a required
-  // analysis pass here.
-  AU.addRequired<FindFCmpEqWrapper>();
-}
-
 //-----------------------------------------------------------------------------
 // New PM Registration
 //-----------------------------------------------------------------------------
@@ -202,14 +180,3 @@ extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
 llvmGetPassPluginInfo() {
   return getConvertFCmpEqPluginInfo();
 }
-
-//-----------------------------------------------------------------------------
-// Legacy PM Registration
-//-----------------------------------------------------------------------------
-
-char ConvertFCmpEqWrapper::ID = 0;
-
-static RegisterPass<ConvertFCmpEqWrapper> X(/*PassArg=*/PassArg,
-                                            /*Name=*/PassName,
-                                            /*CFGOnly=*/false,
-                                            /*is_analysis=*/false);

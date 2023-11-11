@@ -1,4 +1,3 @@
-; RUN:  opt --enable-new-pm=0 -load %shlibdir/libDynamicCallCounter%shlibext -legacy-dynamic-cc -verify  -S %s | FileCheck %s
 ; RUN:  opt -load-pass-plugin %shlibdir/libDynamicCallCounter%shlibext -passes="dynamic-cc,verify"  -S %s | FileCheck %s
 
 ; Instrument this file with DynamicCallCounter and verify that the inserted code

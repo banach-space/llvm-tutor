@@ -9,11 +9,6 @@
 //    See formula (3) in [1].
 //
 // USAGE:
-//    1. Legacy pass manager:
-//      $ opt -load <BUILD_DIR>/lib/libMBAAdd.so `\`
-//        --legacy-mba-add [-mba-ratio=<ratio>] <bitcode-file>
-//      with the optional ratio in the range [0, 1.0].
-//    2. New pass maanger:
 //      $ opt -load-pass-plugin <BUILD_DIR>/lib/libMBAAdd.so `\`
 //        -passes=-"mba-add" <bitcode-file>
 //      The command line option is not available for the new PM
@@ -32,8 +27,6 @@
 #include "llvm/Passes/PassPlugin.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 
-#include "Ratio.h"
-
 #include <random>
 
 using namespace llvm;
@@ -41,12 +34,6 @@ using namespace llvm;
 #define DEBUG_TYPE "mba-add"
 
 STATISTIC(SubstCount, "The # of substituted instructions");
-
-// Pass Option declaration
-static cl::opt<Ratio, false, llvm::cl::parser<Ratio>> MBARatio{
-    "mba-ratio",
-    cl::desc("Only apply the mba pass on <ratio> of the candidates"),
-    cl::value_desc("ratio"), cl::init(1.), cl::Optional};
 
 //-----------------------------------------------------------------------------
 // MBAAdd Implementation
@@ -81,10 +68,6 @@ bool MBAAdd::runOnBasicBlock(BasicBlock &BB) {
     // also 8-bit wide)
     if (!BinOp->getType()->isIntegerTy() ||
         !(BinOp->getType()->getIntegerBitWidth() == 8))
-      continue;
-
-    // Use Ratio and RNG to decide whether to substitute this particular 'add'
-    if (Dist(RNG) > MBARatio.getRatio())
       continue;
 
     // A uniform API for creating instructions and inserting
@@ -153,15 +136,6 @@ PreservedAnalyses MBAAdd::run(llvm::Function &F,
                   : llvm::PreservedAnalyses::all());
 }
 
-bool LegacyMBAAdd::runOnFunction(llvm::Function &F) {
-  bool Changed = false;
-
-  for (auto &BB : F) {
-    Changed |= Impl.runOnBasicBlock(BB);
-  }
-  return Changed;
-}
-
 //-----------------------------------------------------------------------------
 // New PM Registration
 //-----------------------------------------------------------------------------
@@ -184,13 +158,3 @@ extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
 llvmGetPassPluginInfo() {
   return getMBAAddPluginInfo();
 }
-
-//-----------------------------------------------------------------------------
-// Legacy PM Registration
-//-----------------------------------------------------------------------------
-char LegacyMBAAdd::ID = 0;
-
-static RegisterPass<LegacyMBAAdd> X(/*PassArg=*/"legacy-mba-add",
-                                    /*Name=*/"MBAAdd",
-                                    /*CFGOnly=*/true,
-                                    /*is_analysis=*/false);

@@ -1,5 +1,3 @@
-; RUN:  opt --enable-new-pm=0 -load %shlibdir/libInjectFuncCall%shlibext -verify -legacy-inject-func-call -S %s\
-; RUN:  | FileCheck %s
 ; RUN:  opt -load-pass-plugin=%shlibdir/libInjectFuncCall%shlibext -passes="inject-func-call,verify" -S %s\
 ; RUN:  | FileCheck %s
 

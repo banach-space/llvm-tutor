@@ -1,15 +1,4 @@
-; 1. LEGACY PASS MANAGER
-; RUN: opt < %s -enable-new-pm=0 -inline-threshold=0 -always-inline -S | FileCheck %s --check-prefix=CHECK --check-prefix=CHECK-CALL
-;
-; Ensure the threshold has no impact on these decisions.
-; RUN: opt < %s -enable-new-pm=0 -inline-threshold=20000000 -always-inline -S | FileCheck %s --check-prefix=CHECK --check-prefix=CHECK-CALL
-; RUN: opt < %s -enable-new-pm=0 -inline-threshold=-20000000 -always-inline -S | FileCheck %s --check-prefix=CHECK --check-prefix=CHECK-CALL
-;
-; 2. NEW PASS MANAGER
-; The new pass manager doesn't re-use any threshold based infrastructure for
-; the always inliner. The new PM always inliner also doesn't support inlining
-; call-site alwaysinline annotations.
-; RUN: opt < %s -enable-new-pm=0 -passes=always-inline -S | FileCheck %s --check-prefix=CHECK
+; RUN: opt < %s -passes=always-inline -S | FileCheck %s --check-prefix=CHECK
 
 ;------------------------------------------------------------------------------
 ; CASE 1: most obvious scenario for inlining
@@ -108,26 +97,7 @@ entry:
 }
 
 ;------------------------------------------------------------------------------
-; CASE 5: `inner5` is inlined, but only with the Legacy Pass Manager inliner
-;------------------------------------------------------------------------------
-; AlwaysInlinerPass (always-inliner for the new pass manager) does not inline
-; call-sites marked as `alwaysinline`.
-;------------------------------------------------------------------------------
-define internal i32 @inner5() {
-; CHECK-CALL-NOT: @inner5(
-  ret i32 1
-}
-define i32 @outer5() {
-; CHECK-CALL-LABEL: @outer5(
-; CHECK-CALL-NOT: call
-; CHECK-CALL: ret i32 1
-
-  %r = call i32 @inner5() alwaysinline
-  ret i32 %r
-}
-
-;------------------------------------------------------------------------------
-; CASE 6: `inner6` is inlined, but not deleted. 
+; CASE 5: `inner6` is inlined, but not deleted. 
 ;------------------------------------------------------------------------------
 ; The linkage type (https://llvm.org/docs/LangRef.html#linkage-types) of
 ; `inner6` is not `internal`. Instead, `external` is assumed (i.e. the default),

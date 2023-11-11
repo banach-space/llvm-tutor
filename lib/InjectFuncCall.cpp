@@ -21,10 +21,6 @@
 //    ```
 //
 // USAGE:
-//    1. Legacy pass manager:
-//      $ opt -load <BUILD_DIR>/lib/libInjectFuncCall.so `\`
-//        --legacy-inject-func-call <bitcode-file>
-//    2. New pass maanger:
 //      $ opt -load-pass-plugin <BUILD_DIR>/lib/libInjectFunctCall.so `\`
 //        -passes=-"inject-func-call" <bitcode-file>
 //
@@ -119,11 +115,6 @@ PreservedAnalyses InjectFuncCall::run(llvm::Module &M,
                   : llvm::PreservedAnalyses::all());
 }
 
-bool LegacyInjectFuncCall::runOnModule(llvm::Module &M) {
-  bool Changed = Impl.runOnModule(M);
-
-  return Changed;
-}
 
 //-----------------------------------------------------------------------------
 // New PM Registration
@@ -147,13 +138,3 @@ extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
 llvmGetPassPluginInfo() {
   return getInjectFuncCallPluginInfo();
 }
-
-//-----------------------------------------------------------------------------
-// Legacy PM Registration
-//-----------------------------------------------------------------------------
-char LegacyInjectFuncCall::ID = 0;
-
-// Register the pass - required for (among others) opt
-static RegisterPass<LegacyInjectFuncCall>
-    X(/*PassArg=*/"legacy-inject-func-call", /*Name=*/"LegacyInjectFuncCall",
-      /*CFGOnly=*/false, /*is_analysis=*/false);

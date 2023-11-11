@@ -1,5 +1,3 @@
-; RUN: opt --enable-new-pm=0 -load %shlibdir/libFindFCmpEq%shlibext  -load %shlibdir/libConvertFCmpEq%shlibext -convert-fcmp-eq  -S %s \
-; RUN:  | FileCheck %s
 ; RUN: opt -load-pass-plugin=%shlibdir/libFindFCmpEq%shlibext  -load-pass-plugin=%shlibdir/libConvertFCmpEq%shlibext --passes=convert-fcmp-eq  -S %s \
 ; RUN:  | FileCheck %s
 

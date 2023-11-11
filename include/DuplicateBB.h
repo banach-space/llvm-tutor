@@ -53,16 +53,4 @@ struct DuplicateBB : public llvm::PassInfoMixin<DuplicateBB> {
   static bool isRequired() { return true; }
 };
 
-//------------------------------------------------------------------------------
-// Legacy PM interface
-//------------------------------------------------------------------------------
-struct LegacyDuplicateBB : public llvm::FunctionPass {
-  static char ID;
-  LegacyDuplicateBB() : llvm::FunctionPass(ID) {}
-  bool runOnFunction(llvm::Function &F) override;
-  void getAnalysisUsage(llvm::AnalysisUsage &Info) const override;
-
-  DuplicateBB Impl;
-};
-
 #endif

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13.4)
+cmake_minimum_required(VERSION 3.20)
 project(llvm-tutor)
 
 #===============================================================================
@@ -52,8 +52,8 @@ list(APPEND CMAKE_PREFIX_PATH "${LT_LLVM_INSTALL_DIR}/lib/cmake/llvm/")
 find_package(LLVM CONFIG)
 
 # We defer the version checking to this statement
-if("${LLVM_VERSION_MAJOR}" VERSION_LESS 16)
-  message(FATAL_ERROR "Found LLVM ${LLVM_VERSION_MAJOR}, but need LLVM 16 or above")
+if("${LLVM_VERSION_MAJOR}" VERSION_LESS 17)
+  message(FATAL_ERROR "Found LLVM ${LLVM_VERSION_MAJOR}, but need LLVM 17 or above")
 endif()
 
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")

@@ -43,15 +43,4 @@ struct ConvertFCmpEq : llvm::PassInfoMixin<ConvertFCmpEq> {
   static bool isRequired() { return true; }
 };
 
-//------------------------------------------------------------------------------
-// Legacy PM interface
-//------------------------------------------------------------------------------
-struct ConvertFCmpEqWrapper : llvm::FunctionPass {
-  static char ID;
-  ConvertFCmpEqWrapper();
-
-  bool runOnFunction(llvm::Function &Func) override;
-  void getAnalysisUsage(llvm::AnalysisUsage &AU) const override;
-};
-
 #endif // !LLVM_TUTOR_CONVERT_FCMP_EQ_H

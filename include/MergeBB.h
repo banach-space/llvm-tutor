@@ -52,17 +52,6 @@ struct MergeBB : public llvm::PassInfoMixin<MergeBB> {
 };
 
 //------------------------------------------------------------------------------
-// Legacy PM interface
-//------------------------------------------------------------------------------
-struct LegacyMergeBB : public llvm::FunctionPass {
-  static char ID;
-  LegacyMergeBB() : llvm::FunctionPass(ID) {}
-  bool runOnFunction(llvm::Function &F) override;
-
-  MergeBB Impl;
-};
-
-//------------------------------------------------------------------------------
 // Helper data structures
 //------------------------------------------------------------------------------
 // Iterates through instructions in BB1 and BB2 in reverse order from the first

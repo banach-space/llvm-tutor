@@ -10,9 +10,6 @@
 //    See formula 2.2 (j) in [1].
 //
 // USAGE:
-//    1. Legacy pass manager:
-//      $ opt -load <BUILD_DIR>/lib/libMBASub.so --legacy-mba-sub <bitcode-file>
-//    2. New pass maanger:
 //      $ opt -load-pass-plugin <BUILD_DIR>/lib/libMBASub.so `\`
 //        -passes=-"mba-sub" <bitcode-file>
 //
@@ -92,15 +89,6 @@ PreservedAnalyses MBASub::run(llvm::Function &F,
                   : llvm::PreservedAnalyses::all());
 }
 
-bool LegacyMBASub::runOnFunction(llvm::Function &F) {
-  bool Changed = false;
-
-  for (auto &BB : F) {
-    Changed |= Impl.runOnBasicBlock(BB);
-  }
-  return Changed;
-}
-
 //-----------------------------------------------------------------------------
 // New PM Registration
 //-----------------------------------------------------------------------------
@@ -123,14 +111,3 @@ extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
 llvmGetPassPluginInfo() {
   return getMBASubPluginInfo();
 }
-
-//-----------------------------------------------------------------------------
-// Legacy PM Registration
-//-----------------------------------------------------------------------------
-char LegacyMBASub::ID = 0;
-
-// Register the pass - required for (among others) opt
-static RegisterPass<LegacyMBASub> X(/*PassArg=*/"legacy-mba-sub",
-                                    /*Name=*/"MBASub",
-                                    /*CFGOnly=*/true,
-                                    /*is_analysis=*/false);

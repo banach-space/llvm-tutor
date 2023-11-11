@@ -27,15 +27,4 @@ struct InjectFuncCall : public llvm::PassInfoMixin<InjectFuncCall> {
   static bool isRequired() { return true; }
 };
 
-//------------------------------------------------------------------------------
-// Legacy PM interface
-//------------------------------------------------------------------------------
-struct LegacyInjectFuncCall : public llvm::ModulePass {
-  static char ID;
-  LegacyInjectFuncCall() : ModulePass(ID) {}
-  bool runOnModule(llvm::Module &M) override;
-
-  InjectFuncCall Impl;
-};
-
 #endif

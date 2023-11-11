@@ -60,24 +60,4 @@ private:
   llvm::raw_ostream &OS;
 };
 
-//------------------------------------------------------------------------------
-// Legacy PM interface
-//------------------------------------------------------------------------------
-class FindFCmpEqWrapper : public llvm::FunctionPass {
-public:
-  static char ID;
-
-  FindFCmpEqWrapper() : FunctionPass(ID) {}
-
-  const FindFCmpEq::Result &getComparisons() const noexcept;
-
-  bool runOnFunction(llvm::Function &F) override;
-  void getAnalysisUsage(llvm::AnalysisUsage &AU) const override;
-  void print(llvm::raw_ostream &OS,
-             const llvm::Module *M = nullptr) const override;
-
-private:
-  FindFCmpEq::Result Results;
-};
-
 #endif // !LLVM_TUTOR_FIND_FCMP_EQ_H

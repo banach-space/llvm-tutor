@@ -14,10 +14,6 @@
 //    StaticCallCounter without `opt`.
 //
 // USAGE:
-//    1. Legacy PM
-//      opt -load libStaticCallCounter.dylib -legacy-static-cc `\`
-//        -analyze <input-llvm-file>
-//    2. New PM
 //      opt -load-pass-plugin libStaticCallCounter.dylib `\`
 //        -passes="print<static-cc>" `\`
 //        -disable-output <input-llvm-file>
@@ -86,15 +82,6 @@ StaticCallCounter::run(llvm::Module &M, llvm::ModuleAnalysisManager &) {
   return runOnModule(M);
 }
 
-bool LegacyStaticCallCounter::runOnModule(llvm::Module &M) {
-  DirectCalls = Impl.runOnModule(M);
-  return false;
-}
-
-void LegacyStaticCallCounter::print(raw_ostream &OutS, Module const *) const {
-  printStaticCCResult(OutS, DirectCalls);
-}
-
 //------------------------------------------------------------------------------
 // New PM Registration
 //------------------------------------------------------------------------------
@@ -125,18 +112,6 @@ extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
 llvmGetPassPluginInfo() {
   return getStaticCallCounterPluginInfo();
 }
-
-//------------------------------------------------------------------------------
-// Legacy PM Registration
-//------------------------------------------------------------------------------
-char LegacyStaticCallCounter::ID = 0;
-
-// #1 REGISTRATION FOR "opt -analyze -legacy-static-cc"
-RegisterPass<LegacyStaticCallCounter>
-    X(/*PassArg=*/"legacy-static-cc",
-      /*Name=*/"LegacyStaticCallCounter",
-      /*CFGOnly=*/true,
-      /*is_analysis=*/true);
 
 //------------------------------------------------------------------------------
 // Helper functions

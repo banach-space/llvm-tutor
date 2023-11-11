@@ -7,10 +7,8 @@
 //    LLVM IR opcode was used. Prints the output to stderr.
 //
 //    This example demonstrates how to insert your pass at one of the
-//    predefined extension points, e.g. before any other transformations are
-//    run (i.e. via `EP_EarlyAsPossible` for the Legacy PM) or whenever the
-//    vectoriser is run (i.e. via `registerVectorizerStartEPCallback` for the
-//    new PM).
+//    predefined extension points, e.g. whenever the vectoriser is run (i.e. via
+//    `registerVectorizerStartEPCallback` for the new PM).
 //
 // USAGE:
 //    1. New PM
@@ -25,7 +23,6 @@
 //=============================================================================
 #include "OpcodeCounter.h"
 
-#include "llvm/IR/LegacyPassManager.h"
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/Passes/PassPlugin.h"
 

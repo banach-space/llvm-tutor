@@ -28,15 +28,4 @@ struct DynamicCallCounter : public llvm::PassInfoMixin<DynamicCallCounter> {
   static bool isRequired() { return true; }
 };
 
-//------------------------------------------------------------------------------
-// Legacy PM interface
-//------------------------------------------------------------------------------
-struct LegacyDynamicCallCounter : public llvm::ModulePass {
-  static char ID;
-  LegacyDynamicCallCounter() : ModulePass(ID) {}
-  bool runOnModule(llvm::Module &M) override;
-
-  DynamicCallCounter Impl;
-};
-
 #endif

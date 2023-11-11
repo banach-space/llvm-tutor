@@ -75,11 +75,7 @@ RIV::Result RIV::buildRIV(Function &F, NodeTy CFGRoot) {
   // variables and input arguments.
   auto &EntryBBValues = ResultMap[&F.getEntryBlock()];
 
-#if LLVM_VERSION_MAJOR >= 17
   for (auto &Global : F.getParent()->globals())
-#else
-  for (auto &Global : F.getParent()->getGlobalList())
-#endif
     if (Global.getValueType()->isIntegerTy())
       EntryBBValues.insert(&Global);
 
@@ -133,31 +129,6 @@ PreservedAnalyses RIVPrinter::run(Function &Func,
   return PreservedAnalyses::all();
 }
 
-bool LegacyRIV::runOnFunction(llvm::Function &F) {
-  // Clear the results from previous runs.
-  RIVMap.clear();
-
-  // Get the entry node for the CFG for the input function
-  NodeTy Root =
-      getAnalysis<DominatorTreeWrapperPass>().getDomTree().getRootNode();
-
-  RIVMap = Impl.buildRIV(F, Root);
-
-  return false;
-}
-
-void LegacyRIV::print(raw_ostream &out, Module const *) const {
-  printRIVResult(out, RIVMap);
-}
-
-// This method defines how this pass interacts with other passes
-void LegacyRIV::getAnalysisUsage(AnalysisUsage &AU) const {
-  // Request the results from Dominator Tree Pass
-  AU.addRequired<DominatorTreeWrapperPass>();
-  // We do not modify the input module
-  AU.setPreservesAll();
-}
-
 //-----------------------------------------------------------------------------
 // New PM Registration
 //-----------------------------------------------------------------------------
@@ -188,17 +159,6 @@ extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
 llvmGetPassPluginInfo() {
   return getRIVPluginInfo();
 }
-
-//-----------------------------------------------------------------------------
-// Legacy PM Registration
-//-----------------------------------------------------------------------------
-char LegacyRIV::ID = 0;
-
-// #1 REGISTRATION FOR "opt -analyze -legacy-riv"
-static RegisterPass<LegacyRIV> X(/*PassArg=*/"legacy-riv",
-                                 /*Name=*/"Compute Reachable Integer values",
-                                 /*CFGOnly=*/true,
-                                 /*is_analysis*/ true);
 
 //------------------------------------------------------------------------------
 // Helper functions

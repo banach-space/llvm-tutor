@@ -25,11 +25,9 @@ set(ConvertFCmpEq_SOURCES
 set(InjectFuncCall_SOURCES
   InjectFuncCall.cpp)
 set(MBAAdd_SOURCES
-  MBAAdd.cpp
-  Ratio.cpp)
+  MBAAdd.cpp)
 set(MBASub_SOURCES
-  MBASub.cpp
-  Ratio.cpp)
+  MBASub.cpp)
 set(RIV_SOURCES
   RIV.cpp)
 set(DuplicateBB_SOURCES

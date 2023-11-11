@@ -57,20 +57,4 @@ private:
   llvm::raw_ostream &OS;
 };
 
-//------------------------------------------------------------------------------
-// Legacy PM interface
-//------------------------------------------------------------------------------
-struct LegacyStaticCallCounter : public llvm::ModulePass {
-  static char ID;
-  LegacyStaticCallCounter() : llvm::ModulePass(ID) {}
-  bool runOnModule(llvm::Module &M) override;
-  // The print method must be implemented by Legacy analysis passes in order to
-  // print a human readable version of the analysis results:
-  //    http://llvm.org/docs/WritingAnLLVMPass.html#the-print-method
-  void print(llvm::raw_ostream &OutS, llvm::Module const *M) const override;
-
-  ResultStaticCC DirectCalls;
-  StaticCallCounter Impl;
-};
-
 #endif // LLVM_TUTOR_STATICCALLCOUNTER_H

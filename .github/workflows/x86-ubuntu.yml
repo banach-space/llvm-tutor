@@ -25,9 +25,9 @@ jobs:
           CXX: ${{ matrix.compiler.CXX }}
         run: |
           wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-          sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-16 main"
+          sudo apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-17 main"
           sudo apt-get update
-          sudo apt-get install -y llvm-16 llvm-16-dev llvm-16-tools clang-16
+          sudo apt-get install -y llvm-17 llvm-17-dev llvm-17-tools clang-17
           sudo apt-get install python3-setuptools
           sudo pip3 install lit
       - name: Build HelloWorld
@@ -43,6 +43,6 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           mkdir build && cd build
-          cmake -DLT_LLVM_INSTALL_DIR="/usr/lib/llvm-16/" -DCMAKE_BUILD_TYPE=${{ matrix.type }} ../
+          cmake -DLT_LLVM_INSTALL_DIR="/usr/lib/llvm-17/" -DCMAKE_BUILD_TYPE=${{ matrix.type }} ../
           make -j2
           lit -va test/

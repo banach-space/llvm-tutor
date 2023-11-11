@@ -37,11 +37,6 @@
 //    counted.
 //
 // USAGE:
-//    1. Legacy pass manager:
-//      $ opt -load <BUILD_DIR>/lib/libDynamicCallCounter.so `\`
-//        --legacy-dynamic-cc <bitcode-file> -o instrumented.bin
-//      $ lli instrumented.bin
-//    2. New pass manager:
 //      $ opt -load-pass-plugin <BUILD_DIR>/lib/libDynamicCallCounter.so `\`
 //        -passes=-"dynamic-cc" <bitcode-file> -o instrumentend.bin
 //      $ lli instrumented.bin
@@ -225,12 +220,6 @@ PreservedAnalyses DynamicCallCounter::run(llvm::Module &M,
                   : llvm::PreservedAnalyses::all());
 }
 
-bool LegacyDynamicCallCounter::runOnModule(llvm::Module &M) {
-  bool Changed = Impl.runOnModule(M);
-
-  return Changed;
-}
-
 //-----------------------------------------------------------------------------
 // New PM Registration
 //-----------------------------------------------------------------------------
@@ -253,15 +242,3 @@ extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
 llvmGetPassPluginInfo() {
   return getDynamicCallCounterPluginInfo();
 }
-
-//-----------------------------------------------------------------------------
-// Legacy PM Registration
-//-----------------------------------------------------------------------------
-char LegacyDynamicCallCounter::ID = 0;
-
-// Register the pass - required for (among others) opt
-static RegisterPass<LegacyDynamicCallCounter>
-    X(/*PassArg=*/"legacy-dynamic-cc",
-      /*Name=*/"LegacyDynamicCallCounter",
-      /*CFGOnly=*/false,
-      /*is_analysis=*/false);

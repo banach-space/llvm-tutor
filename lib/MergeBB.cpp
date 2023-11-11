@@ -32,10 +32,6 @@
 //  this in mind when running the passes in a chain.
 //
 // USAGE:
-//  1. Legacy Pass Manager:
-//    $ opt -load <BUILD_DIR>/lib/libMergeBB.so `\`
-//      -legacy-merge-bb -S <bitcode-file>
-//  2. New Pass Manager
 //    $ opt -load-pass-plugin <BUILD_DIR>/lib/libMergeBB.so `\`
 //      -passes=merge-bb -S <bitcode-file>
 //
@@ -264,21 +260,6 @@ PreservedAnalyses MergeBB::run(llvm::Function &Func,
                   : llvm::PreservedAnalyses::all());
 }
 
-bool LegacyMergeBB::runOnFunction(llvm::Function &Func) {
-  bool Changed = false;
-  SmallPtrSet<BasicBlock *, 8> DeleteList;
-
-  for (auto &BB : Func) {
-    Changed |= Impl.mergeDuplicatedBlock(&BB, DeleteList);
-  }
-
-  for (BasicBlock *BB : DeleteList) {
-    DeleteDeadBlock(BB);
-  }
-
-  return Changed;
-}
-
 //-----------------------------------------------------------------------------
 // New PM Registration
 //-----------------------------------------------------------------------------
@@ -301,17 +282,6 @@ extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
 llvmGetPassPluginInfo() {
   return getMergeBBPluginInfo();
 }
-
-//-----------------------------------------------------------------------------
-// Legacy PM Registration
-//-----------------------------------------------------------------------------
-char LegacyMergeBB::ID = 0;
-
-static RegisterPass<LegacyMergeBB>
-    X(/*PassArg=*/"legacy-merge-bb",
-      /*Name=*/"Mixed Boolean Arithmetic Substitution",
-      /*CFGOnly=*/false,
-      /*is_analysis=*/false);
 
 //------------------------------------------------------------------------------
 // Helper data structures

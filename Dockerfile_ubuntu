@@ -30,7 +30,7 @@ RUN pip3 install lit
 # reason, we need to add `-DLLVM_INSTALL_UTILS=ON` CMake flag when building
 # LLVM.
 ENV LLVM_DIR /opt/llvm
-RUN git clone --branch release/16.x --depth 1 https://github.com/llvm/llvm-project \
+RUN git clone --branch release/17.x --depth 1 https://github.com/llvm/llvm-project \
     && mkdir -p $LLVM_DIR \
     && mkdir -p llvm-project/build \
     && cd llvm-project/build \

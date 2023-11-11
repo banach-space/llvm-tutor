@@ -27,15 +27,4 @@ struct MBAAdd : public llvm::PassInfoMixin<MBAAdd> {
   static bool isRequired() { return true; }
 };
 
-//------------------------------------------------------------------------------
-// Legacy PM interface
-//------------------------------------------------------------------------------
-struct LegacyMBAAdd : public llvm::FunctionPass {
-  static char ID;
-  LegacyMBAAdd() : FunctionPass(ID) {}
-  bool runOnFunction(llvm::Function &F) override;
-
-  MBAAdd Impl;
-};
-
 #endif
