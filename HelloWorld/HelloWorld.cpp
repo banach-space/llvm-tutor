@@ -9,10 +9,7 @@
 //    there's no 'print' method here (every analysis pass should implement it).
 //
 // USAGE:
-//    1. Legacy PM
-//      opt --bugpoint-enable-legacy-pm -load libHelloWorld.dylib -legacy-hello-world -disable-output `\`
-//        <input-llvm-file>
-//    2. New PM
+//    New PM
 //      opt -load-pass-plugin=libHelloWorld.dylib -passes="hello-world" `\`
 //        -disable-output <input-llvm-file>
 //
