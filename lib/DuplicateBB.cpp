@@ -84,6 +84,7 @@
 #include "llvm/Passes/PassPlugin.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 #include "llvm/Transforms/Utils/Cloning.h"
+#include "llvm/Support/RandomNumberGenerator.h"
 
 #include <random>
 
@@ -99,15 +100,6 @@ using namespace llvm;
 DuplicateBB::BBToSingleRIVMap
 DuplicateBB::findBBsToDuplicate(Function &F, const RIV::Result &RIVResult) {
   BBToSingleRIVMap BlocksToDuplicate;
-
-  // Get a random number generator. This will be used to choose a context
-  // value for the injected `if-then-else` construct.
-  // FIXME Switch to 'F.getParent()->createRNG("DuplicateBB")' once possible.
-  // This patch implements the necessary API:
-  //    * https://reviews.llvm.org/rG73713f3e5ef2ecf1e5afafa89f76ab89cc06b18e
-  // It should be available in LLVM 11.
-  std::random_device RD;
-  std::mt19937_64 RNG(RD());
 
   for (BasicBlock &BB : F) {
     // Basic blocks which are landing pads are used for handling exceptions.
@@ -129,7 +121,7 @@ DuplicateBB::findBBsToDuplicate(Function &F, const RIV::Result &RIVResult) {
     // Get a random context value from the RIV set
     auto Iter = ReachableValues.begin();
     std::uniform_int_distribution<> Dist(0, ReachableValuesCount - 1);
-    std::advance(Iter, Dist(RNG));
+    std::advance(Iter, Dist(*pRNG));
 
     if (dyn_cast<GlobalValue>(*Iter)) {
       LLVM_DEBUG(errs() << "Random context value is a global variable. "
@@ -243,6 +235,9 @@ void DuplicateBB::cloneBB(BasicBlock &BB, Value *ContextValue,
 
 PreservedAnalyses DuplicateBB::run(llvm::Function &F,
                                    llvm::FunctionAnalysisManager &FAM) {
+  if (!pRNG)
+    pRNG = F.getParent()->createRNG("duplicate-bb");
+  
   BBToSingleRIVMap Targets = findBBsToDuplicate(F, FAM.getResult<RIV>(F));
 
   // This map is used to keep track of the new bindings. Otherwise, the

@@ -17,6 +17,11 @@
 #include "llvm/Pass.h"
 
 #include <map>
+#include <memory>
+
+namespace llvm {
+class RandomNumberGenerator;
+} // namespace llvm
 
 //------------------------------------------------------------------------------
 // New PM interface
@@ -51,6 +56,8 @@ struct DuplicateBB : public llvm::PassInfoMixin<DuplicateBB> {
   // decorated with the optnone LLVM attribute. Note that clang -O0 decorates
   // all functions with optnone.
   static bool isRequired() { return true; }
+
+  std::unique_ptr<llvm::RandomNumberGenerator> pRNG;
 };
 
 #endif
