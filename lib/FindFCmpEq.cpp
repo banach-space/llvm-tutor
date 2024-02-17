@@ -45,9 +45,6 @@
 
 using namespace llvm;
 
-// Unnamed namespace for internal functions
-namespace {
-
 static void
 printFCmpEqInstructions(raw_ostream &OS, Function &Func,
                         const FindFCmpEq::Result &FCmpEqInsts) noexcept {
@@ -67,8 +64,6 @@ printFCmpEqInstructions(raw_ostream &OS, Function &Func,
     OS << '\n';
   }
 }
-
-} // namespace
 
 static constexpr char PassArg[] = "find-fcmp-eq";
 static constexpr char PassName[] =
