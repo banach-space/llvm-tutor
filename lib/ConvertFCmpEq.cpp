@@ -47,9 +47,7 @@
 using namespace llvm;
 
 // Unnamed namespace for private functions
-namespace {
-
-FCmpInst *convertFCmpEqInstruction(FCmpInst *FCmp) noexcept {
+static FCmpInst *convertFCmpEqInstruction(FCmpInst *FCmp) noexcept {
   assert(FCmp && "The given fcmp instruction is null");
 
   if (!FCmp->isEquality()) {
@@ -114,8 +112,6 @@ FCmpInst *convertFCmpEqInstruction(FCmpInst *FCmp) noexcept {
   FCmp->setOperand(1, EpsilonValue);
   return FCmp;
 }
-
-} // namespace
 
 static constexpr char PassArg[] = "convert-fcmp-eq";
 static constexpr char PassName[] =
