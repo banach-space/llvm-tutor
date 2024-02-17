@@ -40,18 +40,7 @@ STATISTIC(SubstCount, "The # of substituted instructions");
 //-----------------------------------------------------------------------------
 bool MBAAdd::runOnBasicBlock(BasicBlock &BB) {
   bool Changed = false;
-
-  // Get a (rather naive) random number generator that will be used to decide
-  // whether to replace the current instruction or not.
-  // FIXME We should be using 'Module::createRNG' here instead. However, that
-  // method requires a pointer to 'Pass' on input and passes
-  // for the new pass manager _do_not_ inherit from llvm::Pass. In other words,
-  // 'createRNG' cannot be used here and there's no other way of obtaining
-  // llvm::RandomNumberGenerator. Last checked for LLVM 8.
-  std::mt19937_64 RNG;
-  RNG.seed(1234);
-  std::uniform_real_distribution<double> Dist(0., 1.);
-
+  
   // Loop over all instructions in the block. Replacing instructions requires
   // iterators, hence a for-range loop wouldn't be suitable
   for (auto Inst = BB.begin(), IE = BB.end(); Inst != IE; ++Inst) {
