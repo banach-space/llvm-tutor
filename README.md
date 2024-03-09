@@ -1154,7 +1154,7 @@ To run an individual pass, extract one [RUN line](https://github.com/banach-spac
 from the test file and run it:
 
 ```bash
-$LLVM_DIR/bin/opt -inline-threshold=0 -always-inline -S <source/dir/llvm/tutor>/test/llvm/always-inline.ll
+$LLVM_DIR/bin/opt -inline-threshold=0 -passes=always-inline -S <source/dir/llvm/tutor>/test/llvm/always-inline.ll
 ```
 
 References
