@@ -49,7 +49,7 @@ static void countStaticCalls(Module &M) {
   ModuleAnalysisManager MAM;
   MAM.registerPass([&] { return StaticCallCounter(); });
 
-  // Register all available module analysis passes defined in PassRegisty.def.
+  // Register all available module analysis passes defined in PassRegistry.def.
   // We only really need PassInstrumentationAnalysis (which is pulled by
   // default by PassBuilder), but to keep this concise, let PassBuilder do all
   // the _heavy-lifting_.
