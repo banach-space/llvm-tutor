@@ -876,7 +876,7 @@ to test **FindFCmpEq**:
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/17>
 # Generate the input file
-$LLVM_DIR/bin/clang -emit-llvm -S -c <source_dir>/inputs/input_for_fcmp_eq.c -o input_for_fcmp_eq.ll
+$LLVM_DIR/bin/clang -emit-llvm -S -Xclang -disable-O0-optnone -c <source_dir>/inputs/input_for_fcmp_eq.c -o input_for_fcmp_eq.ll
 # Run the pass
 $LLVM_DIR/bin/opt --load-pass-plugin <build_dir>/lib/libFindFCmpEq.so --passes="print<find-fcmp-eq>" -disable-output input_for_fcmp_eq.ll
 ```
@@ -885,9 +885,11 @@ You should see the following output which lists the direct floating-point equali
 
 ```llvm
 Floating-point equality comparisons in "sqrt_impl":
-  %cmp = fcmp oeq double %0, %1
-Floating-point equality comparisons in "compare_fp_values":
-  %cmp = fcmp oeq double %0, %1
+  %11 = fcmp oeq double %9, %10
+Floating-point equality comparisons in "main":
+  %9 = fcmp oeq double %8, 1.000000e+00
+  %13 = fcmp oeq double %11, %12
+  %19 = fcmp oeq double %17, %18
 ```
 
 ## ConvertFCmpEq
