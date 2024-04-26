@@ -37,7 +37,7 @@ jobs:
         run: |
           cd HelloWorld
           mkdir build && cd build
-          cmake -DLT_LLVM_INSTALL_DIR="/usr/lib/llvm-16/" -DCMAKE_BUILD_TYPE=${{ matrix.type }} ../
+          cmake -DLT_LLVM_INSTALL_DIR="/usr/lib/llvm-17/" -DCMAKE_BUILD_TYPE=${{ matrix.type }} ../
           make -j2
       - name: Build llvm-tutor + run tests
         run: |
