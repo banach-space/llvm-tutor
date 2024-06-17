@@ -1,4 +1,4 @@
-name: x86-Darwin
+name: Apple Silicon
 
 on: 
   push:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-14
     strategy:
       matrix:
         type: [Debug, Release]
