@@ -1,7 +1,7 @@
 llvm-tutor
 =========
-[![x86-Darwin](https://github.com/banach-space/llvm-tutor/actions/workflows/x86-darwin.yml/badge.svg?branch=main)](https://github.com/banach-space/llvm-tutor/actions/workflows/x86-darwin.yml)
-[![Apple Silicon](https://github.com/banach-space/llvm-tutor/actions/workflows/x86-ubuntu.yml/badge.svg?branch=main)](https://github.com/banach-space/llvm-tutor/actions/workflows/x86-ubuntu.yml)
+[![Apple Silicon](https://github.com/banach-space/llvm-tutor/actions/workflows/apple-silicon.yml/badge.svg?branch=main)](https://github.com/banach-space/llvm-tutor/actions/workflows/apple-silicon.yml)
+[![x86-Ubuntu](https://github.com/banach-space/llvm-tutor/actions/workflows/x86-ubuntu.yml/badge.svg?branch=main)](https://github.com/banach-space/llvm-tutor/actions/workflows/x86-ubuntu.yml)
 
 
 Example LLVM passes - based on **LLVM 18**
