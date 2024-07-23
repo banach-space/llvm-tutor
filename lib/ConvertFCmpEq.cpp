@@ -132,7 +132,7 @@ PreservedAnalyses ConvertFCmpEq::run(Function &Func,
   return Modified ? PreservedAnalyses::none() : PreservedAnalyses::all();
 }
 
-bool ConvertFCmpEq::run(llvm::Function &Func,
+bool ConvertFCmpEq::run(Function &Func,
                         const FindFCmpEq::Result &Comparisons) {
   bool Modified = false;
   // Functions marked explicitly 'optnone' should be ignored since we shouldn't
