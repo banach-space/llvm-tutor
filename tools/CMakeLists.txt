@@ -10,6 +10,11 @@ target_include_directories(
   PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/../include")
 
-target_link_libraries(static
-  LLVMCore LLVMPasses LLVMIRReader LLVMSupport
-)
+if(UNIX AND EXISTS "/etc/arch-release")
+  message("LLVM is installed as shared library on Arch Linux")
+  target_link_libraries(static LLVM)
+else()
+  target_link_libraries(static
+    LLVMCore LLVMPasses LLVMIRReader LLVMSupport
+  )
+endif()
