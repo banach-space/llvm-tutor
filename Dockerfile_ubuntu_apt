@@ -6,14 +6,14 @@
 # USAGE:
 # ```bash
 # wget https://raw.githubusercontent.com/banach-space/llvm-tutor/main/Dockerfile_ubuntu_apt
-# docker build -t=llvm-tutor:llvm-17 .
-# docker run --rm -it --hostname=llvm-tutor llvm-tutor:llvm-17 /bin/bash
+# docker build -t=llvm-tutor:llvm-18 .
+# docker run --rm -it --hostname=llvm-tutor llvm-tutor:llvm-18 /bin/bash
 # ```
 # =============================================================================
 
 FROM ubuntu:22.04
 
-ENV LLVM_DIR /usr/lib/llvm-17/
+ENV LLVM_DIR /usr/lib/llvm-18/
 ENV TUTOR_DIR /llvm-tutor
 
 # 1. INSTALL DEPENDENCIES
@@ -30,13 +30,14 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     python3-minimal python3-pip\
     wget \
+    libzstd-dev \
     software-properties-common \
     && rm -rf /var/lib/apt/lists/*
 
 RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
-RUN apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-17 main"
+RUN apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main"
 RUN apt-get update
-RUN apt-get install -y llvm-17 llvm-17-dev llvm-17-tools clang-17
+RUN apt-get install -y llvm-18 llvm-18-dev llvm-18-tools clang-18
 RUN apt-get install -y python3-setuptools
 
 # 2. INSTALL LIT
@@ -50,8 +51,8 @@ RUN mkdir -p $TUTOR_DIR/hello-world-build \
     && cd $TUTOR_DIR/hello-world-build \
     && cmake -G Ninja -DLT_LLVM_INSTALL_DIR=$LLVM_DIR ../HelloWorld \
     && ninja
-RUN cd $TUTOR_DIR/hello-world-build && /usr/bin/clang-17 -S -O1 -emit-llvm ../inputs/input_for_hello.c -o input_for_hello.ll
-RUN cd $TUTOR_DIR/hello-world-build && /usr/bin/opt-17 -load-pass-plugin ./libHelloWorld.so -passes=hello-world -disable-output input_for_hello.ll 2>&1 | grep "(llvm-tutor) Hello from: foo"
+RUN cd $TUTOR_DIR/hello-world-build && /usr/bin/clang-18 -S -O1 -emit-llvm ../inputs/input_for_hello.c -o input_for_hello.ll
+RUN cd $TUTOR_DIR/hello-world-build && /usr/bin/opt-18 -load-pass-plugin ./libHelloWorld.so -passes=hello-world -disable-output input_for_hello.ll 2>&1 | grep "(llvm-tutor) Hello from: foo"
 
 # 5. BUILD AND RUN LLVM-TUTOR
 RUN mkdir -p $TUTOR_DIR/build \
