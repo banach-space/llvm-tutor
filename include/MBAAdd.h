@@ -10,6 +10,7 @@
 #ifndef LLVM_TUTOR_MBA_ADD_H
 #define LLVM_TUTOR_MBA_ADD_H
 
+#include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/PassManager.h"
 #include "llvm/Pass.h"
 
