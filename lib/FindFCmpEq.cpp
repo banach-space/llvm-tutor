@@ -123,7 +123,7 @@ PassPluginLibraryInfo getFindFCmpEqPluginInfo() {
                     ArrayRef<PassBuilder::PipelineElement>) {
                   std::string PrinterPassElement =
                       formatv("print<{0}>", PassArg);
-                  if (Name.equals(PrinterPassElement)) {
+                  if (!Name.compare(PrinterPassElement)) {
                     FPM.addPass(FindFCmpEqPrinter(llvm::outs()));
                     return true;
                   }

@@ -10,6 +10,7 @@
 #ifndef LLVM_TUTOR_MERGEBBS_H
 #define LLVM_TUTOR_MERGEBBS_H
 
+#include "llvm/IR/Instruction.h"
 #include "llvm/IR/PassManager.h"
 #include "llvm/Pass.h"
 

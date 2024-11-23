@@ -114,8 +114,6 @@ static FCmpInst *convertFCmpEqInstruction(FCmpInst *FCmp) noexcept {
 }
 
 static constexpr char PassArg[] = "convert-fcmp-eq";
-static constexpr char PassName[] =
-    "Convert floating-point equality comparisons";
 static constexpr char PluginName[] = "ConvertFCmpEq";
 
 #define DEBUG_TYPE ::PassArg
@@ -162,7 +160,7 @@ PassPluginLibraryInfo getConvertFCmpEqPluginInfo() {
             PB.registerPipelineParsingCallback(
                 [&](StringRef Name, FunctionPassManager &FPM,
                     ArrayRef<PassBuilder::PipelineElement>) {
-                  if (Name.equals(PassArg)) {
+                  if (!Name.compare(PassArg)) {
                     FPM.addPass(ConvertFCmpEq());
                     return true;
                   }
