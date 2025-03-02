@@ -606,7 +606,7 @@ You will see the following output:
 =================================================
 LLVM-TUTOR: RIV analysis results
 =================================================
-BB id      Reachable Ineger Values
+BB id      Reachable Integer Values
 -------------------------------------------------
 BB %entry
              i32 %a
