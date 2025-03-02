@@ -170,7 +170,7 @@ static void printRIVResult(raw_ostream &OutS, const RIV::Result &RIVMap) {
   OutS << "=================================================\n";
 
   const char *Str1 = "BB id";
-  const char *Str2 = "Reachable Ineger Values";
+  const char *Str2 = "Reachable Integer Values";
   OutS << format("%-10s %-30s\n", Str1, Str2);
   OutS << "-------------------------------------------------\n";
 
