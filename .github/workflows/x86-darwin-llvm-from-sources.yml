@@ -46,4 +46,4 @@ jobs:
           mkdir build && cd build
           cmake -DLT_LLVM_INSTALL_DIR="$GITHUB_WORKSPACE/llvm-project/build" ../
           make -j2
-          lit test/
+          lit -va test/
