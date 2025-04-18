@@ -428,7 +428,7 @@ export LLVM_DIR=<installation/dir/of/llvm/19>
 # Generate an LLVM file to analyze
 $LLVM_DIR/bin/clang -emit-llvm -c <source_dir>/inputs/input_for_cc.c -o input_for_cc.bc
 # Run the pass through opt
-$LLVM_DIR/bin/opt opt -load-pass-plugin <build_dir>/lib/libStaticCallCounter.so -passes="print<static-cc>" -disable-output input_for_cc.bc
+$LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libStaticCallCounter.so -passes="print<static-cc>" -disable-output input_for_cc.bc
 ```
 You should see the following output:
 
