@@ -165,20 +165,18 @@ update_mbasub_test()
   # These tabs will be suppressed when the command (i.e. cat) is executed.
   # That's thanks to the delimiter token, EOF, being prefixed with `-`.
   cat > file.diff <<-'EOF'
-	diff --git a/llvm/test/Examples/MBASub/MBA_sub.ll b/llvm/test/Examples/MBASub/MBA_sub.ll
-	index 318394307f6a..761345dcd799 100644
-	--- a/llvm/test/Examples/MBASub/MBA_sub.ll
-	+++ b/llvm/test/Examples/MBASub/MBA_sub.ll
-	@@ -1,7 +1,5 @@
-	-; RUN:  opt --enable-new-pm=0 -load %shlibdir/libMBASub%shlibext -legacy-mba-sub -S %s\
-	-; RUN:  | FileCheck %s
-	-; RUN:  opt -load-pass-plugin=%shlibdir/libMBASub%shlibext -passes="mba-sub" -S %s \
-	-; RUN:  | FileCheck %s
-	+; RUN:  opt --enable-new-pm=0 -legacy-mba-sub -S %s | FileCheck %s
-	+; RUN:  opt -passes="mba-sub" -S %s | FileCheck %s
-	 
 	 define signext i32 @foo(i32 signext, i32 signext, i32 signext, i32 signext) {
 	   %5 = sub i32 %1, %0
+	diff --git a/llvm/test/Examples/MBASub/MBA_sub.ll b/llvm/test/Examples/MBASub/MBA_sub.ll
+  index c33a8b5..a031512 100644
+	--- a/llvm/test/Examples/MBASub/MBA_sub.ll
+	+++ b/llvm/test/Examples/MBASub/MBA_sub.ll
+  @@ -1,4 +1,4 @@
+  -; RUN:  opt -load-pass-plugin=%shlibdir/libMBASub%shlibext -passes="mba-sub" -S %s \
+  +; RUN:  opt  -passes="mba-sub" -S %s \
+   ; RUN:  | FileCheck %s
+
+   define signext i32 @foo(i32 signext, i32 signext, i32 signext, i32 signext) {
 EOF
 
   patch -p1 < file.diff
