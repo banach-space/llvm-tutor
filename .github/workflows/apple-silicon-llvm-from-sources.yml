@@ -28,7 +28,7 @@ jobs:
           mkdir build && cd build
           cmake -G Ninja \
             -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_PROJECTS="clang" \
-            -DLLVM_TARGETS_TO_BUILD="host" -DLLVM_OPTIMIZED_TABLEGEN=ON \
+            -DLLVM_TARGETS_TO_BUILD="host;X86_64" -DLLVM_OPTIMIZED_TABLEGEN=ON \
             ../llvm
           # Note that only the required tools are built
           ninja clang opt lli not FileCheck

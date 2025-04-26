@@ -1,4 +1,4 @@
-name: x86-Ubuntu-llvm-from-sources-static
+name: x86-Ubuntu (LLVM from sources - static linking)
 
 on:
   schedule:
