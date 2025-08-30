@@ -143,10 +143,10 @@ DuplicateBB::findBBsToDuplicate(Function &F, const RIV::Result &RIVResult) {
 void DuplicateBB::cloneBB(BasicBlock &BB, Value *ContextValue,
                           ValueToPhiMap &ReMapper) {
   // Don't duplicate Phi nodes - start right after them
-  Instruction *BBHead = BB.getFirstNonPHI();
+  BasicBlock::iterator BBHead = BB.getFirstNonPHIIt();
 
   // Create the condition for 'if-then-else'
-  IRBuilder<> Builder(BBHead);
+  IRBuilder<> Builder(&*BBHead);
   Value *Cond = Builder.CreateIsNull(
       ReMapper.count(ContextValue) ? ReMapper[ContextValue] : ContextValue);
 
@@ -197,13 +197,13 @@ void DuplicateBB::cloneBB(BasicBlock &BB, Value *ContextValue,
     // Operands of ThenClone still hold references to the original BB.
     // Update/remap them.
     RemapInstruction(ThenClone, ThenVMap, RF_IgnoreMissingLocals);
-    ThenClone->insertBefore(ThenTerm);
+    ThenClone->insertBefore(ThenTerm->getIterator());
     ThenVMap[&Instr] = ThenClone;
 
     // Operands of ElseClone still hold references to the original BB.
     // Update/remap them.
     RemapInstruction(ElseClone, ElseVMap, RF_IgnoreMissingLocals);
-    ElseClone->insertBefore(ElseTerm);
+    ElseClone->insertBefore(ElseTerm->getIterator());
     ElseVMap[&Instr] = ElseClone;
 
     // Instructions that don't produce values can be safely removed from Tail

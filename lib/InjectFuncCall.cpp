@@ -85,7 +85,7 @@ bool InjectFuncCall::runOnModule(Module &M) {
     IRBuilder<> Builder(&*F.getEntryBlock().getFirstInsertionPt());
 
     // Inject a global variable that contains the function name
-    auto FuncName = Builder.CreateGlobalStringPtr(F.getName());
+    auto FuncName = Builder.CreateGlobalString(F.getName());
 
     // Printf requires i8*, but PrintfFormatStrVar is an array: [n x i8]. Add
     // a cast: [n x i8] -> i8*
