@@ -23,7 +23,7 @@ define void @foo() {
 }
 
 ; Declaration of `printf` inserted by the pass
-; CHECK: declare i32 @printf(ptr nocapture readonly, ...) #0
+; CHECK: declare i32 @printf(ptr readonly captures(none), ...) #0
 
 ; Definition of `printf_wrapper` inserted by the pass
 ; CHECK: define void @printf_wrapper() {

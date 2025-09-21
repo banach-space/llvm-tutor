@@ -98,7 +98,7 @@ bool DynamicCallCounter::runOnModule(Module &M) {
     CallCounterMap[F.getName()] = Var;
 
     // Create a global variable to hold the name of this function
-    auto FuncName = Builder.CreateGlobalStringPtr(F.getName());
+    auto FuncName = Builder.CreateGlobalString(F.getName());
     FuncNameMap[F.getName()] = FuncName;
 
     // Inject instruction to increment the call count each time this function
@@ -135,7 +135,8 @@ bool DynamicCallCounter::runOnModule(Module &M) {
   // Set attributes as per inferLibFuncAttributes in BuildLibCalls.cpp
   Function *PrintfF = dyn_cast<Function>(Printf.getCallee());
   PrintfF->setDoesNotThrow();
-  PrintfF->addParamAttr(0, Attribute::NoCapture);
+  PrintfF->addParamAttr(0, llvm::Attribute::getWithCaptureInfo(
+                               M.getContext(), llvm::CaptureInfo::none()));
   PrintfF->addParamAttr(0, Attribute::ReadOnly);
 
   // STEP 3: Inject a global variable that will hold the printf format string

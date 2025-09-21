@@ -6,8 +6,8 @@
 # USAGE:
 # ```bash
 # wget https://raw.githubusercontent.com/banach-space/llvm-tutor/main/Dockerfile_ubuntu
-# docker build -t=llvm-tutor:llvm-20 .
-# docker run --rm -it --hostname=llvm-tutor llvm-tutor:llvm-20 /bin/bash
+# docker build -t=llvm-tutor:llvm-21 .
+# docker run --rm -it --hostname=llvm-tutor llvm-tutor:llvm-21 /bin/bash
 # ```
 # =============================================================================
 
@@ -31,7 +31,7 @@ RUN pip3 install lit
 # reason, we need to add `-DLLVM_INSTALL_UTILS=ON` CMake flag when building
 # LLVM.
 ENV LLVM_DIR /opt/llvm
-RUN git clone --branch release/20.x --depth 1 https://github.com/llvm/llvm-project \
+RUN git clone --branch release/21.x --depth 1 https://github.com/llvm/llvm-project \
     && mkdir -p $LLVM_DIR \
     && mkdir -p llvm-project/build \
     && cd llvm-project/build \

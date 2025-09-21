@@ -24,7 +24,7 @@
 ; CHECK-LABEL: @bez
 ; CHECK-NEXT: %2 = call i32 (ptr, ...) @printf
 
-; CHECK: declare i32 @printf(ptr nocapture readonly, ...) #0
+; CHECK: declare i32 @printf(ptr readonly captures(none), ...) #0
 
 ; CHECK: attributes #0 = { nounwind }
 

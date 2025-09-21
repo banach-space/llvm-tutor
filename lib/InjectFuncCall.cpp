@@ -43,7 +43,7 @@ bool InjectFuncCall::runOnModule(Module &M) {
   bool InsertedAtLeastOnePrintf = false;
 
   auto &CTX = M.getContext();
-  PointerType *PrintfArgTy = PointerType::getUnqual(Type::getInt8Ty(CTX));
+  PointerType *PrintfArgTy = PointerType::getUnqual(CTX);
 
   // STEP 1: Inject the declaration of printf
   // ----------------------------------------
@@ -62,7 +62,8 @@ bool InjectFuncCall::runOnModule(Module &M) {
   // Set attributes as per inferLibFuncAttributes in BuildLibCalls.cpp
   Function *PrintfF = dyn_cast<Function>(Printf.getCallee());
   PrintfF->setDoesNotThrow();
-  PrintfF->addParamAttr(0, Attribute::NoCapture);
+  PrintfF->addParamAttr(0, llvm::Attribute::getWithCaptureInfo(
+                               M.getContext(), llvm::CaptureInfo::none()));
   PrintfF->addParamAttr(0, Attribute::ReadOnly);
 
 
