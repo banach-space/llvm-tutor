@@ -29,7 +29,7 @@ will guide you through the implementation. All examples are complemented with
 files](https://github.com/banach-space/llvm-tutor/blob/main/inputs).
 
 Visit [**clang-tutor**](https://github.com/banach-space/clang-tutor/) if you
-are internested in similar tutorial for Clang.
+are interested in similar tutorial for Clang.
 
 ### Table of Contents
 * [HelloWorld: Your First Pass](#helloworld-your-first-pass)
