@@ -71,3 +71,22 @@ foreach( plugin ${LLVM_TUTOR_PLUGINS} )
       "$<$<PLATFORM_ID:Darwin>:-undefined dynamic_lookup>"
       )
 endforeach()
+
+# SimpleLICM pass (optional example, currently commented)
+# add_llvm_pass_plugin(SimpleLICM
+#   SimpleLICM.cpp
+#   PARTIAL_SOURCES_INTENDED
+# )
+
+# DerivedInductionVar pass
+add_llvm_pass_plugin(DerivedInductionVar
+  DerivedInductionVar.cpp
+  PARTIAL_SOURCES_INTENDED
+)
+
+# DerivedInductionVarElim pass
+add_llvm_pass_plugin(DerivedInductionVarElim
+  DerivedInductionVarElim.cpp
+  PARTIAL_SOURCES_INTENDED
+)
+

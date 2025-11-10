@@ -27,6 +27,23 @@ endif()
 if(EXISTS "${LT_LLVM_INSTALL_DIR}/lib64/cmake/llvm/LLVMConfig.cmake")
   set(LT_VALID_INSTALLATION TRUE)
 endif()
+if(NOT LT_VALID_INSTALLATION)
+  message(FATAL_ERROR "Cannot find LLVMConfig.cmake. Check LT_LLVM_INSTALL_DIR.")
+endif()
+
+#===============================================================================
+# 2. LOAD LLVM CMAKE MACROS
+#===============================================================================
+# Load LLVM configuration and macros so we can use add_llvm_pass_plugin, etc.
+find_package(LLVM REQUIRED CONFIG)
+list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
+include(AddLLVM)
+include(HandleLLVMOptions)
+
+# Print LLVM status (optional, but useful for debugging)
+message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
+message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
+
 
 if(NOT ${LT_VALID_INSTALLATION})
   message(FATAL_ERROR
@@ -36,20 +53,11 @@ endif()
 
 #===============================================================================
 # 2. LOAD LLVM CONFIGURATION
-#    For more: http://llvm.org/docs/CMake.html#embedding-llvm-in-your-project
+#
 #===============================================================================
-# Add the location of LLVMConfig.cmake to CMake search paths (so that
-# find_package can locate it)
-# Note: On Fedora, when using the pre-compiled binaries installed with `dnf`,
-# LLVMConfig.cmake is located in "/usr/lib64/cmake/llvm". But this path is
-# among other paths that will be checked by default when using
-# `find_package(llvm)`. So there's no need to add it here.
+
 list(APPEND CMAKE_PREFIX_PATH "${LT_LLVM_INSTALL_DIR}/lib/cmake/llvm/")
 
-# The way LLVMConfigVersion.cmake is set up, it will only match MAJOR.MINOR
-# exactly, even if we do not specify "REQUIRED" in the statement below.
-# So we accept any version and do the proper ranged check below.
-find_package(LLVM CONFIG)
 
 # We defer the version checking to this statement
 if("${LLVM_VERSION_MAJOR}" VERSION_LESS 21)
@@ -114,3 +122,6 @@ add_subdirectory(lib)
 add_subdirectory(tools)
 add_subdirectory(test)
 add_subdirectory(HelloWorld)
+add_subdirectory(SimpleLICM)
+#add_subdirectory(DerivedInductionVar)
+

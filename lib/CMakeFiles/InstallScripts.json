@@ -1,0 +1,11 @@
+{
+	"InstallScripts" : 
+	[
+		"/Users/naomiarmendariz/llvm-tutor/lib/cmake_install.cmake",
+		"/Users/naomiarmendariz/llvm-tutor/lib/lib/cmake_install.cmake",
+		"/Users/naomiarmendariz/llvm-tutor/lib/tools/cmake_install.cmake",
+		"/Users/naomiarmendariz/llvm-tutor/lib/test/cmake_install.cmake",
+		"/Users/naomiarmendariz/llvm-tutor/lib/HelloWorld/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
