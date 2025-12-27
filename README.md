@@ -801,7 +801,7 @@ define i32 @foo(i32) {
 We will now apply **MergeBB** to `foo`:
 
 ```bash
-$LLVM_DIR/bin/opt -load <build_dir>/lib/libMergeBB.so -legacy-merge-bb -S foo.ll -o merge.ll
+$LLVM_DIR/bin/opt -load-pass-plugin <build_dir>/lib/libMergeBB.so -passes="merge-bb" -S foo.ll -o merge.ll
 ```
 After the instrumentation `foo` will look like this (all metadata has been stripped):
 ```llvm
