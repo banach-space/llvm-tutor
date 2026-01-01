@@ -164,7 +164,7 @@ bool MergeBB::mergeDuplicatedBlock(BasicBlock *BB1,
   const PHINode *PN = dyn_cast<PHINode>(II);
   Value *InValBB1 = nullptr;
   Instruction *InInstBB1 = nullptr;
-  BBSucc->getFirstNonPHI();
+  
   if (nullptr != PN) {
     // Do not optimize if multiple PHI instructions exist in the successor (to
     // keep things relatively simple)
