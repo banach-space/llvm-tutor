@@ -17,7 +17,7 @@ tutorial that targets novice and aspiring LLVM developers. Key features:
 LLVM implements a very rich, powerful and popular API. However, like many
 complex technologies, it can be quite daunting and overwhelming to learn and
 master. The goal of this LLVM tutorial is to showcase that LLVM can in fact be
-easy and fun to work with. This is demonstrated through a range self-contained,
+easy and fun to work with. This is demonstrated through a range of self-contained,
 testable LLVM passes, which are implemented using idiomatic LLVM.
 
 This document explains how to set-up your environment, build and run the
