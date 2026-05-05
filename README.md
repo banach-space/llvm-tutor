@@ -545,8 +545,8 @@ to test **MBASub**:
 
 ```bash
 export LLVM_DIR=<installation/dir/of/llvm/21>
-$LLVM_DIR/bin/clang -emit-llvm -S <source_dir>/inputs/input_for_mba_sub.c -o input_for_sub.ll
-$LLVM_DIR/bin/opt -load-pass-plugin=<build_dir>/lib/libMBASub.so -passes="mba-sub" -S input_for_sub.ll -o out.ll
+$LLVM_DIR/bin/clang -emit-llvm -S <source_dir>/inputs/input_for_mba_sub.c -o input_for_mba_sub.ll
+$LLVM_DIR/bin/opt -load-pass-plugin=<build_dir>/lib/libMBASub.so -passes="mba-sub" -S input_for_mba_sub.ll -o out.ll
 ```
 
 ### MBAAdd
@@ -562,7 +562,7 @@ the formula and the implementation are correct.
 
 #### Run the pass
 We will use
-[input_for_add.c](https://github.com/banach-space/llvm-tutor/blob/main/inputs/input_for_mba.c)
+[input_for_mba.c](https://github.com/banach-space/llvm-tutor/blob/main/inputs/input_for_mba.c)
 to test **MBAAdd**:
 
 ```bash
