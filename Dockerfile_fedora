@@ -12,8 +12,8 @@
 
 FROM fedora:41
 
-ENV LLVM_DIR /usr/
-ENV TUTOR_DIR /llvm-tutor
+ENV LLVM_DIR=/usr/
+ENV TUTOR_DIR=/llvm-tutor
 
 # 1. INSTALL DEPENDENCIES
 RUN dnf -y install \
