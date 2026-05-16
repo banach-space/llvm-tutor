@@ -42,6 +42,8 @@ are interested in similar tutorial for Clang.
   * [Analysis vs Transformation Pass](#analysis-vs-transformation-pass)
   * [Dynamic vs Static Plugins](#dynamic-vs-static-plugins)
   * [Optimisation Passes Inside LLVM](#optimisation-passes-inside-llvm)
+  * [Optimisation Passes Inside LLVM](#optimisation-passes-inside-llvm)
+* [Contributing](#contributing)
 * [References](#references)
 
 
@@ -1158,6 +1160,22 @@ from the test file and run it:
 ```bash
 $LLVM_DIR/bin/opt -inline-threshold=0 -passes=always-inline -S <source/dir/llvm/tutor>/test/llvm/always-inline.ll
 ```
+
+Contributing
+=============
+**llvm-tutor** is intended as a community project and patches are very welcome!
+
+Please keep the following guidelines in mind when submitting PRs:
+
+* For small changes like bug or typo fixes, feel free to submit a PR directly.
+  For new functionality, such as new passes, please open a GitHub issue first
+  and outline your idea.
+* Upgrades to new LLVM releases are handled by the maintainer. This is because
+  they involve several coordinated steps and are easier to manage by someone who
+  does them regularly.
+* Please do not submit AI-generated contributions. This project prioritises
+  human-to-human interaction and knowledge sharing curated by humans.
+
 
 References
 ===========
