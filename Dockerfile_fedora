@@ -5,15 +5,15 @@
 # USAGE:
 # ```bash
 # wget https://raw.githubusercontent.com/banach-space/llvm-tutor/main/Dockerfile_fedora
-# docker build -t=llvm-tutor:llvm-21 .
-# docker run --rm -it --hostname=llvm-tutor llvm-tutor:llvm-21 /bin/bash
+# docker build -t=llvm-tutor:llvm-22 .
+# docker run --rm -it --hostname=llvm-tutor llvm-tutor:llvm-22 /bin/bash
 # ```
 # =============================================================================
 
-FROM fedora:41
+FROM fedora:latest
 
-ENV LLVM_DIR /usr/
-ENV TUTOR_DIR /llvm-tutor
+ENV LLVM_DIR=/usr/
+ENV TUTOR_DIR=/llvm-tutor
 
 # 1. INSTALL DEPENDENCIES
 RUN dnf -y install \
