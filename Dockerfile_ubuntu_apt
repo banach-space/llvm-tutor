@@ -34,19 +34,18 @@ RUN apt-get update && apt-get install -y \
     software-properties-common \
     && rm -rf /var/lib/apt/lists/*
 
+# 2. Install llvm and LLVM tools
+ENV PATH="$PATH:/usr/lib/llvm-22/bin"
 RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
 RUN apt-add-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-22 main"
 RUN apt-get update
 RUN apt-get install -y llvm-22 llvm-22-dev llvm-22-tools clang-22
 RUN apt-get install -y python3-setuptools
 
-# 2. INSTALL LIT
-RUN pip3 install lit
-
-# 3. CLONE LLVM-TUTOR
+# 2. CLONE LLVM-TUTOR
 RUN git clone https://github.com/banach-space/llvm-tutor $TUTOR_DIR
 
-# 4. BUILD AND RUN HELLO-WORLD
+# 3. BUILD AND RUN HELLO-WORLD
 RUN mkdir -p $TUTOR_DIR/hello-world-build \
     && cd $TUTOR_DIR/hello-world-build \
     && cmake -G Ninja -DLT_LLVM_INSTALL_DIR=$LLVM_DIR ../HelloWorld \
@@ -54,7 +53,7 @@ RUN mkdir -p $TUTOR_DIR/hello-world-build \
 RUN cd $TUTOR_DIR/hello-world-build && /usr/bin/clang-22 -S -O1 -emit-llvm ../inputs/input_for_hello.c -o input_for_hello.ll
 RUN cd $TUTOR_DIR/hello-world-build && /usr/bin/opt-22 -load-pass-plugin ./libHelloWorld.so -passes=hello-world -disable-output input_for_hello.ll 2>&1 | grep "(llvm-tutor) Hello from: foo"
 
-# 5. BUILD AND RUN LLVM-TUTOR
+# 4. BUILD AND RUN LLVM-TUTOR
 RUN mkdir -p $TUTOR_DIR/build \
     && cd $TUTOR_DIR/build \
     && cmake -DLT_LLVM_INSTALL_DIR=$LLVM_DIR ../ \

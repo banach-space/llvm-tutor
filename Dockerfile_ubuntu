@@ -20,11 +20,13 @@ RUN apt-get update && apt-get install -y \
     libzstd-dev \
     ninja-build \
     build-essential \
-    python3-minimal python3-pip\
-    && rm -rf /var/lib/apt/lists/*
+    python3-minimal python3-pip
 
 # 2. INSTALL LIT
-RUN pip3 install lit
+RUN apt-get install -y llvm-22-tools \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV PATH="$PATH:/usr/lib/llvm-22/bin"
 
 # 2. BUILD LLVM + Clang from sources
 # Note that LIT tests depend on 'not' and 'FileCheck', LLVM utilities. For this
