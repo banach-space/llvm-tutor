@@ -29,7 +29,7 @@
 #include "InjectFuncCall.h"
 
 #include "llvm/IR/IRBuilder.h"
-#include "llvm/Passes/PassPlugin.h"
+#include "llvm/Plugins/PassPlugin.h"
 #include "llvm/Passes/PassBuilder.h"
 
 using namespace llvm;

@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v2
       - name: Download Ninja
@@ -21,7 +21,7 @@ jobs:
           echo "${GITHUB_WORKSPACE}/ninja" >> $GITHUB_PATH
       - name: Clone llvm-project
         run: |
-          git clone --depth 1 --single-branch --branch release/21.x https://github.com/llvm/llvm-project
+          git clone --depth 1 --single-branch --branch release/22.x https://github.com/llvm/llvm-project
           cd llvm-project
       - name: Register MBAAdd statically
         run: |
