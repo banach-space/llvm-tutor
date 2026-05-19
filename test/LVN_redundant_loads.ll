@@ -1,7 +1,12 @@
+; RUN: opt -load-pass-plugin=%shlibdir/libLVN%shlibext -passes="lvn" -S %s \
+; RUN:   | FileCheck %s
 ; ModuleID = 'test.c'
 source_filename = "test.c"
 target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-pc-linux-gnu"
+; CHECK-LABEL: define dso_local i32 @test_redundant_loads(i32 noundef %0, i32 noundef %1)
+; CHECK-NOT:   %8 = load
+; CHECK-NOT:   %9 = load
 
 ; Function Attrs: noinline nounwind optnone sspstrong uwtable
 define dso_local i32 @test_redundant_loads(i32 noundef %0, i32 noundef %1) #0 {
