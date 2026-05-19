@@ -25,8 +25,7 @@ using ResultOpcodeCounter = llvm::StringMap<unsigned>;
 
 struct OpcodeCounter : public llvm::AnalysisInfoMixin<OpcodeCounter> {
   using Result = ResultOpcodeCounter;
-  Result run(llvm::Function &F,
-                              llvm::FunctionAnalysisManager &);
+  Result run(llvm::Function &F, llvm::FunctionAnalysisManager &);
 
   OpcodeCounter::Result generateOpcodeMap(llvm::Function &F);
   // Part of the official API:
