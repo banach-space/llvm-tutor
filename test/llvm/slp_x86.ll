@@ -10,17 +10,18 @@
 ; }
 define void @foo(i32, i32, i32, i32, i32* nocapture) local_unnamed_addr #0 {
 ; CHECK-LABEL: @foo(
-; CHECK-NEXT:    [[TMP6:%.*]] = insertelement <2 x i32> poison, i32 [[TMP2:%.*]], i32 0
-; CHECK-NEXT:    [[TMP7:%.*]] = insertelement <2 x i32> [[TMP6]], i32 [[TMP3:%.*]], i32 1
-; CHECK-NEXT:    [[TMP8:%.*]] = insertelement <2 x i32> poison, i32 [[TMP0:%.*]], i32 0
-; CHECK-NEXT:    [[TMP9:%.*]] = insertelement <2 x i32> [[TMP8]], i32 [[TMP1:%.*]], i32 1
+; CHECK-SAME: i32 [[IN_0:%.*]], i32 [[IN_1:%.*]], i32 [[IN_2:%.*]], i32 [[IN_3:%.*]], ptr {{.*}} [[DEST:%.*]])
+; CHECK-NEXT:    [[TMP6:%.*]] = insertelement <2 x i32> poison, i32 [[IN_2]], i64 0
+; CHECK-NEXT:    [[TMP7:%.*]] = insertelement <2 x i32> [[TMP6]], i32 [[IN_3]], i64 1
+; CHECK-NEXT:    [[TMP8:%.*]] = insertelement <2 x i32> poison, i32 [[IN_0]], i64 0
+; CHECK-NEXT:    [[TMP9:%.*]] = insertelement <2 x i32> [[TMP8]], i32 [[IN_1]], i64 1
   ; %10 = [a1, a2] + [b1, b2] = [a1 + b1, a2 + b2]
 ; CHECK-NEXT:    [[TMP10:%.*]] = add nsw <2 x i32> [[TMP7]], [[TMP9]]
   ; %11 = [a1 * (a1 + b1), a2 * (a2 + b2)]
 ; CHECK-NEXT:    [[TMP11:%.*]] = mul nsw <2 x i32> [[TMP10]], [[TMP9]]
 ; CHECK-NEXT:    [[TMP12:%.*]] = shufflevector <2 x i32> [[TMP11]], <2 x i32> poison, <4 x i32> <i32 0, i32 1, i32 0, i32 1>
   ; A = [shuffle[0], shuffle[1], shuffle[2], shuffle[3]]
-; CHECK-NEXT:    store <4 x i32> [[TMP12]], ptr [[TMP4:%.*]], align 4
+; CHECK-NEXT:    store <4 x i32> [[TMP12]], ptr [[DEST:%.*]], align 4
 ; CHECK-NEXT:    ret void
 ;
   %6 = add nsw i32 %2, %0

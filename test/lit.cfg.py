@@ -3,6 +3,7 @@
 # Configuration file for the 'lit' test runner.
 
 import platform
+import subprocess
 
 import lit.formats
 # Global instance of LLVMConfig provided by lit
@@ -19,7 +20,7 @@ config.name = 'LLVM-TUTOR'
 #   regression tests (...)
 # I couldn't find any more documentation on this, but it seems to be exactly
 # what we want here.
-config.test_format = lit.formats.ShTest(not llvm_config.use_lit_shell)
+config.test_format = lit.formats.ShTest()
 
 # suffixes: A list of file extensions to treat as test files. This is overriden
 # by individual lit.local.cfg files in the test subdirectories.
@@ -36,13 +37,16 @@ config.excludes = ['Inputs']
 # On Mac OS, 'clang' installed via HomeBrew (or build from sources) won't know
 # where to look for standard headers (e.g. 'stdlib.h'). This is a workaround.
 if platform.system() == 'Darwin':
+    # http://lists.llvm.org/pipermail/cfe-dev/2016-July/049868.html
+    sdk_path = subprocess.check_output( ["xcrun", "--show-sdk-path"], text=True,).strip()
     tool_substitutions = [
-        ToolSubst('%clang', "clang",
-                  extra_args=["-isysroot",
-                              # http://lists.llvm.org/pipermail/cfe-dev/2016-July/049868.html
-                              "`xcrun --show-sdk-path`",
-                              # https://github.com/Homebrew/homebrew-core/issues/52461
-                              "-mlinker-version=0"]),
+        ToolSubst(
+            "%clang", "clang",
+            extra_args=[ "-isysroot", sdk_path,
+                        # https://github.com/Homebrew/homebrew-core/issues/52461
+                        "-mlinker-version=0",
+            ],
+        )
     ]
 else:
     tool_substitutions = [

@@ -7,7 +7,7 @@ define i32 @fcmp_oeq(double %a, double %b) {
 ; CHECK-NEXT: %2 = bitcast double %1 to i64
 ; CHECK-NEXT: %3 = and i64 %2, 9223372036854775807
 ; CHECK-NEXT: %4 = bitcast i64 %3 to double
-; CHECK-NEXT: %cmp = fcmp olt double %4, 0x3CB0000000000000
+; CHECK-NEXT: %cmp = fcmp olt double %4, f0x3CB0000000000000
 ; CHECK-NEXT: %conv = zext i1 %cmp to i32
 ; CHECK-NOT: fcmp oeq
 ; CHECK-DAG: ret i32 %conv
@@ -24,7 +24,7 @@ define i32 @fcmp_une(double %a, double %b) {
 ; CHECK-NEXT: %2 = bitcast double %1 to i64
 ; CHECK-NEXT: %3 = and i64 %2, 9223372036854775807
 ; CHECK-NEXT: %4 = bitcast i64 %3 to double
-; CHECK-NEXT: %cmp = fcmp uge double %4, 0x3CB0000000000000
+; CHECK-NEXT: %cmp = fcmp uge double %4, f0x3CB0000000000000
 ; CHECK-NEXT: %conv = zext i1 %cmp to i32
 ; CHECK-NOT: fcmp une
 ; CHECK-DAG: ret i32 %conv
@@ -42,7 +42,7 @@ define i32 @fcmp_neg_oeq(double %a, double %b) {
 ; CHECK-NEXT: %2 = bitcast double %1 to i64
 ; CHECK-NEXT: %3 = and i64 %2, 9223372036854775807
 ; CHECK-NEXT: %4 = bitcast i64 %3 to double
-; CHECK-NEXT: %cmp = fcmp olt double %4, 0x3CB0000000000000
+; CHECK-NEXT: %cmp = fcmp olt double %4, f0x3CB0000000000000
 ; CHECK-NEXT: %conv = zext i1 %cmp to i32
 ; CHECK-NOT: fcmp oeq
 ; CHECK-DAG: ret i32 %conv
@@ -61,7 +61,7 @@ define i32 @fcmp_neg_une(double %a, double %b) {
 ; CHECK-NEXT %2 = bitcast double %1 to i64
 ; CHECK-NEXT %3 = and i64 %2, 9223372036854775807
 ; CHECK-NEXT %4 = bitcast i64 %3 to double
-; CHECK-NEXT %cmp = fcmp uge double %4, 0x3CB0000000000000
+; CHECK-NEXT %cmp = fcmp uge double %4, f0x3CB0000000000000
 ; CHECK-NEXT %conv = zext i1 %cmp to i32
 ; CHECK-NOT: fcmp une
 ; CHECK-DAG ret i32 %conv

@@ -66,8 +66,6 @@ printFCmpEqInstructions(raw_ostream &OS, Function &Func,
 }
 
 static constexpr char PassArg[] = "find-fcmp-eq";
-static constexpr char PassName[] =
-    "Floating-point equality comparisons locator";
 static constexpr char PluginName[] = "FindFCmpEq";
 
 //------------------------------------------------------------------------------
