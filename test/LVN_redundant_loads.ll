@@ -1,5 +1,12 @@
 ; RUN: opt -load-pass-plugin=%shlibdir/libLVN%shlibext -passes="lvn" -S %s \
 ; RUN:   | FileCheck %s
+
+
+; Verify that Redundant Load Elimination is taking place
+; here %8 and %9 are Redundant Loads since their values are already loaded in %5 and %6
+; hence it checks that %8 and %9 are not loads
+
+
 ; CHECK-LABEL: define dso_local i32 @test_redundant_loads(i32 noundef %0, i32 noundef %1)
 ; CHECK-NOT:   %8 = load
 ; CHECK-NOT:   %9 = load

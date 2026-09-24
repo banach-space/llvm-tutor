@@ -3,6 +3,13 @@
 ; CHECK-LABEL: define dso_local i32 @test_constant(i32 noundef %0)
 ; CHECK-NOT:   %10 = mul
 ; CHECK-NOT:   %11 = mul
+
+
+; Verify if the common subexpression part is rightly implemented
+; here the instructions  %11 = mul nsw i32 %6, %7 can be replaced with
+; %8 = mul nsw i32 %6, %7 , Since both are the same expressions
+; this verifies that %11 is not a mul instruction since it can be eliminated
+
 ; Function Attrs: noinline nounwind optnone sspstrong uwtable
 define dso_local i32 @test_constant(i32 noundef %0) #0 {
   %2 = alloca i32, align 4

@@ -1,5 +1,12 @@
 ; RUN: opt -load-pass-plugin=%shlibdir/libLVN%shlibext -passes="lvn" -S %s \
 ; RUN:   | FileCheck %s
+
+
+; Verify if constant propagation and folding is happening
+; here the whole test_constant folds to 900
+; hence its checking if the function returns 900 as its output
+
+
 ; CHECK-LABEL: define dso_local i32 @test_constant()
 ; CHECK:         ret i32 900
 
