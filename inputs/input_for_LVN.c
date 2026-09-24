@@ -1,3 +1,12 @@
+//=============================================================================
+// FILE:
+//      input_for_LVN.c
+//
+// DESCRIPTION:
+//      Sample input file for the LVN pass.
+//
+// License: MIT
+//=============================================================================
 #include <stdio.h>
 int add(int a, int b) {
   int x = (a + b) * (a + b);
