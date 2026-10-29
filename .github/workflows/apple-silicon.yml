@@ -27,7 +27,7 @@ jobs:
       - name: Install Dependencies
         run: |
           brew update
-          brew install llvm@23
+          brew install --bottle-arch=arm64 llvm@23
           brew install lit
       - name: Build HelloWorld
         run: |
