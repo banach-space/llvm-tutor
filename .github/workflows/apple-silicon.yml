@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-14
+    runs-on: macos-latest
     strategy:
       matrix:
         type: [Debug, Release]
@@ -27,7 +27,7 @@ jobs:
       - name: Install Dependencies
         run: |
           brew update
-          brew install --bottle-arch=arm64 llvm@23
+          brew install llvm@23
           brew install lit
       - name: Build HelloWorld
         run: |
